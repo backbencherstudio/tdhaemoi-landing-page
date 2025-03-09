@@ -1,0 +1,10 @@
+[
+    {
+        "id": 1,
+        "name": "nike",
+        "price": 2000,
+        "description": "nike shoes",
+        "image": " ",
+        "discount": 10
+    }
+]
