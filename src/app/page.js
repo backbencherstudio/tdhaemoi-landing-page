@@ -44,7 +44,7 @@ export default function Home() {
           <h2 className="text-white text-xl sm:text-2xl font-bold mb-4">
             FINDE DEINEN PERFEKT PASSENDEN SCHUH!
           </h2>
-          <Link href="/shoes">
+          <Link href="/categories">
             <button className="bg-[#62a07c] cursor-pointer transform duration-300 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors">
               JETZT STARTEN
             </button>

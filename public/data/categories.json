@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "title": "Alltagsschuhe",
+        "image": "/category/category2.png"
+    },
+    {
+        "id": 2,
+        "title": "Sportschuhe",
+        "image": "/category/category1.png"
+    },
+    {
+        "id": 3,
+        "title": "Berg-Trekkingschuhe",
+        "image": "/category/category.png"
+    }
+]

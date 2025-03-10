@@ -13,6 +13,9 @@
 .font-josefin-sans {
   font-family: var(--font-josefin-sans);
 }
+/* .font-Inter {
+  font-family: var(--font-Inter);
+} */
 
 .container {
   max-width: 1220px;
