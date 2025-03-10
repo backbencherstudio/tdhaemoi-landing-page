@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${pathwayExtreme.variable} ${josefinSans.variable} antialiased`}
       >
-        <Navbar/>
+        {/* <Navbar/> */}
         {children}
       </body>
     </html>
