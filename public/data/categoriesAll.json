@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "title": "Alpines Skifahren",
+        "image": "/categoryData/ima1.png"
+    },
+    {
+        "id": 2,
+        "title": "Sportschuhe",
+        "image": "/category/img2.png"
+    },
+    {
+        "id": 3,
+        "title": "Berg-Trekkingschuhe",
+        "image": "/category/category.png"
+    }
+]

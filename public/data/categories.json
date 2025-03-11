@@ -2,16 +2,87 @@
     {
         "id": 1,
         "title": "Alltagsschuhe",
-        "image": "/category/category2.png"
+        "image": "/category/category2.png",
+        "data": [
+            {
+                "id": 1,
+                "title": "Alpines Skifahren",
+                "image": "/categoryData/img1.png"
+            },
+            {
+                "id": 2,
+                "title": "Laufschuhe",
+                "image": "/categoryData/img2.png"
+            },
+            {
+                "id": 3,
+                "title": "Radschuhe",
+                "image": "/categoryData/img3.png"
+            },
+            {
+                "id": 4,
+                "title": "Tennisschuhe",
+                "image": "/categoryData/img4.png"
+            },
+            {
+                "id": 5,
+                "title": "Basketball",
+                "image": "/categoryData/img5.png"
+            },
+            {
+                "id": 6,
+                "title": "Kletterschuhe",
+                "image": "/categoryData/img6.png"
+            },
+            {
+                "id": 7,
+                "title": "Fussballschuhe",
+                "image": "/categoryData/img7.png"
+            },
+            {
+                "id": 8,
+                "title": "Schlittschuhe (Coming soon)",
+                "image": "/categoryData/img8.png"
+            },
+            {
+                "id": 9,
+                "title": "Golfschuhe",
+                "image": "/categoryData/img9.png"
+            }
+        ]
     },
     {
         "id": 2,
         "title": "Sportschuhe",
-        "image": "/category/category1.png"
+        "image": "/category/category1.png",
+        "data": [
+            {
+                "id": 1,
+                "title": "Kinder-Sportschuhe",
+                "image": "/categoryData/img3.png"
+            },
+            {
+                "id": 2,
+                "title": "Sportschuhe",
+                "image": "/categoryData/img4.png"
+            }
+        ]
     },
     {
         "id": 3,
         "title": "Berg-Trekkingschuhe",
-        "image": "/category/category.png"
+        "image": "/category/category.png",
+        "data": [
+            {
+                "id": 1,
+                "title": "Alpines Skifahren",
+                "image": "/categoryData/img1.png"
+            },
+            {
+                "id": 2,
+                "title": "Laufschuhe",
+                "image": "/categoryData/img2.png"
+            }
+        ]
     }
 ]

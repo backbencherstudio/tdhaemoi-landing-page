@@ -24,22 +24,29 @@ export default function Categories() {
         <div className="flex justify-center">
             <div className="w-[1440px] grid grid-cols-3 gap-4">
                 {categories.map((category) => (
-                    <div key={category.id} className="relative group cursor-pointer h-[500px] md:h-[800px] xl:h-[940px]" >
+                    <Link 
+                        key={category.id}
+                        href={`/categories/${category.id}`}
+                        className="relative group h-[500px] md:h-[800px] xl:h-[940px] block overflow-hidden"
+                    >
                         <div className="w-full h-full">
                             <Image
                                 src={category.image}
                                 alt={category.title}
                                 fill
-                                className=" bg-black/90"
+                                className="bg-black/90 transition-transform duration-500 "
                                 priority
                                 quality={100}
                                 loading="eager"
                             />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
                         </div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <h2 className="text-white font-Inter text-2xl lg:text-3xl xl:text-3xl font-bold uppercase">{category.title}</h2>
+                            <span className="text-white font-Inter text-2xl xl:text-3xl font-bold uppercase transform transition-transform duration-300 group-hover:scale-105">
+                                {category.title}
+                            </span>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>
