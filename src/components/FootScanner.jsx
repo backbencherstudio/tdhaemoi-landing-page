@@ -30,7 +30,7 @@ export default function FootScanner() {
 
             {/* Main Content */}
             <div className='flex-1 flex justify-center items-center'>
-                <div className="container">
+                <div className="container ">
                     <div className="w-full flex flex-wrap justify-center items-start">
                         {/* Left Foot Section */}
                         <div className="w-full md:w-[30%] px-2 mb-6">
@@ -66,7 +66,10 @@ export default function FootScanner() {
                         </div>
                     </div>
                 </div>
+
             </div>
+
+
         </div>
     )
 }
