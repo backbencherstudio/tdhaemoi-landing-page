@@ -29,7 +29,7 @@ export default function Shoes() {
 
     return (
         <>
-            <div className="mb-8">
+            <div className="mb-8 ">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {fitShoes.map((shoe) => (
                         <Link href={`/shoes/details/${shoe.id}`} key={shoe.id}>

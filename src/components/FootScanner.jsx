@@ -8,12 +8,12 @@ import SuccessModal from './SuccessModal'
 
 export default function FootScanner() {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-
     const handleScanClick = () => {
         // Simulate scanning process
         setTimeout(() => {
             setShowSuccessModal(true);
         }, 100);
+        
     };
 
     return (

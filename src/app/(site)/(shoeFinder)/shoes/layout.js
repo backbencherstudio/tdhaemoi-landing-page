@@ -8,7 +8,7 @@ export default function Layout({ children }) {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="container mx-auto">
-        <div className="flex-1 flex flex-col md:flex-row">
+        <div className="flex-1 flex flex-col md:flex-row mt-10">
           <div className="w-full md:w-64 flex-shrink-0">
             <Sidebar />
           </div>
