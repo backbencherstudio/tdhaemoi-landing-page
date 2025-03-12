@@ -1,12 +1,21 @@
-import React from 'react'
-
+import React, { useState } from 'react'
 import Image from 'next/image'
 import leftImg from '../../public/legs/left.png'
 import rightImg from '../../public/legs/right.png'
 import logo from '../../public/categoryData/logo.png'
 import Link from 'next/link'
+import SuccessModal from './SuccessModal'
 
 export default function FootScanner() {
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+    const handleScanClick = () => {
+        // Simulate scanning process
+        setTimeout(() => {
+            setShowSuccessModal(true);
+        }, 100);
+    };
+
     return (
         <div className='flex flex-col min-h-screen'>
             {/* Header Section */}
@@ -27,7 +36,7 @@ export default function FootScanner() {
                     </div>
                 </div>
             </div>
-
+ 
             {/* Main Content */}
             <div className='flex-1 flex justify-center items-center'>
                 <div className="container ">
@@ -37,7 +46,10 @@ export default function FootScanner() {
                             <div className='flex border-2 border-gray-600 flex-col justify-center items-center h-[330px] relative'>
                                 <Image alt='left-leg' src={leftImg} width={200} height={300} className='w-[200px] h-[330px]' />
                             </div>
-                            <button className="bg-[#62a07b] cursor-pointer text-white px-8 py-2 rounded-full w-full text-sm md:text-base mt-4">
+                            <button 
+                                onClick={handleScanClick}
+                                className="bg-[#62a07b] cursor-pointer text-white px-8 py-2 rounded-full w-full text-sm md:text-base mt-4"
+                            >
                                 SCAN
                             </button>
                         </div>
@@ -59,6 +71,7 @@ export default function FootScanner() {
                                 <Image alt='right-leg' src={rightImg} width={200} height={300} className='w-[200px] h-[330px]' />
                             </div>
                             <button
+                                onClick={handleScanClick}
                                 className="bg-[#62a07b] cursor-pointer text-white px-8 py-2 rounded-full w-full text-sm md:text-base mt-4"
                             >
                                 SCAN
@@ -66,10 +79,12 @@ export default function FootScanner() {
                         </div>
                     </div>
                 </div>
-
             </div>
 
-
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <SuccessModal onClose={() => setShowSuccessModal(false)} />
+            )}
         </div>
     )
 }
