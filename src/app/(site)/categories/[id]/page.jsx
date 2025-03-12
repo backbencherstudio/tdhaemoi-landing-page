@@ -68,18 +68,19 @@ export default function CategoryPage({ params }) {
                                 <tr key={rowIndex}>
                                     {row.map((subCategory, colIndex) => (
                                         <td key={subCategory.id} className={`w-1/3 ${colIndex === 1 ? 'pt-14' : ''}`}>
-                                            <div className="flex flex-col items-center cursor-pointer" onClick={() => handleImageClick(subCategory)}>
-                                                <div className="aspect-[4/3] w-full relative">
+                                            <div className="flex flex-col items-center cursor-pointer group" onClick={() => handleImageClick(subCategory)}>
+                                                <div className="aspect-[4/3] w-full relative overflow-hidden">
                                                     <Image
                                                         src={subCategory.image}
                                                         alt={subCategory.title}
                                                         fill
-                                                        className="object-cover"
+                                                        className="object-cover transition-transform duration-500 "
                                                         priority
                                                         quality={100}
                                                     />
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
                                                 </div>
-                                                <h2 className="text-white text-xl font-semibold mt-4">
+                                                <h2 className="text-white text-xl font-semibold mt-4 transform transition-transform duration-300 group-hover:scale-105">
                                                     {subCategory.title}
                                                 </h2>
                                             </div>

@@ -17,7 +17,7 @@ export default function Sidebar() {
 
   const toggleSection = (section) => {
     setOpenSections(prev => ({
-      ...prev,
+      ...Object.fromEntries(Object.keys(prev).map(key => [key, false])),
       [section]: !prev[section]
     }));
   };
@@ -35,7 +35,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-white min-h-[calc(100vh-115px)] fixed left-0 top-[115px] shadow-lg overflow-y-auto">
+    <div className="w-full md:w-64 bg-white shadow-sm rounded-xl sticky top-28">
       <div className="p-4">
         {filterSections.map((section) => (
           <div key={section.id} className="border-b border-gray-200">
@@ -43,11 +43,10 @@ export default function Sidebar() {
               onClick={() => toggleSection(section.id)}
               className="w-full py-4 px-2 flex justify-between items-center hover:bg-gray-50"
             >
-              <span className="font-pathway-extreme text-sm">{section.label}</span>
-              <IoIosArrowDown 
-                className={`transform transition-transform duration-200 ${
-                  openSections[section.id] ? 'rotate-180' : ''
-                }`}
+              <span className="font-pathway-extreme text-sm font-semibold">{section.label}</span>
+              <IoIosArrowDown
+                className={`transform transition-transform duration-200 ${openSections[section.id] ? 'rotate-180' : ''
+                  }`}
               />
             </button>
             {openSections[section.id] && (
@@ -55,7 +54,7 @@ export default function Sidebar() {
                 {/* Content for each section will go here */}
                 <div className="space-y-2">
                   {/* Example filter options - customize based on section */}
-                  <div className="text-sm text-gray-600">Filter options for {section.label}</div>
+                  <div className="text-sm text-gray-600 ">Filter options for {section.label}</div>
                 </div>
               </div>
             )}

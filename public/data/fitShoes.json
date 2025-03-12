@@ -4,26 +4,17 @@
         "name": "Dynafit",
         "price": 19999,
         "description": "Laufschuhe - Herren",
-        "image": "/shoes/shoes5.png",
+        "image": "/shoes/shoes1.png",
         "discount": 90,
         "Farbe": 1
     },
     {
         "id": 2,
-        "name": "Adrenaline Gts 23 GTX",
-        "price": 19999,
-        "description": "Laufschuhe - Herren",
-        "image": "/shoes/shoes4.png",
-        "discount": 90,
-        "Farbe": 2
-    },
-    {
-        "id":  3,
         "name": "Dynafit",
         "price": 19999,
         "description": "Laufschuhe - Herren",
-        "image": "/shoes/shoes3.png",
+        "image": "/shoes/shoes2.png",
         "discount": 90,
-        "Farbe": 3
+        "Farbe": 2
     }
 ]

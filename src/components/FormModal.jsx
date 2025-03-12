@@ -105,7 +105,7 @@ export default function FormModal({ isOpen, onClose, categoryData }) {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="bg-[#62a07b] text-white px-12 py-3 rounded-full text-lg font-medium uppercase hover:bg-opacity-90 transition-all disabled:opacity-50"
+                                className="bg-[#62a07b] cursor-pointer text-white px-12 py-3 rounded-full text-lg font-medium uppercase hover:bg-opacity-90 transition-all disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <div className="flex items-center gap-2">
