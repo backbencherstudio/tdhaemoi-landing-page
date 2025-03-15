@@ -90,9 +90,9 @@ export default function CategoryPage({ params }) {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-black">
-               <LoadingSpring />
-            </div>
+            <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
+            <div>Loading...</div>
+        </div>
         )
     }
 
@@ -119,7 +119,7 @@ export default function CategoryPage({ params }) {
                         />
                     </Link>
                  
-                    <p className="text-white text-2xl md:text-4xl font-bold mt-4">
+                    <p className="text-white uppercase text-2xl md:text-3xl font-bold mt-4">
                         Choose the category for your perfect fitting sport shoes
                     </p>
                 </div>

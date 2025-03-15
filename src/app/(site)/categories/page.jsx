@@ -79,8 +79,8 @@ export default function Categories() {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <LoadingSpring />
+            <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
+                Loading...
             </div>
         )
     }

@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import logo from '../../../public/categoryData/logo.png'
 import { IoIosArrowDown } from 'react-icons/io'
-import LoadingSpring from '../loading/LoadingSpring'
 
 export default function AllQuestions() {
     const [submittedData, setSubmittedData] = useState(null)
@@ -86,7 +85,7 @@ export default function AllQuestions() {
 
     if (!submittedData) {
         return <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
-           <LoadingSpring/>
+            <div>Loading...</div>
         </div>
     }
 
