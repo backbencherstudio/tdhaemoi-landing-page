@@ -3,7 +3,7 @@ import { IoClose } from "react-icons/io5"
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 
-export default function FormModal({ isOpen, onClose, categoryData }) {
+export default function FormModal({ isOpen, onClose, category, categoryData }) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -16,18 +16,33 @@ export default function FormModal({ isOpen, onClose, categoryData }) {
         }
     })
 
+    const normalizedData = categoryData || {
+        id: category?.id,
+        title: category?.title,
+        slug: category?.slug,
+        selectedSubCategory: null,
+    }
+
     const handleFormSubmit = async (data) => {
         setIsSubmitting(true)
         try {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
+            // Get questions from the category data
+            const categoryQuestions = category?.questions || categoryData?.selectedSubCategory?.questions || [];
+            
             const submissionData = {
                 ...data,
-                categoryId: categoryData.id,
-                categoryTitle: categoryData.title,
-                selectedCategory: categoryData.selectedSubCategory
+                categoryId: normalizedData.id,
+                categoryTitle: normalizedData.title,
+                categorySlug: normalizedData.slug,
+                selectedSubCategory: normalizedData.selectedSubCategory,
+                questions: categoryQuestions // Make sure questions are included
             }
-            router.push('/foot-scanning');
+            
+            console.log('Submitting data:', submissionData); // Debug log
+            const encodedData = encodeURIComponent(JSON.stringify(submissionData));
+            router.push(`/question?data=${encodedData}`);
         } catch (error) {
             console.error('Error submitting form:', error)
         } finally {
