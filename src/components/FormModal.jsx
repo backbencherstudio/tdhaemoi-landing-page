@@ -35,6 +35,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
             // Get questions from the category data
             const categoryQuestions = category?.questions || categoryData?.selectedSubCategory?.questions || [];
 
+            // Create full submission data
             const submissionData = {
                 ...data,
                 categoryId: normalizedData.id,
@@ -44,9 +45,23 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                 questions: categoryQuestions
             }
 
-            console.log('Submitting data:', submissionData);
-            const encodedData = encodeURIComponent(JSON.stringify(submissionData));
-            router.push(`/question?data=${encodedData}`);
+            // Store full submission data in sessionStorage
+            sessionStorage.setItem('formSubmissionData', JSON.stringify(submissionData));
+
+            // Create URL params with all necessary category info
+            const urlParams = new URLSearchParams({
+                categoryId: normalizedData.id,
+                categoryTitle: normalizedData.title,
+                categorySlug: normalizedData.slug || '',
+            });
+
+            if (normalizedData.selectedSubCategory?.id) {
+                urlParams.append('subCategoryId', normalizedData.selectedSubCategory.id);
+                urlParams.append('subCategoryTitle', normalizedData.selectedSubCategory.title);
+                urlParams.append('subCategorySlug', normalizedData.selectedSubCategory.slug || '');
+            }
+
+            router.push(`/foot-scanning?${urlParams.toString()}`);
         } catch (error) {
             console.error('Error submitting form:', error)
         } finally {

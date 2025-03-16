@@ -3,18 +3,27 @@ import Image from 'next/image';
 import { IoClose } from "react-icons/io5";
 import qrCode from '../../public/qrscanner.png';
 import ScanningLoading from './loading/ScanningLoading';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SuccessModal({ onClose }) {
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const handleClose = () => {
         setIsLoading(true);
+        
+        // Get all URL parameters and pass them along
+        const currentParams = new URLSearchParams(searchParams.toString());
+        
         setTimeout(() => {
             onClose();
             setTimeout(() => {
                 setIsLoading(false);
             }, 5000);
         }, 1000);
+        
+        router.push(`/scanning-details?${currentParams.toString()}`);
     };
 
     return (

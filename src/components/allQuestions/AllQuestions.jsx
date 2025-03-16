@@ -1,9 +1,10 @@
 'use client'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import logo from '../../../public/categoryData/logo.png'
 import { IoIosArrowDown } from 'react-icons/io'
+import LoadingSpring from '../loading/LoadingSpring'
 
 export default function AllQuestions() {
     const [submittedData, setSubmittedData] = useState(null)
@@ -11,21 +12,39 @@ export default function AllQuestions() {
     const [answers, setAnswers] = useState({})
     const [isLoading, setIsLoading] = useState(true)
     const searchParams = useSearchParams()
+    const router = useRouter()
+    const [showLoadingSpring, setShowLoadingSpring] = useState(false)
 
     useEffect(() => {
-        setIsLoading(true)
-        const data = searchParams.get('data')
-        if (data) {
+        const loadData = () => {
+            setIsLoading(true)
             try {
-                const decodedData = JSON.parse(decodeURIComponent(data))
-                console.log('Decoded Data:', decodedData)
-                setSubmittedData(decodedData)
-                setIsLoading(false)
+                // Get data from sessionStorage
+                const storedData = sessionStorage.getItem('formSubmissionData')
+                if (storedData) {
+                    const parsedData = JSON.parse(storedData)
+
+                    // Verify that the stored data matches the URL parameters
+                    const categoryId = searchParams.get('categoryId')
+                    const subCategoryId = searchParams.get('subCategoryId')
+
+                    if (categoryId === parsedData.categoryId.toString() &&
+                        (!subCategoryId || subCategoryId === parsedData.selectedSubCategory?.id?.toString())) {
+                        setSubmittedData(parsedData)
+                    } else {
+                        console.error('URL parameters do not match stored data')
+                    }
+                } else {
+                    console.error('No stored form data found')
+                }
             } catch (error) {
-                console.error('Error parsing data:', error)
+                console.error('Error loading data:', error)
+            } finally {
                 setIsLoading(false)
             }
         }
+
+        loadData()
     }, [searchParams])
 
     const questions = submittedData?.questions || [];
@@ -80,23 +99,46 @@ export default function AllQuestions() {
         if (answers[currentQuestionId]) {
             console.log('All Questions Completed! Final Answers:', answers)
 
+            // Save answers to sessionStorage
+            sessionStorage.setItem('questionAnswers', JSON.stringify(answers))
+
+            // Show loading animation
+            setShowLoadingSpring(true)
+
+            // Redirect to shoes page after a brief delay
+            setTimeout(() => {
+                router.push('/shoes')
+            }, 500)
         }
     }
 
-    if (!submittedData) {
-        return <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
-            <div>Loading...</div>
-        </div>
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 border-2 border-[#62a07c] border-t-transparent rounded-full animate-spin"></div>
+                    <span>Loading...</span>
+                </div>
+            </div>
+        )
     }
 
-    if (!questions || questions.length === 0) {
-        return <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
-            <div>No questions found for this category.</div>
-        </div>
+    if (!submittedData || !submittedData.questions || submittedData.questions.length === 0) {
+        return (
+            <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
+                <div>No questions found for this category. Please try again.</div>
+            </div>
+        )
     }
 
     const currentQuestion = questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    if (showLoadingSpring) {
+        return <div className='fixed inset-0 bg-black flex items-center justify-center z-[9999]'>
+            <LoadingSpring />
+        </div>
+    }
 
     return (
 
@@ -153,26 +195,62 @@ export default function AllQuestions() {
                         </button>
                     </div>
 
-                    {/* Options with Checkboxes */}
+                    {/* Options with Checkboxes or Input Fields */}
                     <div className="space-y-2">
-                        {currentQuestion.options.map((option) => (
-                            <label
-                                key={option.id}
-                                className={`flex items-center w-full p-4  cursor-pointer ${answers[currentQuestion.id]?.id === option.id
-                                    ? ' bg-opacity-20'
-                                    : 'border-gray-700 hover:border-[#62a07c]'
-                                    } transition-colors`}
-                            >
-                                <input
-                                    type="radio"
-                                    name={`question-${currentQuestion.id}`}
-                                    checked={answers[currentQuestion.id]?.id === option.id}
-                                    onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option)}
-                                    className="mr-4 accent-[#62a07c] w-5 h-5"
-                                />
-                                <span>{option.option}</span>
-                            </label>
-                        ))}
+                        {currentQuestion.options.map((option) => {
+                            // Check if this is a weight/height input question (questions 6 or 7)
+                            const isInputQuestion =
+                                submittedData?.categoryId === 2 &&
+                                submittedData?.selectedSubCategory?.id === 1 &&
+                                (currentQuestion.id === 6 || currentQuestion.id === 7);
+
+                            if (isInputQuestion) {
+                                return (
+                                    <div key={option.id} className="w-full p-4">
+                                        <div className="flex items-center gap-2">
+                                            <span>
+                                                {currentQuestion.id === 6
+                                                    ? "Bitte geben Sie Ihre Körpergröße in Cm an:"
+                                                    : "Bitte geben Sie Ihr Gewicht in Kg an:"
+                                                }
+                                            </span>
+                                            <input
+                                                type="number"
+                                                value={answers[currentQuestion.id]?.answer || ''}
+                                                onChange={(e) => handleAnswerSelect(
+                                                    currentQuestion.id,
+                                                    option.id,
+                                                    e.target.value
+                                                )}
+                                                className="w-20 p-2 text-white bg-transparent rounded border-b-2 border-[#62a07c]"
+                                                min="1"
+                                                max={currentQuestion.id === 6 ? "250" : "200"}
+                                            />
+                                            <span>{currentQuestion.id === 6 ? "cm" : "kg"}</span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <label
+                                    key={option.id}
+                                    className={`flex items-center w-full p-4 cursor-pointer ${answers[currentQuestion.id]?.id === option.id
+                                        ? 'bg-opacity-20'
+                                        : 'border-gray-700 hover:border-[#62a07c]'
+                                        } transition-colors`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name={`question-${currentQuestion.id}`}
+                                        checked={answers[currentQuestion.id]?.id === option.id}
+                                        onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option)}
+                                        className="mr-4 accent-[#62a07c] w-5 h-5"
+                                    />
+                                    <span>{option.option}</span>
+                                </label>
+                            );
+                        })}
                     </div>
                 </div>
 
