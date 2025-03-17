@@ -13,16 +13,16 @@ export default function RecommendShoes() {
         try {
             const response = await fetch('/data/recommendShoes.json');
             const data = await response.json();
-            
+
             // Ensure all shoes have valid data
-            const validShoes = data.filter(shoe => 
-                shoe.id && 
-                shoe.name && 
-                shoe.image && 
-                shoe.price && 
+            const validShoes = data.filter(shoe =>
+                shoe.id &&
+                shoe.name &&
+                shoe.image &&
+                shoe.price &&
                 shoe.description
             );
-            
+
             setShoes(validShoes);
         } catch (error) {
             console.error('Error fetching recommended shoes:', error);
@@ -35,8 +35,8 @@ export default function RecommendShoes() {
     }
 
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-6">Recommended Shoes</h2>
+        <>
+            <h2 className="text-2xl font-bold mb-6">Diese Modelle empfehlen wir dir auch:</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {shoes.map((shoe) => (
                     <Link href={`/shoes/details/${shoe.id}`} key={shoe.id}>
@@ -67,6 +67,6 @@ export default function RecommendShoes() {
                     </Link>
                 ))}
             </div>
-        </div>
+        </>
     );
 }

@@ -157,7 +157,7 @@ export default function AllQuestions() {
 
             {/* Main Content */}
             <div className="container px-4 py-2">
-                <h2 className="text-start text-[20px] md:text-[35px] font-semibold mb-10 uppercase">Shoe finder feetfirst</h2>
+                <h2 className="text-start text-[20px] md:text-[35px] font-semibold mb-10 uppercase">SHOE FINDER FEETF1RST</h2>
 
                 <div className="mb-8">
 
