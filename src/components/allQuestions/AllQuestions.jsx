@@ -14,6 +14,8 @@ export default function AllQuestions() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const [showLoadingSpring, setShowLoadingSpring] = useState(false)
+    const [nestedQuestions, setNestedQuestions] = useState(null)
+    const [inputValues, setInputValues] = useState({})
 
     useEffect(() => {
         const loadData = () => {
@@ -47,28 +49,54 @@ export default function AllQuestions() {
         loadData()
     }, [searchParams])
 
-    const questions = submittedData?.questions || [];
+    // Get questions based on current state
+    const questions = nestedQuestions ? nestedQuestions.questions : (submittedData?.questions || []);
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
     const isFirstQuestion = currentQuestionIndex === 0;
 
-    const handleAnswerSelect = (questionId, answerId, answerText) => {
+    // Modify handleAnswerSelect to handle both radio and input
+    const handleAnswerSelect = (questionId, answerId, answerText, option) => {
         const newAnswers = {
             ...answers,
-            [questionId]: { id: answerId, answer: answerText }
+            [questionId]: { 
+                id: answerId, 
+                answer: answerText,
+                hasNextQuestions: option.nextQuestions ? true : false,
+                nextQuestions: option.nextQuestions || null,
+                inputValue: inputValues[questionId] || '' // Add input value if exists
+            }
         }
         setAnswers(newAnswers)
         console.log('Selected Answer:', { questionId, answerId, answerText })
-        console.log('All Answers:', newAnswers)
+    }
+
+    // Add new function to handle input changes
+    const handleInputChange = (questionId, value) => {
+        setInputValues(prev => ({
+            ...prev,
+            [questionId]: value
+        }));
+
+        // Update answer when input changes
+        if (value) {
+            const option = questions[currentQuestionIndex].options[0];
+            handleAnswerSelect(questionId, option.id, `${option.option} ${value}`, option);
+        }
     }
 
     const handleNextQuestion = () => {
         const currentQuestionId = questions[currentQuestionIndex].id;
-        // Only proceed if an answer is selected or question was skipped
-        if (answers[currentQuestionId]) {
+        const currentAnswer = answers[currentQuestionId];
+
+        if (currentAnswer) {
+            if (currentAnswer.hasNextQuestions && currentAnswer.nextQuestions) {
+                setNestedQuestions(currentAnswer.nextQuestions);
+                setCurrentQuestionIndex(0);
+                return;
+            }
+
             if (currentQuestionIndex < questions.length - 1) {
-                setCurrentQuestionIndex(prev => prev + 1)
-            } else {
-                console.log('Final Answers:', answers)
+                setCurrentQuestionIndex(prev => prev + 1);
             }
         }
     }
@@ -76,6 +104,10 @@ export default function AllQuestions() {
     const handlePreviousQuestion = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(prev => prev - 1)
+        } else if (nestedQuestions) {
+            // If we're at the first question of nested questions, go back to main questions
+            setNestedQuestions(null)
+            setCurrentQuestionIndex(1) // Go back to the main question that had nested questions
         }
     }
 
@@ -189,62 +221,59 @@ export default function AllQuestions() {
                 {/* Question */}
                 <div className="mb-8">
                     <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-xl">{currentQuestion.question}</h2>
+                        <h2 className="text-xl">
+                            {nestedQuestions ? `${currentQuestion.question}` : currentQuestion.question}
+                        </h2>
                         <button className="text-[#62a07c] rounded-full border border-[#62a07c] w-6 h-6 flex items-center justify-center">
                             ?
                         </button>
                     </div>
 
-                    {/* Options with Checkboxes or Input Fields */}
+                    {/* Options */}
                     <div className="space-y-2">
                         {currentQuestion.options.map((option) => {
-                            // Check if this is a weight/height input question (questions 6 or 7)
-                            const isInputQuestion =
-                                submittedData?.categoryId === 2 &&
-                                submittedData?.selectedSubCategory?.id === 1 &&
-                                (currentQuestion.id === 6 || currentQuestion.id === 7);
-
-                            if (isInputQuestion) {
+                            if (option.option.includes('______')) {
+                                const beforeInput = option.option.split('______')[0];
+                                const afterInput = option.option.split('______')[1];
+                                
                                 return (
-                                    <div key={option.id} className="w-full p-4">
-                                        <div className="flex items-center gap-2">
-                                            <span>
-                                                {currentQuestion.id === 6
-                                                    ? "Bitte geben Sie Ihre Körpergröße in Cm an:"
-                                                    : "Bitte geben Sie Ihr Gewicht in Kg an:"
-                                                }
-                                            </span>
-                                            <input
-                                                type="number"
-                                                value={answers[currentQuestion.id]?.answer || ''}
-                                                onChange={(e) => handleAnswerSelect(
-                                                    currentQuestion.id,
-                                                    option.id,
-                                                    e.target.value
-                                                )}
-                                                className="w-20 p-2 text-white bg-transparent rounded border-b-2 border-[#62a07c]"
-                                                min="1"
-                                                max={currentQuestion.id === 6 ? "250" : "200"}
-                                            />
-                                            <span>{currentQuestion.id === 6 ? "cm" : "kg"}</span>
-                                        </div>
-                                    </div>
+                                    <label
+                                        key={option.id}
+                                        className="flex items-center w-full p-4 cursor-pointer border-gray-700 hover:border-[#62a07c] transition-colors"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name={`question-${currentQuestion.id}`}
+                                            checked={answers[currentQuestion.id]?.id === option.id}
+                                            onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option, option)}
+                                            className="mr-4 accent-[#62a07c] w-5 h-5"
+                                        />
+                                        <span>{beforeInput}</span>
+                                        <input
+                                            type="number"
+                                            value={inputValues[currentQuestion.id] || ''}
+                                            onChange={(e) => handleInputChange(currentQuestion.id, e.target.value)}
+                                            className="mx-2 w-20 p-1 bg-transparent border border-gray-700 rounded text-white focus:border-[#62a07c] outline-none"
+                                        />
+                                        <span>{afterInput}</span>
+                                    </label>
                                 );
                             }
 
                             return (
                                 <label
                                     key={option.id}
-                                    className={`flex items-center w-full p-4 cursor-pointer ${answers[currentQuestion.id]?.id === option.id
-                                        ? 'bg-opacity-20'
-                                        : 'border-gray-700 hover:border-[#62a07c]'
+                                    className={`flex items-center w-full p-4 cursor-pointer ${
+                                        answers[currentQuestion.id]?.id === option.id
+                                            ? 'bg-opacity-20'
+                                            : 'border-gray-700 hover:border-[#62a07c]'
                                         } transition-colors`}
                                 >
                                     <input
                                         type="radio"
                                         name={`question-${currentQuestion.id}`}
                                         checked={answers[currentQuestion.id]?.id === option.id}
-                                        onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option)}
+                                        onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option, option)}
                                         className="mr-4 accent-[#62a07c] w-5 h-5"
                                     />
                                     <span>{option.option}</span>
@@ -265,13 +294,14 @@ export default function AllQuestions() {
                         </button>
                     )}
 
-                    {!isLastQuestion ? (
+                    {(!isLastQuestion || (answers[currentQuestion.id]?.hasNextQuestions)) ? (
                         <button
                             onClick={handleNextQuestion}
                             disabled={!answers[currentQuestion.id]}
-                            className={`flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${answers[currentQuestion.id]
-                                ? 'bg-[#62a07c] hover:bg-opacity-90'
-                                : 'bg-gray-700 cursor-not-allowed'
+                            className={`flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${
+                                answers[currentQuestion.id]
+                                    ? 'bg-[#62a07c] hover:bg-opacity-90'
+                                    : 'bg-gray-700 cursor-not-allowed'
                                 }`}
                         >
                             Nächste Frage
@@ -280,14 +310,16 @@ export default function AllQuestions() {
                         <button
                             onClick={handleComplete}
                             disabled={!answers[currentQuestion.id]}
-                            className={`flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${answers[currentQuestion.id]
-                                ? 'bg-[#62a07c] hover:bg-opacity-90'
-                                : 'bg-gray-700 cursor-not-allowed'
+                            className={`flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${
+                                answers[currentQuestion.id]
+                                    ? 'bg-[#62a07c] hover:bg-opacity-90'
+                                    : 'bg-gray-700 cursor-not-allowed'
                                 }`}
                         >
                             Abschließen
                         </button>
                     )}
+
                     <button
                         onClick={handleSkip}
                         className="text-gray-400 underline text-sm hover:text-gray-300"

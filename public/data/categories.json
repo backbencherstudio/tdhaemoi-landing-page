@@ -6,7 +6,7 @@
         "questions": [
             {
                 "id": 1,
-                "question": "Welche Alltagsschuhe suchen Sie?",
+                "question": "Welche Alltagsschuhe suchen sie?",
                 "options": [
                     {
                         "id": 1,
@@ -14,11 +14,11 @@
                     },
                     {
                         "id": 2,
-                        "option": "Anzugsschuhe"
+                        "option": "Anzugsschuhe "
                     },
                     {
                         "id": 3,
-                        "option": "Bequemschuhe"
+                        "option": "Sportschuhe"
                     },
                     {
                         "id": 4,
@@ -27,11 +27,33 @@
                     {
                         "id": 5,
                         "option": "Arbeitsschuhe"
+                    },
+                    {
+                        "id": 6,
+                        "option": "Bequemschuhe"
                     }
                 ]
             },
             {
                 "id": 2,
+                "question": "Wie bevorzugen Sie Ihre Schuhe zu tragen?",
+                "options": [
+                    {
+                        "id": 1,
+                        "option": "Die perfekt empfohlene Passform basierend auf meinem 3D-Scan"
+                    },
+                    {
+                        "id": 2,
+                        "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
+                    },
+                    {
+                        "id": 3,
+                        "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                    }
+                ]
+            },
+            {
+                "id": 3,
                 "question": "Sind Sie im Besitz einer Orthopädischen Einlage?",
                 "options": [
                     {
@@ -45,24 +67,6 @@
                     {
                         "id": 3,
                         "option": "In Planung"
-                    }
-                ]
-            },
-            {
-                "id": 3,
-                "question": "Wie bevorzugen Sie Ihre Schuhe zu tragen?",
-                "options": [
-                    {
-                        "id": 1,
-                        "option": "Die perfekt empfohlene Passform basierend auf meinem 3D-Scan"
-                    },
-                    {
-                        "id": 2,
-                        "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
-                    },
-                    {
-                        "id": 3,
-                        "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge "
                     }
                 ]
             }
@@ -82,147 +86,271 @@
                 "questions": [
                     {
                         "id": 1,
-                        "question": "Was suchen Sie?",
+                        "question": "Sind Sie Anfänger, Fortgeschrittener oder Experte?",
                         "options": [
                             {
                                 "id": 1,
-                                "option": "Nur Skischuhe"
+                                "option": "Anfänger"
                             },
                             {
                                 "id": 2,
-                                "option": "Nur Ski"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Komplettes Set (Ski & Skischuhe )"
+                                "option": "Fortgeschrittener "
                             }
                         ]
                     },
                     {
                         "id": 2,
-                        "question": "Möchten Sie ein Modell aus einer bestimmten Preisklasse?",
+                        "question": "Was suchen Sie?",
                         "options": [
                             {
                                 "id": 1,
-                                "option": "Budget (günstig & funktional)"
+                                "option": "Nur Skischuhe",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Nur Skischuhe",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Möchten Sie ein Modell aus einer bestimmten Preisklasse?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Budget (günstig & funktional)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittelklasse (ausgewogene Performance & Komfort)"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Premium (höchste Qualität & Technologie)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Wie eng soll der Skischuh sitzen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Komfortabel (mehr Bewegungsfreiheit, wärmer)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
+                                                },
+                                                {
+                                                    "id": "Sehr eng (maximale Performance für Rennfahrer)",
+                                                    "option": "Sehr eng (maximale Performance für Rennfahrer)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Welchen Flex bevorzugen Sie?  ",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Weich (Flex 60–90, komfortabel für Einsteiger)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittel (Flex 90–110, ausgewogene Kontrolle)"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Hart (Flex 120+, maximale Präzision für Profis)"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
                                 "id": 2,
-                                "option": " Mittelklasse (ausgewogene Performance & Komfort)"
+                                "option": "Nur Ski",
+                                "nextQuestions": {
+                                    "id": 2,
+                                    "title": "Nur Ski",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Welche Körpergröße haben Sie?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Bitte geben Sie Ihre Körpergröße in Cm an: ______ cm"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Wie viel wiegen Sie?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Bitte geben Sie Ihr Gewicht in Kg an: ______ kg"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Welche Art von Ski benötigen Sie?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Rennski"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Freeride-Ski"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Freestyle-Ski"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 4,
+                                            "question": "Wie lang sollten Ihre Ski sein?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Kurze Ski – Leicht zu steuern, ideal für Anfänger und enge Slalom-Schwünge"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittellange Ski – Gute Balance zwischen Kontrolle und Geschwindigkeit"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Lange Ski – Mehr Stabilität bei hoher Geschwindigkeit, für erfahrene Skifahrer"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
                                 "id": 3,
-                                "option": "Premium (höchste Qualität & Technologie)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 3,
-                        "question": "Sind Sie Anfänger, Fortgeschrittener oder Experte?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Anfänger (komfortabel, fehlerverzeihend)"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Fortgeschrittener (sportlicher, präziser Halt)"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Experte (direkte Kraftübertragung, maximale Kontrolle)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 4,
-                        "question": "Wie eng soll der Skischuh sitzen?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Komfortabel (mehr Bewegungsfreiheit, wärmer)"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Sehr eng (maximale Performance für Rennfahrer)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 5,
-                        "question": "Welchen Flex bevorzugen Sie? ",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Weich (Flex 60–90, komfortabel für Einsteiger)"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Mittel (Flex 90–110, ausgewogene Kontrolle)"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Hart (Flex 120+, maximale Präzision für Profis)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 6,
-                        "question": "Welche Körpergröße haben Sie?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Bitte geben Sie Ihre Körpergröße in Cm an: ______ cm"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 7,
-                        "question": "Wie viel wiegen Sie?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Bitte geben Sie Ihr Gewicht in Kg an: ______ kg"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 8,
-                        "question": "Welche Art von Ski benötigen Sie?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Rennski"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Freeride-Ski"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Tourenski"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 9,
-                        "question": "Wie lang sollten Ihre Ski sein?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Kurze Ski – Leicht zu steuern, ideal für Anfänger und enge Slalom-Schwünge"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Mittellange Ski – Gute Balance zwischen Kontrolle und Geschwindigkeit, vielseitig einsetzbar"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Lange Ski – Mehr Stabilität bei hoher Geschwindigkeit, für erfahrene Skifahrer"
+                                "option": "Komplettes Set (Ski & Skischuhe )",
+                                "nextQuestions": {
+                                    "id": 3,
+                                    "title": "Komplettes Set (Ski & Skischuhe )",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Möchten Sie ein Modell aus einer bestimmten Preisklasse?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Budget (günstig & funktional)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittelklasse (ausgewogene Performance & Komfort)"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Premium (höchste Qualität & Technologie)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Wie eng soll der Skischuh sitzen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Komfortabel (mehr Bewegungsfreiheit, wärmer)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
+                                                },
+                                                {
+                                                    "id": "Sehr eng (maximale Performance für Rennfahrer)",
+                                                    "option": "Sehr eng (maximale Performance für Rennfahrer)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Welchen Flex bevorzugen Sie?  ",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Weich (Flex 60–90, komfortabel für Einsteiger)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittel (Flex 90–110, ausgewogene Kontrolle)"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Hart (Flex 120+, maximale Präzision für Profis)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 4,
+                                            "question": "Welche Körpergröße haben Sie?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Bitte geben Sie Ihre Körpergröße in Cm an: ______ cm"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 5,
+                                            "question": "Wie viel wiegen Sie?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Bitte geben Sie Ihr Gewicht in Kg an: ______ kg"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 6,
+                                            "question": "Welche Art von Ski benötigen Sie?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Rennski"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Freeride-Ski"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Freestyle-Ski"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 7,
+                                            "question": "Wie lang sollten Ihre Ski sein?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Kurze Ski – Leicht zu steuern, ideal für Anfänger und enge Slalom-Schwünge"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittellange Ski – Gute Balance zwischen Kontrolle und Geschwindigkeit"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Lange Ski – Mehr Stabilität bei hoher Geschwindigkeit, für erfahrene Skifahrer"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -240,157 +368,495 @@
                         "options": [
                             {
                                 "id": 1,
-                                "option": "Joggen/Freizeit"
+                                "option": "Allrounder",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Allrounder",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Wie bevorzugen Sie Ihre Allround - Laufschuhe zu tragen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Die perfekte Laufschuh-passform basierend auf  meinen 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Kennen Sie Ihren Fußtyp oder Ihre Pronation?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Analyse basierend auf meinem 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Neutralfuß"
+                                                },
+                                                {
+                                                    "id": "Überpronation (starker Einknick nach innen)",
+                                                    "option": "Supination (starke Außenbelastung)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Hatten Sie schon einmal Probleme oder Schmerzen beim Laufen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Nein"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Ja, Knieprobleme"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Ja, Wadenprobleme "
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 4,
+                                            "question": "Welche Rolle spielt Dämpfung im Verhältnis zu Stabilität?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Maximale Dämpfung – Fokus auf Komfort und Gelenkschonung"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Ausgewogen – Gutes Verhältnis von Dämpfung und Stabilität"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Mehr Stabilität – Fokus auf Kontrolle und Führung"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
                                 "id": 2,
-                                "option": "Wettkampf/Marathon"
+                                "option": "Trailrunning (Gelände)",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Trailrunning (Gelände)",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Wie bevorzugen Sie Ihre Trailrunning - Schuhe zu tragen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Die perfekte Trailrunning-passform basierend auf  meinen 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Soll dein Schuh wasserdicht sein (Gore-Tex-Membran)?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Ja, wasserdicht und atmungsaktiv (Gore-Tex oder ähnliche Membran)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Nein, leichter und besser belüftet"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Wo wirst du deine Trailrunning-Schuhe hauptsächlich nutzen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Nur auf Trails & im Gelände"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mischung aus Trail & Straße (Hybrid-Nutzung)"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Hauptsächlich Straße, aber auch für leichte Trails"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 4,
+                                            "question": "Welche Schafthöhe soll dein Schuh haben?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Niedrig (unter dem Knöchel)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Mittel/Hoch (knöchelhoch oder darüber)"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
                                 "id": 3,
-                                "option": "Trailrunning (Gelände)"
+                                "option": "Lange Distanzen/Dauerläufe",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Lange Distanzen/Dauerläufe",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Wie bevorzugen Sie Ihre Dauer - Laufschuhe zu tragen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Die perfekte Laufschuh-passform basierend auf  meinen 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Auf welchem Untergrund wirst du hauptsächlich laufen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Asphalt/Straße"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Wald-/Feldwege"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Tartanbahn"
+                                                },
+                                                {
+                                                    "id": 4,
+                                                    "option": "Gemischt"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Hatten Sie schon einmal Probleme oder Schmerzen beim Laufen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Nein"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Ja, Knieprobleme"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Ja, Wadenproblem"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 4,
+                                            "question": "Kennen Sie Ihren Fußtyp oder Ihre Pronation?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Analyse basierend auf meinem 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Neutralfuß"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Überpronation (starker Einknick nach innen)"
+                                                },
+                                                {
+                                                    "id": 4,
+                                                    "option": "Supination (starke Außenbelastung)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 5,
+                                            "question": "Welche Rolle spielt Dämpfung im Verhältnis zu Stabilität?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Maximale Dämpfung – Fokus auf Komfort und Gelenkschonung"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Ausgewogen – Gutes Verhältnis von Dämpfung und Stabilität"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Mehr Stabilität – Fokus auf Kontrolle und Führung"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
                                 "id": 4,
-                                "option": "Tägliches Training"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 2,
-                        "question": "Wie oft laufen Sie pro Woche?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Gelegentlich (1-2x)"
+                                "option": "Wettkampf/Marathon",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Wettkampf/Marathon",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Wie bevorzugen Sie Ihre Wettkampf - Schuhe zu tragen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Die perfekte Wettkampf-passform basierend auf  meinen 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Welche Art von Wettkampfschuhen suchst du?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Wettkampfschuhe mit Carbon"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Wettkampfschuhe ohne Carbon"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Für welche Distanz suchst du Wettkampf-Schuhe?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Kurzstrecke (5 km – 10 km)"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Halbmarathon (21,1 km)"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Marathon (42,2 km & mehr)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 4,
+                                            "question": "Kennen Sie Ihren Fußtyp oder Ihre Pronation?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Analyse basierend auf meinem 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Neutralfuß"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Überpronation (starker Einknick nach innen)"
+                                                },
+                                                {
+                                                    "id": 4,
+                                                    "option": "Supination (starke Außenbelastung)"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 5,
+                                            "question": "Wie soll die Dämpfung deine Wettkampfleistung beeinflussen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Maximale Dämpfung – Optimal für Marathon/Ultra, reduziert Ermüdung."
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Reaktives Gleichgewicht – Perfekt für schnelle Halbmarathons & Tempoläufe."
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Direkte Rückmeldung – Minimal gedämpft für maximale Kontrolle (5–10 km, Bahn)."
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 6,
+                                            "question": "Welche Sprengung bevorzugst du?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "6–10 mm – Bewährte Wahl, unterstützt das Abrollen."
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "≤ 5 mm – Direkter Abdruck, erfordert trainierte Technik."
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
-                                "id": 2,
-                                "option": "Regelmäßig (3-4x)"
+                                "id": 5,
+                                "option": "Intervallläufe/Laufbahn",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Intervallläufe/Laufbahn",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Wie bevorzugen Sie Ihre Intervall - Laufschuhe zu tragen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Die perfekte Intervall-passform basierend auf  meinen 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Auf welchem Untergrund läufst du deine Intervalltrainings?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Laufbahn (Spikes)",
+                                                    "nextQuestions": {
+                                                        "id": 1,
+                                                        "title": "Laufbahn (Spikes)",
+                                                        "questions": [
+                                                            {
+                                                                "id": 1,
+                                                                "question": "Welche Distanz läufst du bei deinen Intervalltrainings?",
+                                                                "options": [
+                                                                    {
+                                                                        "id": 1,
+                                                                        "option": "Kurzstrecke (100–400 m)"
+                                                                    },
+                                                                    {
+                                                                        "id": 2,
+                                                                        "option": "Mittel- & Langstrecke (800 m – 10.000 m)"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Asphalt/Laufbahn (ohne Spikes)"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             {
-                                "id": 3,
-                                "option": "Intensiv (5+x)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 3,
-                        "question": "Auf welchem Untergrund laufen Sie meistens?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Asphalt/Straße"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Wald-/Feldwege"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Tartanbahn"
-                            },
-                            {
-                                "id": 4,
-                                "option": "Gemischt"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 4,
-                        "question": "Laufziel: Trainierst du für Wettkämpfe, zur Wettkampfvorbereitung, zur Fitnesssteigerung?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Wettkämpfe - Du nimmst an Rennen teil und strebst nach Bestzeiten."
-                            },
-                            {
-                                "id": 2,
-                                "option": "Wettkampfvorbereitung - Du bereitest dich gezielt auf einen Wettkampf vor"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Fitnesssteigerung - Du möchtest deine allgemeine Fitness verbessern"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 5,
-                        "question": "Hatten Sie schon einmal Probleme oder Schmerzen beim Laufen?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Nein"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Ja, Knieprobleme"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Ja, Fußprobleme (z. B. Fersensporn, Plattfüße)"
-                            },
-                            {
-                                "id": 4,
-                                "option": " Ja, Hüft- oder Rückenprobleme"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 6,
-                        "question": "Kennen Sie Ihren Fußtyp oder Ihre Pronation?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Analyse basierend auf meinem 3D-Scan"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Neutralfuß"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Überpronation (starker Einknick nach innen)"
-                            },
-                            {
-                                "id": 4,
-                                "option": "Supination (starke Außenbelastung)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 7,
-                        "question": "Welche Rolle spielt Dämpfung im Verhältnis zu Stabilität?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Maximale Dämpfung – Fokus auf Komfort und Gelenkschonung"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Ausgewogen – Gutes Verhältnis von Dämpfung und Stabilität"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Mehr Stabilität – Fokus auf Kontrolle und Führung"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 8,
-                        "question": "Tragen Sie orthopädische Einlagen?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Ja"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Nein"
-                            },
-                            {
-                                "id": 3,
-                                "option": "In Planung "
+                                "id": 6,
+                                "option": "Walkingschuhe",
+                                "nextQuestions": {
+                                    "id": 1,
+                                    "title": "Walkingschuhe",
+                                    "questions": [
+                                        {
+                                            "id": 1,
+                                            "question": "Wie bevorzugen Sie Ihre Walking - Laufschuhe zu tragen?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Die perfekte Laufschuh-passform basierend auf  meinen 3D-Scan"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Eher weiter, da ich mehr Bewegungsfreiheit bevorzuge"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "option": "Eher enger, da ich meine Schuhe gern fest am Fuß trage"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question": "Auf welchem Untergrund wirst du hauptsächlich unterwegs sein?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Harter Untergrund – Asphalt, Pflastersteine, Gehwege"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Gemischtes Terrain – Abwechslung aus Natur- und Stadtwegen"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 3,
+                                            "question": "Bevorzugen Sie eine höhere Sohle oder eine normale bis mittlere Sohlenhöhe?",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "option": "Höhere Sohle – Fokus auf Komfort "
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "option": "Normale bis mittlere Sohle – Fokus auf nätürliches Abrollverhalten"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -570,7 +1036,7 @@
                     }
                 ]
             },
-            {
+            {  
                 "id": 5,
                 "title": "Basketball",
                 "slug": "basketball",
@@ -625,25 +1091,7 @@
                                 "option": "Bewegungsfreiheit (Low-Tops)"
                             }
                         ]
-                    },
-                    {
-                        "id": 4,
-                        "question": " Spielstil & Position – Welche Anforderungen hast du?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Point Guard & Shooting Guard"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Small Forward"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Power Forward & Center "
-                            }
-                        ]
-                    }
+                    } 
                 ]
             },
             {
@@ -672,24 +1120,6 @@
                     },
                     {
                         "id": 2,
-                        "question": "Welches Kletterniveau hast du?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Anfänger"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Fortgeschrittener"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Experte"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 3,
                         "question": "Wofür brauchst du die Kletterschuhe?",
                         "options": [
                             {
@@ -711,7 +1141,7 @@
                         ]
                     },
                     {
-                        "id": 4,
+                        "id": 3,
                         "question": "Welche Fußform hast du?",
                         "options": [
                             {
@@ -733,7 +1163,7 @@
                         ]
                     },
                     {
-                        "id": 5,
+                        "id": 4,
                         "question": "Was ist dir bei der Sohle deines Kletterschuhs am wichtigsten?",
                         "options": [
                             {
@@ -755,7 +1185,7 @@
                         ]
                     },
                     {
-                        "id": 6,
+                        "id": 5,
                         "question": "Welche Form bevorzugen Sie?",
                         "options": [
                             {
@@ -800,19 +1230,15 @@
                         "options": [
                             {
                                 "id": 1,
-                                "option": "Naturrasen"
+                                "option": "Naturrasen (FG)"
                             },
                             {
                                 "id": 2,
-                                "option": "Kunstrasen"
+                                "option": "Kunstrasen (AG)"
                             },
                             {
                                 "id": 3,
-                                "option": "Hartplatz"
-                            },
-                            {
-                                "id": 4,
-                                "option": "Halle "
+                                "option": "Halle (IC)"
                             }
                         ]
                     },
@@ -964,6 +1390,24 @@
                 ]
             },
             {
+              "id": 2,
+              "question": "Welche Schafthöhe bevorzugen Sie?",
+              "options": [
+                {
+                  "id": 1,
+                  "option": "High-Cut – Maximaler Halt und Knöchelschutz für schwieriges Gelände."
+                },
+                {
+                  "id": 2,
+                  "option": "Mid-Cut – Gute Balance aus Beweglichkeit und Halt für vielseitige Touren."
+                },
+                {
+                  "id": 3,
+                  "option": "Low-Cut – Leicht und flexibel für schnelle, einfache Wege."
+                }
+              ]  
+            },
+            {
                 "id": 2,
                 "question": "Soll der Schuh wasserdicht sein?",
                 "options": [
@@ -980,7 +1424,7 @@
                         "option": "Spielt keine entscheidende Rolle"
                     }
                 ]
-            },
+            }, 
             {
                 "id": 3,
                 "question": "Wie wichtig sind Gewicht und Komfort?",
