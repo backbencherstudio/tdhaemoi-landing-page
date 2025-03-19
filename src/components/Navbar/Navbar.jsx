@@ -6,10 +6,12 @@ import { LuArrowLeft } from "react-icons/lu";
 import { FaApple } from "react-icons/fa";
 import { BsAndroid2 } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchRef = useRef(null);
+    const router = useRouter();
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -24,12 +26,19 @@ export default function Navbar() {
         };
     }, []);
 
+    const handleBackClick = () => {
+        router.back();
+    };
+
     return (
         <nav className=" py-2 bg-black w-full sticky top-0 z-40">
-            <div className="flex items-center justify-between px-4 py-2 bg-black w-full container mx-auto">
+            <div className="flex items-center justify-between px-4 py-2 bg-black w-full ">
                 {/* Back button */}
                 <div className="w-10">
-                    <button className="text-white cursor-pointer bg-black rounded-full border border-white lg:w-10 lg:h-10 w-8 h-8 flex items-center justify-center">
+                    <button 
+                        onClick={handleBackClick}
+                        className="text-white cursor-pointer bg-black rounded-full border border-white lg:w-10 lg:h-10 w-8 h-8 flex items-center justify-center"
+                    >
                         <LuArrowLeft className='text-white text-2xl' />
                     </button>
                 </div>

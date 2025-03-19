@@ -123,7 +123,7 @@ export default function ShoesDetails({ params }) {
     return (
         <>
             <Navbar />
-            <div className="container mx-auto px-4 py-8 ">
+            <div className="w-full px-4 py-8 ">
                 <Link href="/shoes" className="text-green-600 flex hover:text-green-800 mb-6 items-center">
                     <RiArrowLeftSLine className='text-2xl' /> Back to Shoes
                 </Link>
