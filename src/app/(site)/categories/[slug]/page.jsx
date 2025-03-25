@@ -91,8 +91,8 @@ export default function CategoryPage({ params }) {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
-            <div>Loading...</div>
-        </div>
+                <div>Loading...</div>
+            </div>
         )
     }
 
@@ -118,9 +118,9 @@ export default function CategoryPage({ params }) {
                             priority
                         />
                     </Link>
-                 
-                    <p className="text-white uppercase text-2xl md:text-3xl font-bold mt-4">
-                        Choose the category for your perfect fitting sport shoes
+
+                    <p className="text-white uppercase text-2xl md:text-3xl  mt-4">
+                    Wählen Sie Ihre Kategorie und finden Sie Ihren perfekten Schuh.
                     </p>
                 </div>
 
@@ -130,12 +130,12 @@ export default function CategoryPage({ params }) {
                             {chunk(subCategories, chunkSize).map((row, rowIndex) => (
                                 <tr key={rowIndex}>
                                     {row.map((subCategory, colIndex) => (
-                                        <td 
-                                            key={subCategory.id} 
+                                        <td
+                                            key={subCategory.id}
                                             className={`${chunkSize === 2 ? 'w-1/2' : 'w-1/3'} 
                                             ${chunkSize === 3 && colIndex === 1 ? 'pt-4 md:pt-14' : ''}`}
                                         >
-                                            <div className="flex flex-col items-center cursor-pointer group" 
+                                            <div className="flex flex-col items-center cursor-pointer group"
                                                 onClick={() => handleImageClick(subCategory)}>
                                                 <div className="w-full relative overflow-hidden rounded-lg">
                                                     <Image

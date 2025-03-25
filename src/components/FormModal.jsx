@@ -16,7 +16,9 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
             firstName: '',
             lastName: '',
             email: '',
-            acceptTerms: false
+            gender: '',
+            acceptTerms: false,
+            acceptNewsletter: false
         }
     })
 
@@ -160,25 +162,60 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                 />
                                 {errors.email && <span className="text-red-500 text-sm">{errors.email.message || 'Dieses Feld ist erforderlich'}</span>}
                             </div>
-                            <div className="flex items-start gap-3">
-                                <input
-                                    type="checkbox"
-                                    {...register('acceptTerms', { required: true })}
-                                    className="mt-1 w-4 h-4 rounded border-white"
-                                />
-                                <span className="text-sm leading-[22px]">
-                                    Hiermit erkläre ich mein Einverständnis zur Verarbeitung meiner personenbezogenen Daten und zur Anmeldung zum Newsletter gemäß der{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPrivacyPolicy(true)}
-                                        className="font-bold underline text-blue-500 cursor-pointer hover:text-blue-600"
-                                    >
-                                        Datenschutzrichtlinie
-                                    </button>
-                                    {' '}von FeetF1rst.
-                                </span>
+                            <div className="flex justify-center gap-4 mb-8">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="male"
+                                        {...register('gender', { required: true })}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-lg">Male</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="female"
+                                        {...register('gender', { required: true })}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-lg">Female</span>
+                                </label>
                             </div>
-                            {errors.acceptTerms && <span className="text-red-500 text-sm block">Sie müssen die Bedingungen akzeptieren</span>}
+                            {errors.gender && <span className="text-red-500 text-sm block text-center">Bitte wählen Sie Ihr Geschlecht</span>}
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        type="checkbox"
+                                        {...register('acceptTerms', { required: true })}
+                                        className="mt-1 w-4 h-4 rounded border-white"
+                                    />
+                                    <span className="text-sm leading-[22px]">
+                                        Hiermit erkläre ich mein Einverständnis zur Verarbeitung meiner personenbezogenen Daten.
+                                    </span>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        type="checkbox"
+                                        {...register('acceptNewsletter', { required: true })}
+                                        className="mt-1 w-4 h-4 rounded border-white"
+                                    />
+                                    <span className="text-sm leading-[22px]">
+                                        Ich melde mich zum Newsletter gemäß der{' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPrivacyPolicy(true)}
+                                            className="font-bold underline text-blue-500 cursor-pointer hover:text-blue-600"
+                                        >
+                                            Datenschutzrichtlinie
+                                        </button>
+                                        {' '}von FeetF1rst an.
+                                    </span>
+                                </div>
+                            </div>
+                            {(errors.acceptTerms || errors.acceptNewsletter) && 
+                                <span className="text-red-500 text-sm block">Sie müssen die Bedingungen akzeptieren</span>
+                            }
                             <div className="flex justify-center mt-12">
                                 <button
                                     type="submit"

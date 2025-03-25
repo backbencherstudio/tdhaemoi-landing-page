@@ -67,14 +67,14 @@ export default function ScanModal({ onClose, onComplete, side }) {
         // Controls
         const controls = new OrbitControls(camera, renderer.domElement)
         controls.enableDamping = true
-        controls.dampingFactor = 0.05  // Smoother damping
+        controls.dampingFactor = 0.05  
         controls.minDistance = 2
         controls.maxDistance = 7
         controls.autoRotate = true
-        controls.autoRotateSpeed = 3.0  // Faster rotation
+        controls.autoRotateSpeed = 3.0  
         controls.enableZoom = true
-        controls.enablePan = false      // Disable panning for better focus
-        controls.rotateSpeed = 0.8      // Smoother manual rotation
+        controls.enablePan = false      
+        controls.rotateSpeed = 0.8      
 
         // Load STL
         const loader = new STLLoader()
@@ -92,9 +92,9 @@ export default function ScanModal({ onClose, onComplete, side }) {
                 color: 0xe6c5a9,
                 metalness: 0.05,
                 roughness: 0.7,
-                clearcoat: 0.3,     // Increased clearcoat
+                clearcoat: 0.3,     
                 clearcoatRoughness: 0.2,
-                sheen: 1.0,         // Enhanced sheen
+                sheen: 1.0,         
                 sheenRoughness: 0.8,
                 sheenColor: 0xffebe0,
                 transmission: 0.05,
@@ -104,7 +104,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
 
             mesh.rotation.x = -Math.PI / 2
             mesh.rotation.z = Math.PI
-            mesh.position.set(0, -0.3, 0)  // Adjusted position
+            mesh.position.set(0, -0.3, 0)  
             scene.add(mesh)
         })
 
@@ -154,8 +154,6 @@ export default function ScanModal({ onClose, onComplete, side }) {
                     }, 1000);
                     return 100;
                 }
-
-                // Improved easing function for more realistic scanning feel
                 const eased = Math.pow(next / 100, 0.85) * 100;
                 return Math.min(eased, 100);
             });
