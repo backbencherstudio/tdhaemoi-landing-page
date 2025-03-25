@@ -7,6 +7,7 @@ import logo from '../../public/categoryData/logo.png'
 import Link from 'next/link'
 import Image from 'next/image'
 import SuccessModal from './SuccessModal'
+import ScanModal from './ScanModal'  
 
 function ThreeScene({ containerId }) {
     const containerRef = useRef(null);
@@ -32,15 +33,41 @@ function ThreeScene({ containerId }) {
         renderer.setSize(width, height)
         container.appendChild(renderer.domElement)
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+        // Lighting setup
+        const ambientLight = new THREE.AmbientLight(0xfff1e6, 0.6) // Increased ambient intensity
         scene.add(ambientLight)
 
-        const spotLight = new THREE.SpotLight(0xffffff, 0.8)
-        spotLight.position.set(5, 5, 5)
-        spotLight.angle = 0.15
-        spotLight.penumbra = 1
+        // Main spotlight with increased intensity
+        const spotLight = new THREE.SpotLight(0xfff1e6, 1.5)
+        spotLight.position.set(5, 8, 5)
+        spotLight.angle = 0.5
+        spotLight.penumbra = 0.8
+        spotLight.castShadow = true
+        spotLight.decay = 1.2
         scene.add(spotLight)
+
+        // Brighter fill light
+        const fillLight = new THREE.DirectionalLight(0xffe4d6, 0.8)
+        fillLight.position.set(-5, 3, -5)
+        scene.add(fillLight)
+
+        // Additional front light for better illumination
+        const frontLight = new THREE.DirectionalLight(0xffffff, 0.4)
+        frontLight.position.set(0, 0, 5)
+        scene.add(frontLight)
+
+        // Softer bottom light with increased intensity
+        const bottomLight = new THREE.PointLight(0xfff1e6, 0.5)
+        bottomLight.position.set(0, -3, 0)
+        bottomLight.decay = 1.5
+        scene.add(bottomLight)
+
+        // Brighter accent light
+        const accentLight = new THREE.SpotLight(0xffe4d6, 0.6)
+        accentLight.position.set(-3, 5, -3)
+        accentLight.angle = 0.6
+        accentLight.penumbra = 0.7
+        scene.add(accentLight)
 
         // Controls
         const controls = new OrbitControls(camera, renderer.domElement)
@@ -50,6 +77,7 @@ function ThreeScene({ containerId }) {
 
         // Load STL
         const loader = new STLLoader()
+        // Update material in STL loader
         loader.load('/3dScanner/3d.stl', (geometry) => {
             geometry.center()
             geometry.computeBoundingBox()
@@ -60,24 +88,29 @@ function ThreeScene({ containerId }) {
             const scale = 4 / maxDim
             geometry.scale(scale, scale, scale)
 
-            const material = new THREE.MeshStandardMaterial({ 
-                color: 0xe0e0e0,  // Darker gray for better visibility
-                metalness: 0.1,
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0xe6c5a9,  // Neutral skin tone
+                metalness: 0.05,
                 roughness: 0.7,
-                flatShading: false
+                clearcoat: 0.2,
+                clearcoatRoughness: 0.3,
+                sheen: 0.8,
+                sheenRoughness: 0.9,
+                sheenColor: 0xffebe0,
+                transmission: 0.05,
+                thickness: 0.5
             })
             const mesh = new THREE.Mesh(geometry, material)
             
             // Adjusted rotation and position to match the reference image
             mesh.rotation.x = -Math.PI / 2
-            mesh.rotation.z = Math.PI  // Rotate to match the orientation
-            mesh.position.set(0, -0.5, 0)  // Adjusted position
+            mesh.rotation.z = Math.PI  
+            mesh.position.set(0, -0.5, 0)  
             scene.add(mesh)
         })
 
         // Camera setup adjustment
-        camera.position.set(0, 8, -9)  // Adjusted camera position for better view
-
+        camera.position.set(0, 8, -9)  
         // Animation loop
         function animate() {
             requestAnimationFrame(animate)
@@ -107,20 +140,15 @@ function ThreeScene({ containerId }) {
     return <div ref={containerRef} id={containerId} className="w-full h-full" />;
 }
 
+
 export default function FootScanner() {
-    const [scanStep, setScanStep] = useState(1); // 1: left foot, 2: right foot
-    const [scanProgress, setScanProgress] = useState(0);
+    const [scanStep, setScanStep] = useState(1);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [isScanning, setIsScanning] = useState(false);
-    
-    // Add new state to track completion status for each foot
+    const [showScanningModal, setShowScanningModal] = useState(false);
     const [leftFootCompleted, setLeftFootCompleted] = useState(false);
     const [rightFootCompleted, setRightFootCompleted] = useState(false);
     
-    // Modify handleRetry function
     const handleRetry = () => {
-        setScanProgress(0);
-        setIsScanning(false);
         if (scanStep === 1) {
             setLeftFootCompleted(false);
         } else {
@@ -128,27 +156,19 @@ export default function FootScanner() {
         }
     };
     
-    // Modify handleScanClick function
     const handleScanClick = () => {
-        setIsScanning(true);
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 2;
-            setScanProgress(progress);
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                setIsScanning(false);
-                setScanProgress(0);
-                if (scanStep === 1) {
-                    setLeftFootCompleted(true);
-                    setScanStep(2);
-                } else {
-                    setRightFootCompleted(true);
-                    setShowSuccessModal(true);
-                }
-            }
-        }, 50);
+        setShowScanningModal(true);
+    };
+
+    const handleScanComplete = () => {
+        setShowScanningModal(false);
+        if (scanStep === 1) {
+            setLeftFootCompleted(true);
+            setScanStep(2);
+        } else {
+            setRightFootCompleted(true);
+            setShowSuccessModal(true);
+        }
     };
 
     return (
@@ -206,7 +226,7 @@ export default function FootScanner() {
                             {/* Show buttons for left foot when it's active or completed */}
                             {(scanStep === 1 || leftFootCompleted) && (
                                 <div className="space-y-3 mt-4">
-                                    {(!isScanning && scanProgress > 0) || leftFootCompleted ? (
+                                    {leftFootCompleted ? (
                                         <button 
                                             onClick={() => {
                                                 handleRetry();
@@ -222,30 +242,13 @@ export default function FootScanner() {
                                     ) : (
                                         <button 
                                             onClick={handleScanClick}
-                                            disabled={isScanning}
-                                            className={`${isScanning 
-                                                ? 'bg-gray-400' 
-                                                : 'bg-[#62a07b] hover:bg-[#528c68] transform hover:scale-[1.02]'} 
+                                            className="bg-[#62a07b] hover:bg-[#528c68] transform hover:scale-[1.02]
                                                 transition-all duration-300 cursor-pointer text-white px-8 
                                                 py-3 rounded-full w-full text-sm md:text-base font-semibold 
-                                                shadow-md`}
+                                                shadow-md"
                                         >
-                                            {isScanning ? 'SCANNING...' : 'START SCAN'}
+                                            START SCAN
                                         </button>
-                                    )}
-                                    {/* Left Foot Section Progress Bar */}
-                                    {isScanning && scanStep === 1 && (
-                                        <div className="space-y-2">
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-[#62a07b] h-2 rounded-full transition-all duration-300" 
-                                                    style={{ width: `${scanProgress}%` }}
-                                                />
-                                            </div>
-                                            <div className="text-center text-sm text-gray-600 font-medium">
-                                                {Math.round(scanProgress)}% Complete
-                                            </div>
-                                        </div>
                                     )}
                                 </div>
                             )}
@@ -330,7 +333,7 @@ export default function FootScanner() {
                             </div>
                             {(scanStep === 2 || rightFootCompleted) && (
                                 <div className="space-y-3 mt-4">
-                                    {(!isScanning && scanProgress > 0) || rightFootCompleted ? (
+                                    {rightFootCompleted ? (
                                         <button 
                                             onClick={() => {
                                                 handleRetry();
@@ -347,30 +350,13 @@ export default function FootScanner() {
                                     ) : (
                                         <button
                                             onClick={handleScanClick}
-                                            disabled={isScanning}
-                                            className={`${isScanning 
-                                                ? 'bg-gray-400' 
-                                                : 'bg-[#62a07b] hover:bg-[#528c68] transform hover:scale-[1.02]'} 
+                                            className="bg-[#62a07b] hover:bg-[#528c68] transform hover:scale-[1.02]
                                                 transition-all duration-300 cursor-pointer text-white px-8 
                                                 py-3 rounded-full w-full text-sm md:text-base font-semibold 
-                                                shadow-md`}
+                                                shadow-md"
                                         >
-                                            {isScanning ? 'SCANNING...' : 'START SCAN'}
+                                            START SCAN
                                         </button>
-                                    )}
-                                    {/* Right Foot Section Progress Bar */}
-                                    {isScanning && (
-                                        <div className="space-y-2">
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-[#62a07b] h-2 rounded-full transition-all duration-300" 
-                                                    style={{ width: `${scanProgress}%` }}
-                                                />
-                                            </div>
-                                            <div className="text-center text-sm text-gray-600 font-medium">
-                                                {Math.round(scanProgress)}% Complete
-                                            </div>
-                                        </div>
                                     )}
                                 </div>
                             )}
@@ -378,6 +364,17 @@ export default function FootScanner() {
                     </div>
                 </div>
             </div>
+
+          
+
+            {/* Scanning Modal */}
+            {showScanningModal && (
+                <ScanModal 
+                    onClose={() => setShowScanningModal(false)}
+                    onComplete={handleScanComplete}
+                    side={scanStep === 1 ? 'left' : 'right'}
+                />
+            )}
 
             {/* Success Modal */}
             {showSuccessModal && (
