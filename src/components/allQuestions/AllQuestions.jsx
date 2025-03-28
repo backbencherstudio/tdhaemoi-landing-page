@@ -50,9 +50,9 @@ export default function AllQuestions() {
     }, [searchParams])
 
     // Get questions based on current state
-    const questions = nestedQuestions ? nestedQuestions.questions : (submittedData?.questions || []);
-    const isLastQuestion = currentQuestionIndex === questions.length - 1;
-    const isFirstQuestion = currentQuestionIndex === 0;
+    // const questions = nestedQuestions ? nestedQuestions.questions : (submittedData?.questions || []);
+    // const isLastQuestion = currentQuestionIndex === questions.length - 1;
+    // const isFirstQuestion = currentQuestionIndex === 0;
 
     // Modify handleAnswerSelect to handle both radio and input
     const handleAnswerSelect = (questionId, answerId, answerText, option) => {
@@ -107,12 +107,13 @@ export default function AllQuestions() {
             setCurrentQuestionIndex(prev => prev - 1);
         } else if (nestedQuestions) {
             // If we're at the first question of nested questions, go back to main questions
-            setNestedQuestions(null);
-            // Find the index of the question that led to nested questions
-            const mainQuestionIndex = questions.findIndex(q => 
+            const mainQuestionIndex = submittedData.questions.findIndex(q => 
                 answers[q.id]?.hasNextQuestions && answers[q.id]?.nextQuestions
             );
-            setCurrentQuestionIndex(mainQuestionIndex);
+            setNestedQuestions(null);
+            if (mainQuestionIndex !== -1) {
+                setCurrentQuestionIndex(mainQuestionIndex);
+            }
         }
     }
 
@@ -168,7 +169,21 @@ export default function AllQuestions() {
         )
     }
 
-    const currentQuestion = questions[currentQuestionIndex];
+    // Get questions and current question safely
+    const questions = nestedQuestions ? nestedQuestions.questions : (submittedData?.questions || []);
+    const currentQuestion = questions[currentQuestionIndex] || null;
+    const isLastQuestion = currentQuestionIndex === questions.length - 1;
+    const isFirstQuestion = currentQuestionIndex === 0;
+
+    // Add safety check for rendering
+    if (!currentQuestion) {
+        return (
+            <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
+                <div>Error loading question. Please try again.</div>
+            </div>
+        );
+    }
+
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
     if (showLoadingSpring) {
