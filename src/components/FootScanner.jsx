@@ -8,6 +8,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import SuccessModal from './SuccessModal'
 import ScanModal from './ScanModal'  
+import ScanningDetailsModal from './ScanningDetailsModal'
+import ScanningLoading from './loading/ScanningLoading'
 
 function ThreeScene({ containerId }) {
     const containerRef = useRef(null);
@@ -147,6 +149,7 @@ export default function FootScanner() {
     const [showScanningModal, setShowScanningModal] = useState(false);
     const [leftFootCompleted, setLeftFootCompleted] = useState(false);
     const [rightFootCompleted, setRightFootCompleted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     
     const handleRetry = () => {
         if (scanStep === 1) {
@@ -167,7 +170,12 @@ export default function FootScanner() {
             setScanStep(2);
         } else {
             setRightFootCompleted(true);
-            setShowSuccessModal(true);
+            setIsLoading(true);
+            // Simulate loading time before showing success modal
+            setTimeout(() => {
+                setIsLoading(false);
+                setShowSuccessModal(true);
+            }, 4000); // 4 seconds loading time
         }
     };
 
@@ -257,9 +265,9 @@ export default function FootScanner() {
                         {/* Instructions Section */}
                         <div className="w-full px-4 order-first md:order-none">
                             <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                                <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+                                {/* <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
                                     3D-SCANNER ANLEITUNG
-                                </h2>
+                                </h2> */}
                                 <div className="space-y-6 text-sm md:text-base">
                                     {scanStep === 1 ? (
                                         <>
@@ -376,9 +384,16 @@ export default function FootScanner() {
                 />
             )}
 
+            {/* Loading State */}
+            {isLoading && (
+                <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
+                    <ScanningLoading />
+                </div>
+            )}
+
             {/* Success Modal */}
-            {showSuccessModal && (
-                <SuccessModal onClose={() => setShowSuccessModal(false)} />
+            {showSuccessModal && !isLoading && (
+                <ScanningDetailsModal onClose={() => setShowSuccessModal(false)} />
             )}
         </div>
     )
