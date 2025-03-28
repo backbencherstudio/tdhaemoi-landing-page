@@ -424,6 +424,15 @@
                                                 {
                                                     "id": 3,
                                                     "option": "Ja, Wadenprobleme "
+                                                },
+                                              
+                                                {
+                                                    "id": 4,
+                                                    "option": "Ja, Shin Splints (Schienbeinschmerzen)"
+                                                },
+                                                {
+                                                    "id": 5,
+                                                    "option": "Ja, Plantarfasziitis (Fersenschmerzen)"
                                                 }
                                             ]
                                         },
@@ -498,11 +507,8 @@
                                                 {
                                                     "id": 2,
                                                     "option": "Mischung aus Trail & Straße (Hybrid-Nutzung)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Hauptsächlich Straße, aber auch für leichte Trails"
                                                 }
+                                                
                                             ]
                                         },
                                         {
@@ -553,11 +559,11 @@
                                             "options": [
                                                 {
                                                     "id": 1,
-                                                    "option": "Asphalt/Straße"
+                                                    "option": "Für regelmäßige, feste Oberflächen "
                                                 },
                                                 {
                                                     "id": 2,
-                                                    "option": "Wald-/Feldwege"
+                                                    "option": "Für weiche, unebene Pfade"
                                                 },
                                                 {
                                                     "id": 3,
@@ -565,7 +571,7 @@
                                                 },
                                                 {
                                                     "id": 4,
-                                                    "option": "Gemischt"
+                                                    "option": "Für eine Kombination beider Oberflächen"
                                                 }
                                             ]
                                         },
@@ -584,6 +590,14 @@
                                                 {
                                                     "id": 3,
                                                     "option": "Ja, Wadenproblem"
+                                                },
+                                                {
+                                                    "id": 4,
+                                                    "option": "Ja, Shin Splints (Schienbeinschmerzen)"
+                                                },
+                                                {
+                                                    "id": 5,
+                                                    "option": "Ja, Plantarfasziitis (Fersenschmerzen)"
                                                 }
                                             ]
                                         },
@@ -602,11 +616,8 @@
                                                 {
                                                     "id": 3,
                                                     "option": "Überpronation (starker Einknick nach innen)"
-                                                },
-                                                {
-                                                    "id": 4,
-                                                    "option": "Supination (starke Außenbelastung)"
                                                 }
+                                               
                                             ]
                                         },
                                         {
@@ -687,48 +698,9 @@
                                                 }
                                             ]
                                         },
+                                        
                                         {
                                             "id": 4,
-                                            "question": "Kennen Sie Ihren Fußtyp oder Ihre Pronation?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Analyse basierend auf meinem 3D-Scan"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Neutralfuß"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Überpronation (starker Einknick nach innen)"
-                                                },
-                                                {
-                                                    "id": 4,
-                                                    "option": "Supination (starke Außenbelastung)"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 5,
-                                            "question": "Wie soll die Dämpfung deine Wettkampfleistung beeinflussen?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Maximale Dämpfung – Optimal für Marathon/Ultra, reduziert Ermüdung."
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Reaktives Gleichgewicht – Perfekt für schnelle Halbmarathons & Tempoläufe."
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Direkte Rückmeldung – Minimal gedämpft für maximale Kontrolle (5–10 km, Bahn)."
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 6,
                                             "question": "Welche Sprengung bevorzugst du?",
                                             "options": [
                                                 {
@@ -986,19 +958,15 @@
                         "options": [
                             {
                                 "id": 1,
-                                "option": "Sandplatz"
+                                "option": "Sandplatz/Claycourt "
                             },
                             {
                                 "id": 2,
-                                "option": "Hartplatz"
+                                "option": "Hartplatz/Allcourt  "
                             },
                             {
                                 "id": 3,
                                 "option": "Rasenplatz"
-                            },
-                            {
-                                "id": 4,
-                                "option": "Allcourt"
                             }
                         ]
                     },

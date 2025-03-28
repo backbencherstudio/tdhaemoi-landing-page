@@ -63,11 +63,11 @@ export default function AllQuestions() {
                 answer: answerText,
                 hasNextQuestions: option.nextQuestions ? true : false,
                 nextQuestions: option.nextQuestions || null,
-                inputValue: inputValues[questionId] || '' // Add input value if exists
+                inputValue: inputValues[questionId] || '',
+                isNested: !!nestedQuestions
             }
-        }
-        setAnswers(newAnswers)
-        console.log('Selected Answer:', { questionId, answerId, answerText })
+        };
+        setAnswers(newAnswers);
     }
 
     // Add new function to handle input changes
@@ -84,12 +84,22 @@ export default function AllQuestions() {
         }
     }
 
+    // Add a new state to track question history
+    const [questionHistory, setQuestionHistory] = useState([]);
+
+    // Modify handleNextQuestion
     const handleNextQuestion = () => {
         const currentQuestionId = questions[currentQuestionIndex].id;
         const currentAnswer = answers[currentQuestionId];
 
         if (currentAnswer) {
             if (currentAnswer.hasNextQuestions && currentAnswer.nextQuestions) {
+                // Save current state before moving to nested questions
+                setQuestionHistory(prev => [...prev, {
+                    questions: questions,
+                    index: currentQuestionIndex,
+                    nestedQuestions: nestedQuestions
+                }]);
                 setNestedQuestions(currentAnswer.nextQuestions);
                 setCurrentQuestionIndex(0);
                 return;
@@ -101,18 +111,26 @@ export default function AllQuestions() {
         }
     }
 
+    // Modify handlePreviousQuestion
     const handlePreviousQuestion = () => {
         if (currentQuestionIndex > 0) {
-            // If we're in nested questions and not at first question
             setCurrentQuestionIndex(prev => prev - 1);
         } else if (nestedQuestions) {
-            // If we're at the first question of nested questions, go back to main questions
-            const mainQuestionIndex = submittedData.questions.findIndex(q => 
-                answers[q.id]?.hasNextQuestions && answers[q.id]?.nextQuestions
-            );
-            setNestedQuestions(null);
-            if (mainQuestionIndex !== -1) {
-                setCurrentQuestionIndex(mainQuestionIndex);
+            // Get the last state from history
+            const previousState = questionHistory[questionHistory.length - 1];
+            if (previousState) {
+                setNestedQuestions(previousState.nestedQuestions);
+                setCurrentQuestionIndex(previousState.index);
+                setQuestionHistory(prev => prev.slice(0, -1));
+            } else {
+                // If no history, go back to main questions
+                setNestedQuestions(null);
+                const mainQuestionIndex = submittedData.questions.findIndex(q => 
+                    answers[q.id]?.hasNextQuestions && answers[q.id]?.nextQuestions
+                );
+                if (mainQuestionIndex !== -1) {
+                    setCurrentQuestionIndex(mainQuestionIndex);
+                }
             }
         }
     }
