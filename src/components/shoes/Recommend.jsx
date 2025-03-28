@@ -47,7 +47,7 @@ export default function RecommendShoes() {
                                     width={500}
                                     height={400}
                                     alt={shoe.name}
-                                    className="w-[400px] h-[400px] md:w-[240px] md:h-[240px] object-contain transition-transform duration-300 hover:scale-105"
+                                    className="w-[400px] h-[400px] md:w-[340px] md:h-[340px] object-contain transition-transform duration-300 hover:scale-105"
                                     priority
                                 />
                             </div>

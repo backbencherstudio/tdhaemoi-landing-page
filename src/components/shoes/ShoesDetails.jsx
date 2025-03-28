@@ -281,7 +281,7 @@ export default function ShoesDetails({ params }) {
                                     </button>
                                     <p className='text-white'>90% FIT</p>
                                     {isDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-24 bg-white rounded-lg shadow-lg z-10">
+                                        <div className="absolute right-0 mt-3 w-24 bg-white rounded-lg shadow-lg z-10">
                                             {sizes.map((size) => (
                                                 <button
                                                     key={size}
@@ -289,7 +289,11 @@ export default function ShoesDetails({ params }) {
                                                         setSelectedSize(size);
                                                         setIsDropdownOpen(false);
                                                     }}
-                                                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-black"
+                                                    className={`block w-full text-left px-4 py-2 
+                                                    ${selectedSize === size 
+                                                        ? 'bg-black text-white' 
+                                                        : 'hover:bg-gray-100 text-black'
+                                                    } transition-colors duration-200`}
                                                 >
                                                     {size}
                                                 </button>
@@ -320,18 +324,40 @@ export default function ShoesDetails({ params }) {
                                     className="mx-auto w-auto h-auto"
                                 />
                             </div>
-                            <div className="max-w-md mx-auto">
-                                <p className="text-gray-600">FeetF1rst empfiehlt  Ihnen Größe 36 und erzielt damit eine fast ideale Passform.
-                                    Der Schuh passt perfekt in Länge und Breite.Insgesamt eine sehr gute Wahl für dich!</p>
-                            </div>
-                        </div>
 
-                        {/* Right column - QR Scanner */}
+                        </div>
 
 
                         {/* tab use */}
                         <div className='px-5'>
                             <div className='flex flex-col gap-10'>
+                                <div className='space-y-4'>
+                                    <button
+                                        onClick={() => handleTabClick('app')}
+                                        className='flex items-center gap-2 justify-between w-full border-b border-black pb-2'
+                                    >
+                                        <span className='font-semibold'>Persönlicher App Zugang</span>
+                                        <IoChevronDown className={`transform transition-transform duration-300 ${activeTab === 'app' ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    {activeTab === 'app' && (
+                                        <div className="animate-fadeIn">
+                                            <div className="space-y-4 text-center ">
+                                                <div className="bg-white p-4 rounded-lg">
+                                                    <Image
+                                                        src={scannerImg}
+                                                        alt="QR Scanner"
+                                                        width={500}
+                                                        height={500}
+                                                        className="w-[289px] h-[277px] mx-auto"
+                                                    />
+                                                </div>
+                                                <div className="max-w-md mx-auto">
+                                                    <p className="text-gray-600">Dies ist dein persönlicher QR Code für den Zugang zur FeetF1rst App um jederzeit den perfekten Schuh griffbereit zu haben</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className='space-y-4'>
                                     <button
                                         onClick={() => handleTabClick('description')}
@@ -360,7 +386,6 @@ export default function ShoesDetails({ params }) {
                                         </div>
                                     )}
                                 </div>
-
                                 <div className='space-y-4'>
                                     <button
                                         onClick={() => handleTabClick('technical')}
@@ -376,9 +401,9 @@ export default function ShoesDetails({ params }) {
                                             </h1>
                                             <p className='text-gray-800 mt-3'><span className='font-semibold'>Schuhtyp:</span> Stabilitätsschuh / Allround-Trainingsschuh</p>
                                             <p className='text-gray-800 mt-3'><span className='font-semibold'>Obermaterial:</span>  Engineered Air Mesh für maximale Belüftung & sicheren Sitz</p>
-                                                <p className='text-gray-800 mt-3'><span className='font-semibold'>Zwischensohle:</span> DNA Loft v3-Schaumstoff (stickstoffangereichert) für weiche & reaktive Dämpfung</p>
+                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Zwischensohle:</span> DNA Loft v3-Schaumstoff (stickstoffangereichert) für weiche & reaktive Dämpfung</p>
                                             <p className='text-gray-800 mt-3'><span className='font-semibold'>Fersenkappe:</span> Stabiler Halt für Knöchel und Ferse</p>
-                                                <p className='text-gray-800 mt-3'><span className='font-semibold'>Laufsohle:</span> Robustes Gummi mit Flexkerben für hohe Haltbarkeit & guten Grip</p>
+                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Laufsohle:</span> Robustes Gummi mit Flexkerben für hohe Haltbarkeit & guten Grip</p>
                                             <p className='text-gray-800 mt-3'><span className='font-semibold'>Sprengung:</span> 12 mm (35.1 mm Ferse / 22.7 mm Vorfuß)</p>
                                             <p className='text-gray-800 mt-3'><span className='font-semibold'>Gewicht:</span> Ca. 269 g (Damen) / 286 g (Herren)</p>
                                             <p className='text-gray-800 mt-3'>🏃‍♂️ Der perfekte Stabilitäts-Laufschuh für alle, die Unterstützung & Komfort bei langen und mittleren Läufen suchen!</p>
@@ -386,37 +411,8 @@ export default function ShoesDetails({ params }) {
                                     )}
                                 </div>
 
-                                <div className='space-y-4'>
-                                    <button
-                                        onClick={() => handleTabClick('app')}
-                                        className='flex items-center gap-2 justify-between w-full border-b border-black pb-2'
-                                    >
-                                        <span className='font-semibold'>Persönlicher App Zugang</span>
-                                        <IoChevronDown className={`transform transition-transform duration-300 ${activeTab === 'app' ? 'rotate-180' : ''}`} />
-                                    </button>
-                                    {activeTab === 'app' && (
-                                        <div className="animate-fadeIn">
-                                            <div className="space-y-4 text-center ">
-                                                <div className="bg-white p-4 rounded-lg">
-                                                    <Image
-                                                        src={scannerImg}
-                                                        alt="QR Scanner"
-                                                        width={500}
-                                                        height={500}
-                                                        className="w-[289px] h-[277px] mx-auto"
-                                                    />
-                                                </div>
-                                                <div className="max-w-md mx-auto">
-                                                    <p className="text-gray-600">Dies ist dein persönlicher QR Code für den Zugang zur FeetF1rst App um jederzeit den perfekten Schuh griffbereit zu haben</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
 

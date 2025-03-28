@@ -45,7 +45,7 @@ export default function Navbar() {
 
                 {/* Center logo */}
                 <div className="flex-1 flex justify-center">
-                    <Image src={logo} alt="logo" width={400} height={40} className='lg:w-[60px] lg:h-[70px] w-[50px] h-[60px]' />
+                    <Image src={logo} alt="logo" width={500} height={40} className='lg:w-[90px] lg:h-[110px] w-[70px] h-[80px]' />
                 </div>
 
                 {/* Right side icons with labels */}

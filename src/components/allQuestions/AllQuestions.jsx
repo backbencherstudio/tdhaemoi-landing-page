@@ -103,11 +103,16 @@ export default function AllQuestions() {
 
     const handlePreviousQuestion = () => {
         if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(prev => prev - 1)
+            // If we're in nested questions and not at first question
+            setCurrentQuestionIndex(prev => prev - 1);
         } else if (nestedQuestions) {
             // If we're at the first question of nested questions, go back to main questions
-            setNestedQuestions(null)
-            setCurrentQuestionIndex(1) // Go back to the main question that had nested questions
+            setNestedQuestions(null);
+            // Find the index of the question that led to nested questions
+            const mainQuestionIndex = questions.findIndex(q => 
+                answers[q.id]?.hasNextQuestions && answers[q.id]?.nextQuestions
+            );
+            setCurrentQuestionIndex(mainQuestionIndex);
         }
     }
 
@@ -285,10 +290,11 @@ export default function AllQuestions() {
 
                 {/* Navigation Buttons */}
                 <div className="flex flex-col items-center gap-4 mt-8">
-                    {!isFirstQuestion && (
+                    {/* Show back button if not first question OR if in nested questions */}
+                    {(!isFirstQuestion || nestedQuestions) && (
                         <button
                             onClick={handlePreviousQuestion}
-                            className="flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold bg-gray-700 hover:bg-gray-600"
+                            className="flex-1 py-3 cursor-pointer max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold bg-gray-700 hover:bg-gray-600"
                         >
                             Zurück
                         </button>
@@ -298,7 +304,7 @@ export default function AllQuestions() {
                         <button
                             onClick={handleNextQuestion}
                             disabled={!answers[currentQuestion.id]}
-                            className={`flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${
+                            className={`flex-1 py-3 max-w-[451px] cursor-pointer w-full rounded text-center uppercase text-sm font-semibold ${
                                 answers[currentQuestion.id]
                                     ? 'bg-[#62a07c] hover:bg-opacity-90'
                                     : 'bg-gray-700 cursor-not-allowed'
@@ -310,7 +316,7 @@ export default function AllQuestions() {
                         <button
                             onClick={handleComplete}
                             disabled={!answers[currentQuestion.id]}
-                            className={`flex-1 py-3 max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${
+                            className={`flex-1 py-3 cursor-pointer max-w-[451px] w-full rounded text-center uppercase text-sm font-semibold ${
                                 answers[currentQuestion.id]
                                     ? 'bg-[#62a07c] hover:bg-opacity-90'
                                     : 'bg-gray-700 cursor-not-allowed'
@@ -322,7 +328,7 @@ export default function AllQuestions() {
 
                     <button
                         onClick={handleSkip}
-                        className="text-gray-400 underline text-sm hover:text-gray-300"
+                        className="text-gray-400 cursor-pointer underline text-sm hover:text-gray-300"
                     >
                         Überspringen
                     </button>

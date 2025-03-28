@@ -44,7 +44,7 @@ export default function Shoes() {
     return (
         <>
             {/* Search Bar */}
-            {/* <div className="sticky top-20 z-30 mb-6">
+            <div className="pb-5">
                 <div className="flex justify-end">
                     <div className="relative w-full max-w-md">
                         <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
@@ -61,7 +61,7 @@ export default function Shoes() {
                         </div>
                     </div>
                 </div>
-            </div> */}
+            </div>
 
             {/* Show "No results found" message when both filtered arrays are empty */}
             {filteredFitShoes.length === 0 && filteredShoes.length === 0 ? (
@@ -84,7 +84,7 @@ export default function Shoes() {
                                             <div className="relative">
                                                 {/* Black label at the top */}
                                                 <div className="absolute top-4 right-4 z-10">
-                                                    <span className="bg-black text-[#62A07C] text-sm px-4 py-1 rounded-full">
+                                                    <span className="bg-black text-[#62A07C] text-sm px-4 py-1 rounded-full best-match-label">
                                                         Your Best Matching Shoe!
                                                     </span>
                                                 </div>
@@ -130,10 +130,10 @@ export default function Shoes() {
                                         <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
                                             <Image
                                                 src={shoe.image}
-                                                width={500}
+                                                width={1000}
                                                 height={400}
                                                 alt={shoe.name}
-                                                className="w-[400px] h-[400px] md:w-[240px] md:h-[240px] object-contain transition-transform duration-300 hover:scale-105"
+                                                className="w-[400px] h-[400px] md:w-[540px] md:h-[300px] object-contain transition-transform duration-300 hover:scale-105"
                                             />
                                         </div>
                                         <div className="space-y-1 px-4 pb-3 overflow-hidden">

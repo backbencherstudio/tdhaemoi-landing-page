@@ -35,7 +35,8 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-full md:w-64 bg-white shadow-sm rounded-xl sticky top-28">
+    <div className="w-full md:w-64 bg-white shadow-sm rounded-xl sticky top-36">
+     
       <div className="p-4">
         {filterSections.map((section) => (
           <div key={section.id} className="border-b border-gray-200">
