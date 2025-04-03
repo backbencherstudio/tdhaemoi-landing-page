@@ -17,8 +17,8 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
             lastName: '',
             email: '',
             gender: '',
-            acceptTerms: false,
-            acceptNewsletter: false
+            acceptTerms: true,
+            acceptNewsletter: true
         }
     })
 
@@ -130,6 +130,27 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                     // Existing Form Content
                     <div className="p-8">
                         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+                            <div className="flex items-center justify-center gap-10 mb-8">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="male"
+                                        {...register('gender', { required: true })}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-lg">Mann</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="female"
+                                        {...register('gender', { required: true })}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-lg">Frau</span>
+                                </label>
+                            </div>
+                            {errors.gender && <span className="text-red-500 text-sm block text-center">Bitte wählen Sie Ihr Geschlecht</span>}
                             <div className="grid grid-cols-2 gap-8">
                                 <div>
                                     <label className="block mb-3 text-sm">Vorname</label>
@@ -162,43 +183,23 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                 />
                                 {errors.email && <span className="text-red-500 text-sm">{errors.email.message || 'Dieses Feld ist erforderlich'}</span>}
                             </div>
-                            <div className="flex justify-center gap-4 mb-8">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        value="male"
-                                        {...register('gender', { required: true })}
-                                        className="w-4 h-4"
-                                    />
-                                    <span className="text-lg">Male</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        value="female"
-                                        {...register('gender', { required: true })}
-                                        className="w-4 h-4"
-                                    />
-                                    <span className="text-lg">Female</span>
-                                </label>
-                            </div>
-                            {errors.gender && <span className="text-red-500 text-sm block text-center">Bitte wählen Sie Ihr Geschlecht</span>}
+
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-start gap-3">
                                     <input
                                         type="checkbox"
                                         {...register('acceptTerms', { required: true })}
-                                        className="mt-1 w-4 h-4 rounded border-white"
+                                        className="min-w-[20px] h-5 mt-[3px] rounded border-gray-300 accent-[#5B9279] cursor-pointer"
                                     />
                                     <span className="text-sm leading-[22px]">
-                                        Hiermit erkläre ich mein Einverständnis zur Verarbeitung meiner personenbezogenen Daten.
+                                        Hiermit erkläre ich mein Einverständnis zur Erhebung und Verarbeitung meiner personenbezogenen Daten gemäß der Datenschutzrichtlinie von FeetF1rst.
                                     </span>
                                 </div>
                                 <div className="flex items-start gap-3">
                                     <input
                                         type="checkbox"
                                         {...register('acceptNewsletter', { required: true })}
-                                        className="mt-1 w-4 h-4 rounded border-white"
+                                        className="min-w-[20px] h-5 mt-[3px] rounded border-gray-300 accent-[#5B9279] cursor-pointer"
                                     />
                                     <span className="text-sm leading-[22px]">
                                         Ich melde mich zum Newsletter gemäß der{' '}
@@ -213,7 +214,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                     </span>
                                 </div>
                             </div>
-                            {(errors.acceptTerms || errors.acceptNewsletter) && 
+                            {(errors.acceptTerms || errors.acceptNewsletter) &&
                                 <span className="text-red-500 text-sm block">Sie müssen die Bedingungen akzeptieren</span>
                             }
                             <div className="flex justify-center mt-12">

@@ -119,9 +119,12 @@ export default function CategoryPage({ params }) {
                         />
                     </Link>
 
-                    <p className="text-white uppercase text-2xl md:text-3xl  mt-4">
-                    Wählen Sie Ihre Kategorie und finden Sie Ihren perfekten Schuh.
-                    </p>
+                    <div className='mt-4'>
+                        <h1 className='text-white uppercase text-2xl md:text-4xl'>SHOE FINDER FEETF1RST</h1>
+                        <p className="text-white capitalize text-xl font-light mt-4">
+                            Wählen Sie Ihre Kategorie und finden Sie Ihren perfekten Schuh
+                        </p>
+                    </div>
                 </div>
 
                 <div className="relative">
