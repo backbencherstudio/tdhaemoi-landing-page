@@ -163,8 +163,8 @@ export default function ScanModal({ onClose, onComplete, side }) {
     }, [onComplete]);
 
     return (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 backdrop-blur rounded-3xl w-full max-w-3xl p-10 shadow-2xl border border-white/20">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white/95 backdrop-blur rounded-3xl w-full max-w-2xl p-10 shadow-2xl border border-white/20">
                 {/* Header with modern design */}
                 <div className="flex items-center justify-center gap-4 mb-8">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#62a07b] to-[#4a8063] flex items-center justify-center shadow-lg">
@@ -173,7 +173,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
                         </svg>
                     </div>
                     <div className="text-center">
-                        <h2 className="text-3xl font-bold text-gray-800 mb-1">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-1">
                             Scanning {side === 'left' ? 'Left' : 'Right'} Foot
                         </h2>
                         <p className="text-gray-500">High-precision 3D foot scanning in progress</p>
@@ -182,7 +182,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
 
                 {/* 3D Model Container with enhanced styling */}
                 <div className="relative">
-                    <div className="h-[450px] mb-8 bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-100 overflow-hidden shadow-inner">
+                    <div className="h-[350px] mb-8 bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-100 overflow-hidden shadow-inner">
                         <div ref={containerRef} className="w-full h-full" />
                     </div>
                     {/* Scanning overlay effect */}

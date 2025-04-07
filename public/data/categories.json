@@ -140,7 +140,7 @@
                                                     "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
                                                 },
                                                 {
-                                                    "id": "Sehr eng (maximale Performance für Rennfahrer)",
+                                                    "id": 3,
                                                     "option": "Sehr eng (maximale Performance für Rennfahrer)"
                                                 }
                                             ]
@@ -270,7 +270,7 @@
                                                     "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
                                                 },
                                                 {
-                                                    "id": "Sehr eng (maximale Performance für Rennfahrer)",
+                                                    "id": 3,
                                                     "option": "Sehr eng (maximale Performance für Rennfahrer)"
                                                 }
                                             ]
@@ -404,8 +404,8 @@
                                                     "option": "Neutralfuß"
                                                 },
                                                 {
-                                                    "id": "Überpronation (starker Einknick nach innen)",
-                                                    "option": "Supination (starke Außenbelastung)"
+                                                    "id": 3,
+                                                    "option": "Überpronation (starker Einknick nach innen)"
                                                 }
                                             ]
                                         },
@@ -425,7 +425,6 @@
                                                     "id": 3,
                                                     "option": "Ja, Wadenprobleme "
                                                 },
-                                              
                                                 {
                                                     "id": 4,
                                                     "option": "Ja, Shin Splints (Schienbeinschmerzen)"
@@ -508,7 +507,6 @@
                                                     "id": 2,
                                                     "option": "Mischung aus Trail & Straße (Hybrid-Nutzung)"
                                                 }
-                                                
                                             ]
                                         },
                                         {
@@ -559,19 +557,15 @@
                                             "options": [
                                                 {
                                                     "id": 1,
-                                                    "option": "Für regelmäßige, feste Oberflächen "
+                                                    "option": "Asphalt/Straße – Für regelmäßige, feste Oberflächen "
                                                 },
                                                 {
                                                     "id": 2,
-                                                    "option": "Für weiche, unebene Pfade"
+                                                    "option": "Wald-/Feldwege – Für weiche, unebene Pfade"
                                                 },
                                                 {
                                                     "id": 3,
-                                                    "option": "Tartanbahn"
-                                                },
-                                                {
-                                                    "id": 4,
-                                                    "option": "Für eine Kombination beider Oberflächen"
+                                                    "option": "Gemischt – Für eine Kombination beider Oberflächen"
                                                 }
                                             ]
                                         },
@@ -617,7 +611,6 @@
                                                     "id": 3,
                                                     "option": "Überpronation (starker Einknick nach innen)"
                                                 }
-                                               
                                             ]
                                         },
                                         {
@@ -698,7 +691,6 @@
                                                 }
                                             ]
                                         },
-                                        
                                         {
                                             "id": 4,
                                             "question": "Welche Sprengung bevorzugst du?",
@@ -1004,7 +996,7 @@
                     }
                 ]
             },
-            {  
+            {
                 "id": 5,
                 "title": "Basketball",
                 "slug": "basketball",
@@ -1059,7 +1051,7 @@
                                 "option": "Bewegungsfreiheit (Low-Tops)"
                             }
                         ]
-                    } 
+                    }
                 ]
             },
             {
@@ -1358,22 +1350,22 @@
                 ]
             },
             {
-              "id": 2,
-              "question": "Welche Schafthöhe bevorzugen Sie?",
-              "options": [
-                {
-                  "id": 1,
-                  "option": "High-Cut – Maximaler Halt und Knöchelschutz für schwieriges Gelände."
-                },
-                {
-                  "id": 2,
-                  "option": "Mid-Cut – Gute Balance aus Beweglichkeit und Halt für vielseitige Touren."
-                },
-                {
-                  "id": 3,
-                  "option": "Low-Cut – Leicht und flexibel für schnelle, einfache Wege."
-                }
-              ]  
+                "id": 2,
+                "question": "Welche Schafthöhe bevorzugen Sie?",
+                "options": [
+                    {
+                        "id": 1,
+                        "option": "High-Cut – Maximaler Halt und Knöchelschutz für schwieriges Gelände."
+                    },
+                    {
+                        "id": 2,
+                        "option": "Mid-Cut – Gute Balance aus Beweglichkeit und Halt für vielseitige Touren."
+                    },
+                    {
+                        "id": 3,
+                        "option": "Low-Cut – Leicht und flexibel für schnelle, einfache Wege."
+                    }
+                ]
             },
             {
                 "id": 2,
@@ -1392,7 +1384,7 @@
                         "option": "Spielt keine entscheidende Rolle"
                     }
                 ]
-            }, 
+            },
             {
                 "id": 3,
                 "question": "Wie wichtig sind Gewicht und Komfort?",

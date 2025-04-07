@@ -45,7 +45,7 @@ export default function Shoes() {
         <>
             {/* Search Bar */}
             <div className="pb-5">
-                <div className="flex justify-end">
+                <div className="flex justify-end mt-3 mb-7">
                     <div className="relative w-full max-w-md">
                         <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
                             <FiSearch className="ml-4 text-gray-500 text-xl" />

@@ -9,11 +9,11 @@ export default function Layout({ children }) {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="w-full pb-10">
-        <div className="flex-1 flex flex-col md:flex-row mt-5">
-          <div className="w-full md:w-64 flex-shrink-0">
+        <div className="flex-1 flex flex-col lg:flex-row mt-5 gap-10 lg:gap-0">
+          <div className="w-full lg:w-80 flex-shrink-0">
             <div className='p-4 '>
-              <div className=' flex items-center gap-2'>
-                <h1 className="text-xl font-bold ">Herren Laufschuhe
+              <div className=' flex items-center gap-2 mt-3 mb-7'>
+                <h1 className=" font-bold text-2xl md:text-3xl lg:text-[28px]">Herren Laufschuhe
                 </h1>
                 <IoIosArrowDown className='text-2xl' />
               </div>

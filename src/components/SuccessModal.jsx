@@ -7,65 +7,40 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import ScanningDetailsModal from './ScanningDetailsModal';
 
 export default function SuccessModal({ onClose }) {
-    const [isLoading, setIsLoading] = useState(false);
-    const [showScanningDetails, setShowScanningDetails] = useState(false);
-
-    const handleClose = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            setShowScanningDetails(true);
-        }, 500); 
-    };
-
-    if (showScanningDetails) {
-        return <ScanningDetailsModal onClose={onClose} />;
-    }
-
     return (
-        <>
-            <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-                {!isLoading ? (
-                    <div className="bg-white rounded-lg w-full max-w-4xl overflow-hidden">
-                        <div className="bg-[#62a07b] p-8 text-center relative">
-                            <button
-                                onClick={onClose}
-                                className="absolute cursor-pointer top-4 right-4 text-white hover:opacity-80"
-                            >
-                                <IoClose size={24} />
-                            </button>
-                            <h2 className="text-white text-3xl font-bold mb-4">GLÜCKWUNSCH!</h2>
-                            <p className="text-white text-lg">
-                                Ihr Fußscan ist abgeschlossen. Fahren Sie jetzt fort, um die perfekten Schuhe für Sie zu finden und von unserer individuellen Beratung zu profitieren.
-                            </p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl transform animate-fadeIn">
+                <div className="text-center">
+                    {/* Success Icon */}
+                    <div className="mb-6">
+                        <div className="w-20 h-20 bg-[#62a07b]/10 rounded-full mx-auto flex items-center justify-center">
+                            <svg className="w-12 h-12 text-[#62a07b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
                         </div>
-                        <div className="p-8 text-center">
-                            <h3 className="text-xl font-bold mb-2">PROFITIEREN SIE JETZT VON UNSERER APP!</h3>
-                            <p className="text-gray-600 mb-6">Passende Schuhe - immer Griffbereit!</p>
+                    </div>
 
-                            {/* QR Code */}
-                            <div className="flex justify-center mb-6">
-                                <Image
-                                    src={qrCode}
-                                    alt="QR Code"
-                                    width={200}
-                                    height={200}
-                                />
-                            </div>
-                            <button
-                                onClick={handleClose}
-                                className="bg-[#62a07b] cursor-pointer text-white px-12 py-3 rounded-md hover:bg-opacity-90 transition-all"
-                            >
-                                FORTFAHREN
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
-                        <ScanningLoading />
-                    </div>
-                )}
+                    {/* Success Message */}
+                    <h2 className="text-2xl font-bold text-[#62a07b] mb-4">
+                        GLÜCKWUNSCH!
+                    </h2>
+                    <p className="text-xl text-gray-700 mb-8">
+                        IHR FUSSSCAN IST ABGESCHLOSSEN!
+                    </p>
+                    <p className="text-gray-600 mb-8">
+                        Fahren Sie fort und lassen Sie unsere Technologie die perfekte Passform für Ihren Schuh ermitteln.
+                    </p>
+
+                    {/* Continue Button */}
+                    <button
+                        onClick={onClose}
+                        className="bg-[#62a07b] hover:bg-[#528c68] text-white px-10 py-3 rounded-full
+                            text-lg font-semibold shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                    >
+                        Fortfahren
+                    </button>
+                </div>
             </div>
-        </>
+        </div>
     );
 }

@@ -192,7 +192,17 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                         className="min-w-[20px] h-5 mt-[3px] rounded border-gray-300 accent-[#5B9279] cursor-pointer"
                                     />
                                     <span className="text-sm leading-[22px]">
-                                        Hiermit erkläre ich mein Einverständnis zur Erhebung und Verarbeitung meiner personenbezogenen Daten gemäß der Datenschutzrichtlinie von FeetF1rst.
+                                        Hiermit erkläre ich mein Einverständnis zur Erhebung und Verarbeitung meiner personenbezogenen Daten gemäß der
+                                        {' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPrivacyPolicy(true)}
+                                            className="font-bold underline text-blue-500 cursor-pointer hover:text-blue-600"
+                                        >
+                                            Datenschutzrichtlinie
+                                        </button>
+                                        {' '}
+                                        von FeetF1rst.
                                     </span>
                                 </div>
                                 <div className="flex items-start gap-3">

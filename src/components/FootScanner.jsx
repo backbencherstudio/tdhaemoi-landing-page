@@ -7,7 +7,7 @@ import logo from '../../public/categoryData/logo.png'
 import Link from 'next/link'
 import Image from 'next/image'
 import SuccessModal from './SuccessModal'
-import ScanModal from './ScanModal'  
+import ScanModal from './ScanModal'
 import ScanningDetailsModal from './ScanningDetailsModal'
 import ScanningLoading from './loading/ScanningLoading'
 
@@ -83,7 +83,7 @@ function ThreeScene({ containerId }) {
         loader.load('/3dScanner/3d.stl', (geometry) => {
             geometry.center()
             geometry.computeBoundingBox()
-            
+
             const size = new THREE.Vector3()
             geometry.boundingBox.getSize(size)
             const maxDim = Math.max(size.x, size.y, size.z)
@@ -103,16 +103,16 @@ function ThreeScene({ containerId }) {
                 thickness: 0.5
             })
             const mesh = new THREE.Mesh(geometry, material)
-            
+
             // Adjusted rotation and position to match the reference image
             mesh.rotation.x = -Math.PI / 2
-            mesh.rotation.z = Math.PI  
-            mesh.position.set(0, -0.5, 0)  
+            mesh.rotation.z = Math.PI
+            mesh.position.set(0, -0.5, 0)
             scene.add(mesh)
         })
 
         // Camera setup adjustment
-        camera.position.set(0, 8, -9)  
+        camera.position.set(0, 8, -9)
         // Animation loop
         function animate() {
             requestAnimationFrame(animate)
@@ -150,15 +150,8 @@ export default function FootScanner() {
     const [leftFootCompleted, setLeftFootCompleted] = useState(false);
     const [rightFootCompleted, setRightFootCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    
-    const handleRetry = () => {
-        if (scanStep === 1) {
-            setLeftFootCompleted(false);
-        } else {
-            setRightFootCompleted(false);
-        }
-    };
-    
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
     const handleScanClick = () => {
         setShowScanningModal(true);
     };
@@ -170,47 +163,44 @@ export default function FootScanner() {
             setScanStep(2);
         } else {
             setRightFootCompleted(true);
-            setIsLoading(true);
-            // Simulate loading time before showing success modal
-            setTimeout(() => {
-                setIsLoading(false);
-                setShowSuccessModal(true);
-            }, 4000); // 4 seconds loading time
+            // Show success message first
+            setShowSuccessMessage(true);
         }
     };
 
+    const handleContinue = () => {
+        setShowSuccessMessage(false);
+        setIsLoading(true);
+        // Show loading screen and then details modal
+        setTimeout(() => {
+            setIsLoading(false);
+            setShowSuccessModal(true);
+        }, 4000);
+    };
+
     return (
-        <div className='flex flex-col min-h-screen bg-gray-50'>
+        <div className='flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100'>
             {/* Header Section */}
             <div className="w-full bg-black py-6 shadow-lg">
                 <div className="container mx-auto px-4">
-                    <div className="text-[#62a07b] text-4xl font-bold">
-                        <div className='flex justify-center items-center'>
-                            <Link href='/'>
-                                <Image
-                                    src={logo}
-                                    alt="Logo"
-                                    height={500}
-                                    width={500}
-                                    className="h-20 w-auto"
-                                />
-                            </Link>
-                        </div>
+                    <div className="flex justify-center items-center">
+                        <Link href='/'>
+                            <Image src={logo} alt="Logo" height={500} width={500} className="h-20 w-auto" />
+                        </Link>
                     </div>
                 </div>
             </div>
- 
+
             {/* Main Content */}
             <div className='flex-1 flex justify-center items-center py-10'>
                 <div className="container max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                        {/* Left Foot Section */}
-                        <div className="w-full px-2">
-                            {/* Left Foot Section */}
-                            <div className={`flex border-3 ${scanStep === 1 
-                                ? 'border-[#62a07b] shadow-lg ring-2 ring-[#62a07b]/20' 
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center px-2">
+                        {/* left foot  */}
+                        <div className="w-full ">
+                            <div className={`flex border  ${scanStep === 1
+                                ? 'border-[#62a07b] shadow-lg ring-2 ring-[#62a07b]/20'
                                 : 'border-[#62a07b]'} 
-                                flex-col justify-center items-center h-[330px] relative rounded-xl 
+                                flex-col justify-center items-center h-[330px] relative  
                                 transition-all duration-300 bg-white`}>
                                 <ThreeScene containerId="leftFootContainer" />
                                 {scanStep === 1 && !leftFootCompleted ? (
@@ -230,96 +220,78 @@ export default function FootScanner() {
                                     </div>
                                 )}
                             </div>
-                            
-                            {/* Show buttons for left foot when it's active or completed */}
-                            {(scanStep === 1 || leftFootCompleted) && (
-                                <div className="space-y-3 mt-4">
-                                    {leftFootCompleted ? (
-                                        <button 
-                                            onClick={() => {
-                                                handleRetry();
-                                                setScanStep(1);
-                                            }}
-                                            className="bg-gray-500 hover:bg-gray-600 transform hover:scale-[1.02] 
-                                                transition-all duration-300 cursor-pointer text-white px-8 
-                                                py-2 rounded-full w-full text-sm md:text-base font-semibold 
-                                                shadow-md"
-                                        >
-                                            RETRY SCAN
-                                        </button>
-                                    ) : (
-                                        <button 
-                                            onClick={handleScanClick}
-                                            className="bg-[#62a07b] hover:bg-[#528c68] transform hover:scale-[1.02]
-                                                transition-all duration-300 cursor-pointer text-white px-8 
-                                                py-3 rounded-full w-full text-sm md:text-base font-semibold 
-                                                shadow-md"
-                                        >
-                                            START SCAN
-                                        </button>
-                                    )}
-                                </div>
-                            )}
                         </div>
+                        <div className="lg:max-w-2xl mx-auto w-full">
+                            <div className="bg-white rounded-2xl p-5 shadow-xl border border-gray-100 relative overflow-hidden">
+                                {/* Progress indicator */}
+                                <div className="absolute top-0 left-0 w-full h-2 bg-gray-100">
+                                    <div
+                                        className="h-full bg-[#62a07b] transition-all duration-500"
+                                        style={{ width: scanStep === 1 ? '50%' : '100%' }}
+                                    />
+                                </div>
 
-                        {/* Instructions Section */}
-                        <div className="w-full px-4 order-first md:order-none">
-                            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                                {/* <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-                                    3D-SCANNER ANLEITUNG
-                                </h2> */}
-                                <div className="space-y-6 text-sm md:text-base">
-                                    {scanStep === 1 ? (
-                                        <>
-                                            <div className="flex items-center gap-3 text-[#62a07b]">
-                                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#62a07b]/10 font-bold">1</span>
-                                                <h3 className="font-semibold">Linken Fuß scannen</h3>
+                                {scanStep === 1 ? (
+                                    <>
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <div className="w-12 h-12 rounded-full bg-[#62a07b]/10 flex items-center justify-center">
+                                                <span className="text-[#62a07b]  font-bold text-xl">1</span>
                                             </div>
-                                            <p className="text-gray-600 ml-11">
-                                                Stellen Sie sich so, dass Ihr linker Fuß direkt auf dem Scanner steht, 
+                                            <h1 className="font-semibold text-[#62a07b] text-md xl:text-xl">
+                                                Führe jetzt deinen individuellen 3D-Scan durch
+                                            </h1>
+                                        </div>
+                                        <div className="ml-5 xl:ml-15 pl-8 border-l-2 border-[#62a07b]/20">
+                                            <p className="text-gray-600 text-lg leading-relaxed mb-12">
+                                                Stellen Sie sich so, dass Ihr linker Fuß direkt auf dem Scanner steht,
                                                 während Ihr rechter Fuß auf der erhöhten Plattform rechts neben dem Scanner platziert wird.
                                             </p>
-                                            <p className="text-gray-600 ml-11">
-                                                Drücken Sie den „Scan"-Button auf dem Bildschirm und warten Sie, 
-                                                bis der Fortschrittsbalken vollständig geladen ist.
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="flex items-center gap-3 text-[#62a07b]">
-                                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#62a07b]/10 font-bold">2</span>
-                                                <h3 className="font-semibold">Rechten Fuß scannen</h3>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <div className="w-12 h-12 rounded-full bg-[#62a07b]/10 flex items-center justify-center">
+                                                <span className="text-[#62a07b] font-bold text-xl">2</span>
                                             </div>
-                                            <p className="text-gray-600 ml-11">
-                                                Platzieren Sie nun Ihren rechten Fuß auf dem Scanner und den linken 
+                                            <h1 className="font-semibold text-[#62a07b] text-md xl:text-xl">
+                                                Scannen Sie Ihren rechten Fuß
+                                            </h1>
+                                        </div>
+                                        <div className="ml-15 pl-8 border-l-2 border-[#62a07b]/20">
+                                            <p className="text-gray-600 text-lg leading-relaxed mb-12">
+                                                Platzieren Sie nun Ihren rechten Fuß auf dem Scanner und den linken
                                                 Fuß auf der erhöhten Plattform.
                                             </p>
-                                            <p className="text-gray-600 ml-11">
-                                                Drücken Sie erneut den „Scan"-Button und warten Sie, 
-                                                bis der Fortschrittsbalken vollständig geladen ist.
-                                            </p>
-                                        </>
-                                    )}
-                                    <div className="bg-[#62a07b]/10 p-4 rounded-lg mt-4">
-                                        <p className="text-[#62a07b] font-semibold">
-                                            Wichtig: Bleiben Sie während des Scans ruhig stehen.
-                                        </p>
-                                    </div>
-                                    <div className="flex justify-center">
-                                        <span className="px-4 py-2 bg-gray-100 rounded-full text-sm font-medium text-gray-600">
-                                            Schritt {scanStep} von 2
-                                        </span>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="flex flex-col items-center gap-6">
+                                    <button
+                                        onClick={handleScanClick}
+                                        className="bg-[#62a07b] cursor-pointer hover:bg-[#528c68] transform hover:scale-[1.02]
+                                    transition-all duration-300 text-white px-10 py-3 rounded-full
+                                    text-xl font-semibold shadow-lg flex items-center gap-3"
+                                    >
+
+                                        {scanStep === 1 ? 'Linken Fuß scannen' : 'Rechten Fuß scannen'}
+                                    </button>
+
+                                    <div className="flex items-center gap-2 text-gray-500">
+                                        <span className="w-2 h-2 rounded-full bg-[#62a07b]"></span>
+                                        <span className="text-sm">Schritt {scanStep} von 2</span>
+                                        <span className="w-2 h-2 rounded-full bg-[#62a07b]"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Right Foot Section */}
-                        <div className="w-full px-2">
-                            <div className={`flex border-3 ${scanStep === 2 
-                                ? 'border-[#62a07b] shadow-lg ring-2 ring-[#62a07b]/20' 
+                        {/* this is right foot  */}
+                        <div className='w-full'>
+                            <div className={`flex border  ${scanStep === 2
+                                ? 'border-[#62a07b] shadow-lg ring-2 ring-[#62a07b]/20'
                                 : scanStep > 2 || rightFootCompleted ? 'border-[#62a07b]' : 'border-gray-300'} 
-                                flex-col justify-center items-center h-[330px] relative rounded-xl 
+                                flex-col justify-center items-center h-[330px] relative 
                                 transition-all duration-300 bg-white`}>
                                 <ThreeScene containerId="rightFootContainer" />
                                 {scanStep === 2 && !rightFootCompleted ? (
@@ -339,62 +311,72 @@ export default function FootScanner() {
                                     </div>
                                 )}
                             </div>
-                            {(scanStep === 2 || rightFootCompleted) && (
-                                <div className="space-y-3 mt-4">
-                                    {rightFootCompleted ? (
-                                        <button 
-                                            onClick={() => {
-                                                handleRetry();
-                                                setScanStep(2);
-                                                setShowSuccessModal(false);
-                                            }}
-                                            className="bg-gray-500 hover:bg-gray-600 transform hover:scale-[1.02] 
-                                                transition-all duration-300 cursor-pointer text-white px-8 
-                                                py-2 rounded-full w-full text-sm md:text-base font-semibold 
-                                                shadow-md"
-                                        >
-                                            RETRY SCAN
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={handleScanClick}
-                                            className="bg-[#62a07b] hover:bg-[#528c68] transform hover:scale-[1.02]
-                                                transition-all duration-300 cursor-pointer text-white px-8 
-                                                py-3 rounded-full w-full text-sm md:text-base font-semibold 
-                                                shadow-md"
-                                        >
-                                            START SCAN
-                                        </button>
-                                    )}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
             </div>
 
-          
-
-            {/* Scanning Modal */}
+            {/* Modals */}
             {showScanningModal && (
-                <ScanModal 
+                <ScanModal
                     onClose={() => setShowScanningModal(false)}
                     onComplete={handleScanComplete}
                     side={scanStep === 1 ? 'left' : 'right'}
                 />
             )}
 
-            {/* Loading State */}
             {isLoading && (
                 <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
                     <ScanningLoading />
                 </div>
             )}
 
-            {/* Success Modal */}
+            {/* Success Message Modal */}
+            {showSuccessMessage && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+                    <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl transform animate-fadeIn">
+                        <div className="text-center">
+                            <div className="mb-6">
+                                <div className="w-20 h-20 bg-[#62a07b]/10 rounded-full mx-auto flex items-center justify-center">
+                                    <svg className="w-12 h-12 text-[#62a07b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-[#62a07b] mb-4">
+                                GLÜCKWUNSCH!
+                            </h2>
+                            <p className="text-xl text-gray-700 mb-8">
+                                IHR FUSSSCAN IST ABGESCHLOSSEN!
+                            </p>
+                            <p className="text-gray-600 mb-8">
+                                Fahren Sie fort und lassen Sie unsere Technologie die perfekte Passform für Ihren Schuh ermitteln.
+                            </p>
+
+                            <button
+                                onClick={handleContinue}
+                                className="bg-[#62a07b] hover:bg-[#528c68] text-white px-10 py-3 rounded-full
+                                    text-lg font-semibold shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                            >
+                                Fortfahren
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Loading Screen */}
+            {isLoading && (
+                <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
+                    <ScanningLoading />
+                </div>
+            )}
+
+            {/* Details Modal */}
             {showSuccessModal && !isLoading && (
                 <ScanningDetailsModal onClose={() => setShowSuccessModal(false)} />
             )}
         </div>
-    )
+    );
 }
