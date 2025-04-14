@@ -29,8 +29,12 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
+import { createProducts } from "@/apis/productsApis";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function CreateProducts() {
+  const router = useRouter();
   // State for form fields
   const [formData, setFormData] = useState({
     productName: '',
@@ -149,34 +153,93 @@ export default function CreateProducts() {
   }
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault()
-
-    // Create form data object for submission
-    const productFormData = new FormData()
-
-    // Add all text fields
-    Object.keys(formData).forEach(key => {
-      if (key === 'size') {
-        productFormData.append(key, JSON.stringify(formData[key]))
-      } else {
-        productFormData.append(key, formData[key])
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Add reset form function
+  const resetForm = () => {
+    setFormData({
+      productName: '',
+      brand: '',
+      category: '',
+      subCategory: '',
+      typeOfShoes: '',
+      productDesc: '',
+      price: '',
+      availability: true,
+      offer: '',
+      size: [],
+      feetFirstFit: '',
+      footLength: '',
+      color: '',
+      technicalData: '',
+      company: '',
+      gender: ''
+    });
+    setUploadedImages([]);
+  };
+  
+  // Update handleSubmit function
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+  
+      // Validate required fields
+      const requiredFields = ['productName', 'brand', 'category', 'price'];
+      const missingFields = requiredFields.filter(field => !formData[field]);
+      
+      if (missingFields.length > 0) {
+          toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+          return;
       }
-    })
-
-    // Add all images
-    uploadedImages.forEach((image, index) => {
-      productFormData.append(`image-${index}`, image.file)
-    })
-
-    // Here you would typically send this to your API
-    console.log('Form submitted:', formData)
-    console.log('Images:', uploadedImages)
-
-    // For demo purposes, just show an alert
-    alert('Product submitted successfully!')
-  }
-
+  
+      // Validate size selection
+      if (formData.size.length === 0) {
+          toast.error('Please select at least one size');
+          return;
+      }
+  
+      setIsLoading(true); // Start loading
+  
+      try {
+          // Prepare the product data according to API requirements
+          const productData = {
+              name: formData.productName,
+              brand: formData.brand,
+              Category: formData.category,
+              Sub_Category: formData.subCategory || null,
+              typeOfShoes: formData.typeOfShoes || null,
+              productDesc: formData.productDesc,
+              price: parseFloat(formData.price),
+              availability: Boolean(formData.availability),
+              offer: formData.offer || null,
+              size: formData.size,
+              feetFirstFit: formData.feetFirstFit || null,
+              footLength: formData.footLength || null,
+              color: formData.color || null,
+              technicalData: formData.technicalData || null,
+              Company: formData.company || null,
+              gender: formData.gender?.toUpperCase() || null,
+              images: uploadedImages.map(img => img.file)
+          };
+  
+          const response = await createProducts(productData);
+  
+          if (response.success) {
+              toast.success(response.message || "Product created successfully!");
+              resetForm(); // Reset form after successful creation
+              // router.push("/dashboard/products");
+          } else {
+              throw new Error(response.message || "Failed to create product");
+          }
+      } catch (error) {
+          toast.error(error.message);
+          console.error("Error creating product:", error);
+      } finally {
+          setIsLoading(false); // Stop loading
+      }
+  };
+  
+  // Update the submit button in the return statement
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -184,10 +247,10 @@ export default function CreateProducts() {
           <h1 className="text-2xl font-bold text-gray-800">Create New Product</h1>
           <p className="text-gray-500 mt-1">Add a new product to your inventory</p>
         </div>
-        <Button variant="outline" className="flex items-center gap-2">
+        {/* <Button variant="outline" className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Products
-        </Button>
+        </Button> */}
       </div>
 
       <div className="space-y-6">
@@ -195,7 +258,7 @@ export default function CreateProducts() {
           <div className="lg:col-span-1">
             <CardContent className="pt-6">
               <div
-                className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center min-h-[300px] transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-6  transition-colors ${
                   isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-gray-400'
                 }`}
                 onDragOver={handleDragOver}
@@ -207,34 +270,43 @@ export default function CreateProducts() {
                 }}
               >
                 {uploadedImages.length === 0 ? (
-                  <>
-                    <Upload className="h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-600 text-center mb-2">Drag & drop product images here</p>
-                    <p className="text-gray-400 text-sm text-center">or click to browse files</p>
-                  </>
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="bg-gray-50 rounded-full p-4 mb-4">
+                      <Upload className="h-12 w-12 text-gray-400" />
+                    </div>
+                    <p className="text-lg font-medium text-gray-700 mb-2">Drag & drop product images here</p>
+                    <p className="text-gray-500">or click to browse files</p>
+                    {/* <p className="text-xs text-gray-400 mt-2">Supported formats: PNG, JPG, JPEG</p> */}
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {uploadedImages.map(image => (
                       <div key={image.id} className="relative group">
-                        <div className="aspect-square rounded-md overflow-hidden border border-gray-200">
+                        <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                           <Image
                             src={image.preview}
                             alt={image.name}
                             width={200}
                             height={200}
-                            className=""
+                            className="object-cover hover:scale-105 transition-transform duration-200"
                           />
                         </div>
+                        <div className="absolute inset-0 hover:bg-black/50 bg-opacity-50 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg" />
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             removeImage(image.id);
                           }}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 cursor-pointer  right-2 bg-white text-red-500 rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-500 hover:text-white"
                         >
                           <X className="h-4 w-4" />
                         </button>
+                        <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                          <p className="text-xs text-white truncate bg-black/70 bg-opacity-50 rounded-md px-2 py-1">
+                            {image.name}
+                          </p>
+                        </div>
                       </div>
                     ))}
                     <button
@@ -245,9 +317,10 @@ export default function CreateProducts() {
                           fileInputRef.current.click();
                         }
                       }}
-                      className="aspect-square rounded-md border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors"
+                      className="aspect-square rounded-lg cursor-pointer  border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 hover:border-gray-400 hover:bg-gray-50 transition-all"
                     >
                       <Plus className="h-8 w-8 text-gray-400" />
+                      <span className="text-sm text-gray-500">Add More</span>
                     </button>
                   </div>
                 )}
@@ -454,7 +527,7 @@ export default function CreateProducts() {
                     <Badge
                       key={size}
                       variant={formData.size.includes(size) ? "default" : "outline"}
-                      className="cursor-pointer hover:bg-gray-100 px-3 py-1"
+                      className="cursor-pointer hover:bg-gray-100 hover:text-black hover:border-black px-3 py-1"
                       onClick={() => handleSizeToggle(size)}
                     >
                       {size}
@@ -560,11 +633,56 @@ export default function CreateProducts() {
           <Button 
             onClick={handleSubmit} 
             className="bg-green-600 hover:bg-green-700"
+            disabled={isLoading}
           >
-            Create Product
+            {isLoading ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Creating Product...
+              </>
+            ) : (
+              'Create Product'
+            )}
           </Button>
         </div>
       </div>
     </div>
   )
 }
+
+
+
+
+// Basic filtering: /products/query?name=nike&brand=nike
+ 
+// Price range: /products/query?minPrice=50&maxPrice=100
+ 
+// Category filtering: /products/query?category=running&subCategory=trail
+ 
+// Size and color: /products/query?size=10&color=black
+ 
+// Pagination: /products/query?page=2&limit=10
+ 
+// Sorting: /products/query?sortBy=price&sortOrder=desc
+
+
+// query?name=Ora Hopkins&brand=Qui laborum ullam qu&minPrice=50&maxPrice=60&category=running&subCategory=boots&size=37&color=Perspiciatis ea nat&page=1&limit=10&sortBy=price&sortOrder=desc
