@@ -34,7 +34,8 @@
     "react-konva": "^19.0.3",
     "tailwind-merge": "^3.2.0",
     "three": "^0.174.0",
-    "tw-animate-css": "^1.2.5"
+    "tw-animate-css": "^1.2.5",
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

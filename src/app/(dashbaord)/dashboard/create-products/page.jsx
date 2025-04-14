@@ -43,9 +43,9 @@ export default function CreateProducts() {
     subCategory: '',
     typeOfShoes: '',
     productDesc: '',
-    price: '',
+    price: 0,
     availability: true,
-    offer: '',
+    offer: 0,
     size: [],
     feetFirstFit: '',
     footLength: '',
@@ -69,7 +69,12 @@ export default function CreateProducts() {
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    // Convert price and offer to numbers
+    if (name === 'price' || name === 'offer') {
+      setFormData(prev => ({ ...prev, [name]: value === '' ? 0 : Number(value) }))
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
+    }
   }
 
   // Handle select changes
@@ -165,9 +170,9 @@ export default function CreateProducts() {
       subCategory: '',
       typeOfShoes: '',
       productDesc: '',
-      price: '',
+      price: 0,
       availability: true,
-      offer: '',
+      offer: 0,
       size: [],
       feetFirstFit: '',
       footLength: '',
@@ -209,7 +214,7 @@ export default function CreateProducts() {
               Sub_Category: formData.subCategory || null,
               typeOfShoes: formData.typeOfShoes || null,
               productDesc: formData.productDesc,
-              price: parseFloat(formData.price),
+              price: formData.price,
               availability: Boolean(formData.availability),
               offer: formData.offer || null,
               size: formData.size,

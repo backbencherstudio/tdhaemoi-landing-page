@@ -3,57 +3,152 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { FiSearch } from 'react-icons/fi';
+import { getAllProducts } from '@/apis/productsApis';
+import { useSearchParams, useRouter } from 'next/navigation';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
+import { useDebounce } from 'use-debounce';
 
 export default function Shoes() {
     const [shoes, setShoes] = useState([]);
-    const [fitShoes, setFitShoes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [totalPages, setTotalPages] = useState(0);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // Get current page from URL or default to 1
+    const currentPage = Number(searchParams.get('page')) || 1;
+    const itemsPerPage = 8;
 
     useEffect(() => {
-        fetchAllShoes();
-    }, []);
-    const fetchAllShoes = async () => {
+        fetchShoes();
+    }, [searchParams]);
+
+    // Remove the first useEffect that watches searchParams
+
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams);
+        if (debouncedSearchTerm) {
+            params.set('search', debouncedSearchTerm);
+        } else {
+            params.delete('search');
+        }
+        router.push(`/shoes?${params.toString()}`);
+        fetchShoes();
+    }, [debouncedSearchTerm]); // Only watch debouncedSearchTerm
+
+    // Update handleSearch to only update searchTerm
+    const handleSearch = (value) => {
+        setSearchTerm(value);
+    };
+
+    const fetchShoes = async () => {
         try {
-            const [shoesResponse, fitShoesResponse] = await Promise.all([
-                fetch('/data/data.json'),
-                fetch('/data/fitShoes.json')
-            ]);
+            setLoading(true);
+            const filters = {
+                name: debouncedSearchTerm || '',
+                brand: searchParams.get('brand') || '',
+                category: searchParams.get('category') || '',
+                subCategory: searchParams.get('subCategory') || '',
+                color: searchParams.get('color') || '',
+                size: searchParams.get('size') || '',
+                minPrice: searchParams.get('minPrice') || '',
+                maxPrice: searchParams.get('maxPrice') || '',
+                gender: searchParams.get('gender') || '',
+                page: currentPage,
+                limit: itemsPerPage
+            };
 
-            const shoesData = await shoesResponse.json();
-            const fitShoesData = await fitShoesResponse.json();
+            const response = await getAllProducts(filters);
 
-            setShoes(shoesData);
-            setFitShoes(fitShoesData);
+            // Filter products based on price range
+            const filteredProducts = response.products.filter(product => {
+                const price = Number(product.price);
+                const min = Number(filters.minPrice) || 0;
+                const max = Number(filters.maxPrice) || 5000;
+                return price >= min && price <= max;
+            });
+
+            setShoes(filteredProducts);
+            // Calculate total pages
+            setTotalPages(Math.ceil(response.total / itemsPerPage));
+
         } catch (error) {
             console.error('Error fetching shoes:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Filter shoes based on search term
-    const filteredShoes = shoes.filter(shoe =>
-        shoe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        shoe.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handlePageChange = (page) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('page', page);
+        router.push(`/shoes?${params.toString()}`);
+    };
 
-    const filteredFitShoes = fitShoes.filter(shoe =>
-        shoe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        shoe.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Generate array of page numbers
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
+
+        if (totalPages <= maxVisiblePages) {
+            // Show all pages if total pages are less than max visible
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+
+            // Calculate start and end of visible pages
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+
+            // Add ellipsis after first page if needed
+            if (start > 2) {
+                pages.push('...');
+            }
+
+            // Add visible pages
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            // Add ellipsis before last page if needed
+            if (end < totalPages - 1) {
+                pages.push('...');
+            }
+
+            // Always show last page
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
 
     return (
         <>
             {/* Search Bar */}
             <div className="pb-5">
-                <div className="flex justify-end mt-3 mb-7">
-                    <div className="relative w-full max-w-md">
+                <div className="flex justify-end mt-3 mb-7"> {/* Changed justify-between to justify-end */}
+                    <div className="relative w-full max-w-md ml-auto"> {/* Added ml-auto */}
                         <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
                             <FiSearch className="ml-4 text-gray-500 text-xl" />
                             <input
                                 type="text"
                                 placeholder="Suchen Sie nach Schuhen..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => handleSearch(e.target.value)}
                                 onFocus={() => setIsSearchFocused(true)}
                                 onBlur={() => setIsSearchFocused(false)}
                                 className="w-full px-4 py-3 rounded-lg focus:outline-none"
@@ -63,8 +158,15 @@ export default function Shoes() {
                 </div>
             </div>
 
-            {/* Show "No results found" message when both filtered arrays are empty */}
-            {filteredFitShoes.length === 0 && filteredShoes.length === 0 ? (
+            {/* Loading state */}
+            {loading && (
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#62A07B]"></div>
+                </div>
+            )}
+
+            {/* No results */}
+            {!loading && shoes.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                     <FiSearch className="text-6xl text-gray-400 mb-4" />
                     <h3 className="text-2xl font-semibold text-gray-700 mb-2">Keine Ergebnisse gefunden</h3>
@@ -72,88 +174,86 @@ export default function Shoes() {
                         Leider konnten wir keine Schuhe finden, die Ihrer Suche entsprechen.
                     </p>
                 </div>
-            ) : (
-                <>
-                    {/* Fit Shoes Section */}
-                    {filteredFitShoes.length > 0 && (
-                        <div className="mb-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {filteredFitShoes.map((shoe) => (
-                                    <Link href={`/shoes/details/${shoe.id}`} key={shoe.id}>
-                                        <div className="relative transform transition-all duration-300  hover:shadow-xl cursor-pointer">
-                                            <div className="relative">
-                                                {/* Black label at the top */}
-                                                <div className="absolute top-4 right-4 z-10">
-                                                    <span className="bg-black text-[#62A07C] text-sm px-4 py-1 rounded-full best-match-label">
-                                                        Your Best Matching Shoe!
-                                                    </span>
-                                                </div>
-
-                                                {/* Image section with hover effect */}
-                                                <div className="bg-[#e8e8e8] rounded-t-lg relative overflow-hidden">
-                                                    <Image
-                                                        src={shoe.image}
-                                                        width={500}
-                                                        height={400}
-                                                        alt={shoe.name}
-                                                        className="w-full h-full px-1 md:px-0 md:w-[324px] md:h-[324px] mx-auto transition-transform duration-300 hover:scale-105"
-                                                    />
-                                                </div>
-
-                                                {/* Black info section */}
-                                                <div className="bg-black rounded-b-lg text-[#62A07C] p-4 space-y-2 overflow-hidden">
-                                                    <h3 className="font-pathway-extreme font-semibold text-lg">{shoe.name}</h3>
-                                                    <p className="opacity-80">{shoe.description}</p>
-                                                    <p className="text-sm">{shoe.Farbe} Farbe</p>
-                                                    <p className="text-lg">{(shoe.price / 100).toFixed(2)}€</p>
-                                                    <div className="flex items-center space-x-2">
-
-                                                        <span className="bg-[#62A07C] text-black text-xs font-medium px-2.5 py-0.5 rounded">
-                                                            {shoe.discount}% FIT
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Regular Shoes Section */}
-                    {filteredShoes.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredShoes.map((shoe) => (
-                                <Link href={`/shoes/details/${shoe.id}`} key={shoe.id}>
-                                    <div className="bg-white rounded-lg shadow-md transform transition-all duration-300  hover:shadow-xl cursor-pointer">
-                                        <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
-                                            <Image
-                                                src={shoe.image}
-                                                width={1000}
-                                                height={400}
-                                                alt={shoe.name}
-                                                className="w-[400px] h-[400px] md:w-[540px] md:h-[300px] object-contain transition-transform duration-300 hover:scale-105"
-                                            />
-                                        </div>
-                                        <div className="space-y-1 px-4 pb-3 overflow-hidden">
-                                            <h3 className="font-pathway-extreme font-bold">{shoe.name}</h3>
-                                            <p className="text-gray-600">{shoe.description}</p>
-                                            <p className="text-sm">{shoe.Farbe} Farbe</p>
-                                            <p className="font-semibold">{(shoe.price / 100).toFixed(2)}€</p>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="bg-[#62A07B] text-white text-xs font-medium px-2.5 py-0.5 rounded">
-                                                    {shoe.discount}% FIT
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </>
             )}
+
+            {/* Shoes Grid */}
+            {!loading && shoes.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {shoes.map((shoe) => (
+                        <Link href={`/shoes/details/${shoe.id}`} key={shoe.id}>
+                            <div className="bg-white rounded-lg shadow-md transform transition-all duration-300 hover:shadow-xl cursor-pointer max-w-sm mx-auto">
+                                <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
+                                    {shoe?.images && shoe?.images?.length > 0 ? (
+                                        <Image
+                                            src={shoe?.images[0]}
+                                            width={300}
+                                            height={300}
+                                            alt={shoe?.name}
+                                            className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105"
+                                            priority
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                                            No image available
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-2 px-4 pb-4">
+                                    <h3 className="font-pathway-extreme font-bold text-lg truncate">{shoe.name}</h3>
+                                    <p className="text-gray-600 text-sm line-clamp-2">{shoe.description}</p>
+                                    <p className="text-sm">{shoe.color} Farbe</p>
+                                    <p className="font-semibold text-lg">{Number(shoe.price).toFixed(2)} €</p>
+                                    <div className="flex items-center space-x-2">
+                                        <span className="bg-[#62A07B] text-white text-xs font-medium px-2.5 py-0.5 rounded">
+                                            {shoe.offer}% FIT
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            )}
+
+            {/* Pagination */}
+            <div className="flex justify-center mt-8">
+                <Pagination>
+                    <PaginationContent>
+                        {/* Previous button */}
+                        <PaginationItem>
+                            <PaginationPrevious
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                        </PaginationItem>
+
+                        {/* Page numbers */}
+                        {getPageNumbers().map((page, index) => (
+                            <PaginationItem key={index}>
+                                {page === '...' ? (
+                                    <PaginationEllipsis />
+                                ) : (
+                                    <PaginationLink
+                                        onClick={() => handlePageChange(page)}
+                                        isActive={currentPage === page}
+                                        className="cursor-pointer"
+                                    >
+                                        {page}
+                                    </PaginationLink>
+                                )}
+                            </PaginationItem>
+                        ))}
+
+                        {/* Next button */}
+                        <PaginationItem>
+                            <PaginationNext
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            </div>
         </>
     )
 }

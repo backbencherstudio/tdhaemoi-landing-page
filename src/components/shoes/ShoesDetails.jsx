@@ -13,6 +13,7 @@ import footImg from "../../../public/shoesDetails/footImg.png"
 import scannerImg from "../../../public/shoesDetails/scanner.png"
 import RecommendShoes from './Recommend';
 import { IoChevronDown, IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { getProductById } from '@/apis/productsApis';
 
 
 export default function ShoesDetails({ params }) {
@@ -21,11 +22,10 @@ export default function ShoesDetails({ params }) {
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState('36');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('app');
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [sizes, setSizes] = useState([]);
     const id = params?.id;
-
-    const sizes = ['36', '38', '40', '42', '44'];
 
     useEffect(() => {
         fetchShoeDetails();
@@ -35,32 +35,22 @@ export default function ShoesDetails({ params }) {
         if (!id) return;
         try {
             setLoading(true);
-            // Fetch all data sources
-            const [shoesResponse, fitShoesResponse, recommendShoesRes] = await Promise.all([
-                fetch('/data/data.json'),
-                fetch('/data/fitShoes.json'),
-                fetch('/data/recommendShoes.json')
-            ]);
-
-            // Parse JSON responses
-            const [shoesData, fitShoesData, recommendShoes] = await Promise.all([
-                shoesResponse.json(),
-                fitShoesResponse.json(),
-                recommendShoesRes.json()
-            ]);
-
-            // Combine all shoes data with unique IDs
-            const allShoes = [
-                ...shoesData.map(s => ({ ...s, source: 'regular' })),
-                ...fitShoesData.map(s => ({ ...s, source: 'fit' })),
-                ...recommendShoes.map(s => ({ ...s, source: 'recommended' }))
-            ];
-
-            // Find the requested shoe
-            const foundShoe = allShoes.find(s => s.id.toString() === id.toString());
-
-            if (foundShoe) {
-                setShoe(foundShoe);
+            const data = await getProductById(id);
+            if (data) {
+                setShoe(data);
+                // Parse sizes and set both sizes state and selected size
+                if (data.size) {
+                    try {
+                        const parsedSizes = JSON.parse(data.size);
+                        if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
+                            setSizes(parsedSizes); // Set the sizes array
+                            setSelectedSize(parsedSizes[0]); // Set initial selected size
+                        }
+                    } catch (e) {
+                        console.error('Error parsing sizes:', e);
+                        setSizes([]); // Set empty array if parsing fails
+                    }
+                }
             }
         } catch (error) {
             console.error('Error fetching shoe details:', error);
@@ -91,12 +81,8 @@ export default function ShoesDetails({ params }) {
         );
     }
 
-    const demoImages = shoe ? [
-        shoe.image,
-        shoe.image,
-        shoe.image,
-        shoe.image
-    ] : [];
+    // Update the demoImages array to use shoe.images
+    const demoImages = shoe?.images || [];
 
     const handlePrevious = () => {
         setCurrentIndex((prev) => (prev === 0 ? demoImages.length - 1 : prev - 1));
@@ -111,7 +97,11 @@ export default function ShoesDetails({ params }) {
         const visibleIndexes = [];
         for (let i = 0; i < 3; i++) {
             const index = (currentIndex + i) % demoImages.length;
-            visibleIndexes.push(index);
+            visibleIndexes.push({
+                index,
+                // Create a unique key using both the index and a timestamp
+                id: `thumb-${index}-${i}-${Date.now()}`
+            });
         }
         return visibleIndexes;
     };
@@ -143,19 +133,19 @@ export default function ShoesDetails({ params }) {
                                 </button>
 
                                 <div className="flex justify-center items-center w-full gap-2 px-8">
-                                    {getVisibleThumbnails().map((index) => (
+                                    {getVisibleThumbnails().map((item) => (
                                         <button
-                                            key={index}
-                                            onClick={() => setSelectedImage(index)}
+                                            key={item.id}
+                                            onClick={() => setSelectedImage(item.index)}
                                             className={`bg-[#e8e8e8] rounded-lg p-2 transition-all w-20 flex-shrink-0
-                                                ${selectedImage === index ? 'ring-2  ring-green-500' : ''}`}
+                                                ${selectedImage === item.index ? 'ring-2 ring-green-500' : ''}`}
                                         >
                                             <div className="relative aspect-square">
                                                 <Image
-                                                    src={demoImages[index]}
+                                                    src={demoImages[item.index]}
                                                     fill
                                                     sizes="80px"
-                                                    alt={`View ${index + 1}`}
+                                                    alt={`View ${item.index + 1}`}
                                                     className="object-contain p-1"
                                                 />
                                             </div>
@@ -174,7 +164,7 @@ export default function ShoesDetails({ params }) {
 
                             {/* Desktop Thumbnails - Original vertical layout */}
                             <div className="hidden md:flex md:flex-col px-1 py-1 gap-5 overflow-y-auto max-h-[600px]">
-                                {demoImages.map((img, index) => (
+                                {demoImages?.map((img, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setSelectedImage(index)}
@@ -202,7 +192,7 @@ export default function ShoesDetails({ params }) {
                                     src={demoImages[selectedImage]}
                                     fill
                                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
-                                    alt={shoe.name}
+                                    alt={shoe?.name}
                                     className="object-contain p-2 md:p-4"
                                     priority
                                     quality={100}
@@ -213,18 +203,18 @@ export default function ShoesDetails({ params }) {
 
                     {/* Details section - Updated classes */}
                     <div className="space-y-6 order-2 max-w-2xl">
-                        <h1 className="text-3xl font-bold">{shoe.name}</h1>
+                        <h1 className="text-3xl font-bold">{shoe?.name}</h1>
                         <div className="space-y-2">
-                            <p className="text-lg">{shoe.description}</p>
-                            <p className="text-2xl font-semibold">{(shoe.price / 100).toFixed(2)}€</p>
-                            <p className="text-lg">{shoe.Farbe ? `${shoe.Farbe} Farben` : '3 Farben'}</p>
+                            <p className="text-lg">{shoe?.description}</p>
+                            <p className="text-2xl font-semibold">{(shoe.price).toFixed(2)}€</p>
+                            <p className="text-lg">{shoe?.Farbe ? `${shoe.Farbe} Farben` : '1 Farben'}</p>
                         </div>
 
                         {/* Color variants */}
                         <div className="flex gap-4 overflow-x-auto md:overflow-x-visible">
                             <div className="bg-[#e8e8e8] rounded-lg p-2 w-24 h-24 flex-shrink-0">
                                 <Image
-                                    src={shoe.image}
+                                    src={shoe?.images?.[0] || ''}
                                     width={100}
                                     height={100}
                                     alt="Color variant 1"
@@ -233,7 +223,7 @@ export default function ShoesDetails({ params }) {
                             </div>
                             <div className="bg-[#e8e8e8] rounded-lg p-2 w-24 h-24 flex-shrink-0">
                                 <Image
-                                    src={shoe.image}
+                                    src={shoe?.images?.[1] || shoe?.images?.[0] || ''}
                                     width={100}
                                     height={100}
                                     alt="Color variant 2"
@@ -290,10 +280,10 @@ export default function ShoesDetails({ params }) {
                                                         setIsDropdownOpen(false);
                                                     }}
                                                     className={`block w-full text-left px-4 py-2 
-                                                    ${selectedSize === size 
-                                                        ? 'bg-black text-white' 
-                                                        : 'hover:bg-gray-100 text-black'
-                                                    } transition-colors duration-200`}
+                                                    ${selectedSize === size
+                                                            ? 'bg-black text-white'
+                                                            : 'hover:bg-gray-100 text-black'
+                                                        } transition-colors duration-200`}
                                                 >
                                                     {size}
                                                 </button>
@@ -326,8 +316,6 @@ export default function ShoesDetails({ params }) {
                             </div>
 
                         </div>
-
-
                         {/* tab use */}
                         <div className='px-5'>
                             <div className='flex flex-col gap-10'>
