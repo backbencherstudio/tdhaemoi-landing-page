@@ -56,9 +56,9 @@ export default function CreateProducts() {
     subCategory: '',
     typeOfShoes: '',
     productDesc: '',
-    price: 0,
+    price: '',
     availability: true,
-    offer: 0,
+    offer: '',
     size: [],
     feetFirstFit: '',
     footLength: '',
@@ -90,27 +90,25 @@ export default function CreateProducts() {
     try {
       const product = await getProductById(editId)
       if (product) {
-        // Parse the size array from string
         const parsedSize = product.size ? JSON.parse(product.size) : []
 
-        // Set form data with existing product data
         setFormData({
-          productName: product.name,
-          brand: product.brand,
-          category: product.Category.toLowerCase(),
-          subCategory: product.Sub_Category,
-          typeOfShoes: product.typeOfShoes,
-          productDesc: product.productDesc,
-          price: product.price,
-          availability: product.availability,
-          offer: product.offer,
+          productName: product.name || '',
+          brand: product.brand || '',
+          category: (product.Category || '').toLowerCase(),
+          subCategory: product.Sub_Category || '',
+          typeOfShoes: product.typeOfShoes || '',
+          productDesc: product.productDesc || '',
+          price: product.price?.toString() || '',
+          availability: Boolean(product.availability),
+          offer: product.offer?.toString() || '',
           size: parsedSize,
-          feetFirstFit: product.feetFirstFit,
-          footLength: product.footLength,
-          color: product.color,
-          technicalData: product.technicalData,
-          company: product.Company,
-          gender: product.gender.toLowerCase()
+          feetFirstFit: product.feetFirstFit?.toString() || '',
+          footLength: product.footLength || '',
+          color: product.color || '',
+          technicalData: product.technicalData || '',
+          company: product.Company || '',
+          gender: (product.gender || '').toLowerCase()
         })
 
         // Handle existing images
@@ -134,12 +132,7 @@ export default function CreateProducts() {
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target
-    // Convert price and offer to numbers
-    if (name === 'price' || name === 'offer') {
-      setFormData(prev => ({ ...prev, [name]: value === '' ? 0 : Number(value) }))
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }))
-    }
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle select changes
@@ -255,9 +248,9 @@ export default function CreateProducts() {
       subCategory: '',
       typeOfShoes: '',
       productDesc: '',
-      price: 0,
+      price: '',
       availability: true,
-      offer: 0,
+      offer: '',
       size: [],
       feetFirstFit: '',
       footLength: '',
@@ -274,18 +267,18 @@ export default function CreateProducts() {
     e.preventDefault()
 
     // Validate required fields
-    const requiredFields = ['productName', 'brand', 'category', 'price'];
-    const missingFields = requiredFields.filter(field => !formData[field]);
+    const requiredFields = ['productName', 'brand', 'category', 'price']
+    const missingFields = requiredFields.filter(field => !formData[field])
 
     if (missingFields.length > 0) {
-      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      return;
+      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`)
+      return
     }
 
     // Validate size selection
     if (formData.size.length === 0) {
-      toast.error('Please select at least one size');
-      return;
+      toast.error('Please select at least one size')
+      return
     }
 
     setIsLoading(true)
@@ -298,11 +291,11 @@ export default function CreateProducts() {
         Sub_Category: formData.subCategory || null,
         typeOfShoes: formData.typeOfShoes || null,
         productDesc: formData.productDesc,
-        price: formData.price,
+        price: parseFloat(formData.price) || 0,
         availability: Boolean(formData.availability),
-        offer: formData.offer || null,
+        offer: parseFloat(formData.offer) || 0,
         size: formData.size,
-        feetFirstFit: formData.feetFirstFit || null,
+        feetFirstFit: formData.feetFirstFit ? parseFloat(formData.feetFirstFit) : null,
         footLength: formData.footLength || null,
         color: formData.color || null,
         technicalData: formData.technicalData || null,

@@ -38,17 +38,16 @@ export default function ShoesDetails({ params }) {
             const data = await getProductById(id);
             if (data) {
                 setShoe(data);
-                // Parse sizes and set both sizes state and selected size
                 if (data.size) {
                     try {
                         const parsedSizes = JSON.parse(data.size);
                         if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
-                            setSizes(parsedSizes); // Set the sizes array
-                            setSelectedSize(parsedSizes[0]); // Set initial selected size
+                            setSizes(parsedSizes); 
+                            setSelectedSize(parsedSizes[0]); 
                         }
                     } catch (e) {
                         console.error('Error parsing sizes:', e);
-                        setSizes([]); // Set empty array if parsing fails
+                        setSizes([]); 
                     }
                 }
             }
@@ -81,7 +80,6 @@ export default function ShoesDetails({ params }) {
         );
     }
 
-    // Update the demoImages array to use shoe.images
     const demoImages = shoe?.images || [];
 
     const handlePrevious = () => {
@@ -99,7 +97,6 @@ export default function ShoesDetails({ params }) {
             const index = (currentIndex + i) % demoImages.length;
             visibleIndexes.push({
                 index,
-                // Create a unique key using both the index and a timestamp
                 id: `thumb-${index}-${i}-${Date.now()}`
             });
         }
@@ -114,10 +111,6 @@ export default function ShoesDetails({ params }) {
         <>
             <Navbar />
             <div className="w-full px-4 py-8 ">
-                <Link href="/shoes" className="text-green-600 flex hover:text-green-800 mb-6 items-center">
-                    <RiArrowLeftSLine className='text-2xl' /> Back to Shoes
-                </Link>
-
                 <div className="grid lg:grid-cols-2 gap-8 mt-6">
                     <div className="flex md:flex-row flex-col gap-4 h-full ">
                         {/* Thumbnails Section - Different for mobile and desktop */}

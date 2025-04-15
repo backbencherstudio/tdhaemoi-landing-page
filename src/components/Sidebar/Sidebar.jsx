@@ -4,7 +4,6 @@ import { IoIosArrowDown } from "react-icons/io";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-
 import * as Slider from "@radix-ui/react-slider";
 
 export default function Sidebar() {
@@ -69,9 +68,7 @@ export default function Sidebar() {
         
         const params = new URLSearchParams(searchParams);
         
-        // Special handling for price range
         if (key === 'minPrice' || key === 'maxPrice') {
-            // Ensure both minPrice and maxPrice are set together
             if (key === 'minPrice') {
                 params.set('minPrice', value);
                 params.set('maxPrice', filters.maxPrice || '5000');
@@ -80,7 +77,6 @@ export default function Sidebar() {
                 params.set('minPrice', filters.minPrice || '0');
             }
         } else {
-            // Handle other filters as before
             if (value) {
                 if (Array.isArray(value)) {
                     if (value.length > 0) {
@@ -113,29 +109,20 @@ export default function Sidebar() {
     const handlePriceInputChange = (type, value) => {
         const numValue = parseInt(value) || 0;
         if (type === 'min') {
-            // Ensure min price is between 0 and current max price
             const newMin = Math.max(0, Math.min(numValue, priceRange[1]));
             setPriceRange([newMin, priceRange[1]]);
         } else {
-            // Ensure max price is between current min price and 5000
             const newMax = Math.min(5000, Math.max(numValue, priceRange[0]));
             setPriceRange([priceRange[0], newMax]);
         }
     };
 
     const handlePriceApply = () => {
-        // Ensure values are within valid range
         const validMinPrice = Math.max(0, Math.min(priceRange[0], 5000));
         const validMaxPrice = Math.max(validMinPrice, Math.min(priceRange[1], 5000));
-
-        // Create new URLSearchParams with current params
         const params = new URLSearchParams(searchParams);
-        
-        // Always set both minPrice and maxPrice together
         params.set('minPrice', validMinPrice.toString());
         params.set('maxPrice', validMaxPrice.toString());
-        
-        // Update the URL with both price parameters
         router.push(`/shoes?${params.toString()}`);
     };
 
