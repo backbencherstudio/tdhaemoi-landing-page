@@ -54,10 +54,15 @@ export default function Shoes() {
                 limit: itemsPerPage
             };
 
+            // Keep the old data while loading new data
             const response = await getAllProducts(filters);
-            setShoes(response.products);
-            setTotalItems(response.total);
-            setTotalPages(response.totalPages);
+            
+            // Only update state if the component is still mounted and the page hasn't changed
+            if (currentPage === Number(searchParams.get('page'))) {
+                setShoes(response.products);
+                setTotalItems(response.total);
+                setTotalPages(response.totalPages);
+            }
         } catch (error) {
             console.error('Error fetching shoes:', error);
         } finally {
@@ -100,10 +105,13 @@ export default function Shoes() {
         }
     }, []);
 
+    // Update page change handler
     const handlePageChange = (page) => {
+        if (page === currentPage || loading) return;
+        
         const params = new URLSearchParams(searchParams);
         params.set('page', page);
-        router.push(`/shoes?${params.toString()}`);
+        router.push(`/shoes?${params.toString()}`, { scroll: false });
     };
 
     // Generate array of page numbers

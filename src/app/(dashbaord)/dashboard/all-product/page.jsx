@@ -49,64 +49,89 @@ export default function AllProduct() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1)
+  const [pagination, setPagination] = useState({
+    currentPage: Number(searchParams.get('page')) || 1,
+    totalPages: 0,
+    total: 0,
+    hasNextPage: false,
+    hasPreviousPage: false
+  })
   const [products, setProducts] = useState([])
-  const [totalPages, setTotalPages] = useState(0)
-  const [totalItems, setTotalItems] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const itemsPerPage = 8
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState(null)
+  const [startIndex, setStartIndex] = useState(0)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchParams.get('search') || '')
 
-  // Fetch products
-  const fetchProducts = async () => {
+  // Debounced search handler
+  const debounceSearch = useCallback((value) => {
+    setSearchTerm(value)
+
+    if (window.searchTimeout) {
+      clearTimeout(window.searchTimeout)
+    }
+
+    // Set new timeout for the actual search
+    window.searchTimeout = setTimeout(() => {
+      setDebouncedSearchTerm(value)
+      setPagination(prev => ({ ...prev, currentPage: 1 }))
+      updateURL(value, 1)
+    }, 500)
+  }, [])
+
+  async function fetchProducts() {
     try {
       setLoading(true)
       setError(null)
       const result = await getAllProduct({
-        search: searchTerm,
-        page: currentPage,
+        search: debouncedSearchTerm,
+        page: pagination.currentPage,
         limit: itemsPerPage
       })
-      setProducts(result.products || [])
-      setTotalPages(result.totalPages || 0)
-      setTotalItems(result.total || 0)
+
+      setProducts(result.products)
+      setPagination({
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        total: result.total,
+        hasNextPage: result.hasNextPage,
+        hasPreviousPage: result.hasPreviousPage
+      })
+
+      setStartIndex((result.currentPage - 1) * itemsPerPage)
     } catch (error) {
       console.error('Failed to fetch products:', error)
       setError(error.message)
       setProducts([])
-      setTotalPages(0)
-      setTotalItems(0)
+      setStartIndex(0)
     } finally {
       setLoading(false)
     }
   }
 
-  // Create a function to update URL with search params
-  const updateSearchParams = useCallback((search, page) => {
+  // Simple function to update URL
+  function updateURL(search, page) {
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     if (page > 1) params.set('page', page.toString())
 
-    const newUrl = params.toString()
-      ? `?${params.toString()}`
-      : window.location.pathname
-
-    router.push(newUrl)
-  }, [router])
-
-  // Update search handler
-  const handleSearch = (value) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-    updateSearchParams(value, 1)
+    router.push(`?${params.toString() || ''}`, { scroll: false })
   }
 
-  // Update page change handler
-  const changePage = (page) => {
-    setCurrentPage(page)
-    updateSearchParams(searchTerm, page)
+  // Simplified search handler
+  function handleSearch(value) {
+    setSearchTerm(value)
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
+    updateURL(value, 1)
+  }
+
+  // Simplified page change handler
+  function changePage(newPage) {
+    if (newPage === pagination.currentPage) return
+    setPagination(prev => ({ ...prev, currentPage: newPage }))
+    updateURL(searchTerm, newPage)
   }
 
   // Update delete handler
@@ -131,59 +156,58 @@ export default function AllProduct() {
     setDeleteModalOpen(true)
   }
 
+  // Update useEffect to use debouncedSearchTerm
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchProducts()
-    }, 500)
+    const page = Number(searchParams.get('page')) || 1
+    const search = searchParams.get('search') || ''
 
-    return () => clearTimeout(timer)
+    setSearchTerm(search)
+    setDebouncedSearchTerm(search)
+    setPagination(prev => ({ ...prev, currentPage: page }))
+    fetchProducts()
   }, [searchParams])
+
+  // Clean up timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (window.searchTimeout) {
+        clearTimeout(window.searchTimeout)
+      }
+    }
+  }, [])
 
   // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pageNumbers = []
     const maxVisiblePages = 5
+    const { currentPage, totalPages } = pagination
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages are less than max visible
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i)
       }
-    } else {
-      // Always show first page
-      pageNumbers.push(1)
-
-      // Calculate start and end of visible pages
-      let start = Math.max(2, currentPage - 1)
-      let end = Math.min(totalPages - 1, currentPage + 1)
-
-      // Adjust if at the beginning or end
-      if (currentPage <= 2) {
-        end = 4
-      } else if (currentPage >= totalPages - 1) {
-        start = totalPages - 3
-      }
-
-      // Add ellipsis if needed
-      if (start > 2) {
-        pageNumbers.push('...')
-      }
-
-      // Add middle pages
-      for (let i = start; i <= end; i++) {
-        pageNumbers.push(i)
-      }
-
-      // Add ellipsis if needed
-      if (end < totalPages - 1) {
-        pageNumbers.push('...')
-      }
-
-      // Always show last page
-      if (totalPages > 1) {
-        pageNumbers.push(totalPages)
-      }
+      return pageNumbers
     }
+
+    pageNumbers.push(1)
+
+    let start = Math.max(2, currentPage - 1)
+    let end = Math.min(totalPages - 1, currentPage + 1)
+
+    if (currentPage <= 2) {
+      end = 4
+    } else if (currentPage >= totalPages - 1) {
+      start = totalPages - 3
+    }
+
+    if (start > 2) pageNumbers.push('...')
+
+    for (let i = start; i <= end; i++) {
+      pageNumbers.push(i)
+    }
+
+    if (end < totalPages - 1) pageNumbers.push('...')
+    if (totalPages > 1) pageNumbers.push(totalPages)
 
     return pageNumbers
   }
@@ -213,7 +237,7 @@ export default function AllProduct() {
             <Input
               placeholder="Search by name or brand..."
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => debounceSearch(e.target.value)}
               className="pl-10 bg-gray-50 border-gray-200"
             />
           </div>
@@ -231,7 +255,7 @@ export default function AllProduct() {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">
-                <TableHead className="w-[80px] text-center">ID</TableHead>
+                <TableHead className="w-[80px] text-center">Index</TableHead>
                 <TableHead className="w-[250px]">Product</TableHead>
                 <TableHead className="w-[120px] text-center">Gender</TableHead>
                 <TableHead className="w-[120px] text-center">Price</TableHead>
@@ -243,20 +267,33 @@ export default function AllProduct() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10">
-                    Loading...
+                  <TableCell colSpan={7}>
+                    <div className="flex items-center justify-center py-20">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-gray-500 text-sm">Loading products...</span>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : error ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-10 text-red-600">
-                    Failed to load products. Please try again later.
+                    {error}
                   </TableCell>
                 </TableRow>
-              ) : products.length > 0 ? (
-                products.map((product) => (
+              ) : products.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                    No shoes found. Try adjusting your search.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                products.map((product, index) => (
                   <TableRow key={product.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium text-center">{product.id}</TableCell>
+                    <TableCell className="font-medium text-center">
+                      {startIndex + index + 1}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <img
@@ -295,7 +332,7 @@ export default function AllProduct() {
                             <Eye className="mr-2 h-4 w-4 text-gray-500" />
                             <span>View Details</span>
                           </DropdownMenuItem> */}
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
                             onClick={() => router.push(`/dashboard/create-products?edit=${product.id}`)}
                           >
@@ -315,12 +352,6 @@ export default function AllProduct() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-gray-500">
-                    No shoes found. Try adjusting your search.
-                  </TableCell>
-                </TableRow>
               )}
             </TableBody>
           </Table>
@@ -329,7 +360,12 @@ export default function AllProduct() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
           <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md">
-            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} shoes
+            {!loading && products.length > 0 && (
+              <>
+                Showing {((pagination.currentPage - 1) * itemsPerPage) + 1}-
+                {Math.min(pagination.currentPage * itemsPerPage, pagination.total)} of {pagination.total} shoes
+              </>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -337,7 +373,7 @@ export default function AllProduct() {
               size="icon"
               className="h-8 w-8"
               onClick={() => changePage(1)}
-              disabled={currentPage === 1}
+              disabled={!pagination.hasPreviousPage || loading}
             >
               <ChevronsLeft className="h-4 w-4" />
             </Button>
@@ -345,8 +381,8 @@ export default function AllProduct() {
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={() => changePage(currentPage - 1)}
-              disabled={currentPage === 1}
+              onClick={() => changePage(pagination.currentPage - 1)}
+              disabled={!pagination.hasPreviousPage || loading}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -357,10 +393,11 @@ export default function AllProduct() {
               ) : (
                 <Button
                   key={`page-${page}`}
-                  variant={currentPage === page ? "default" : "outline"}
+                  variant={pagination.currentPage === page ? "default" : "outline"}
                   size="icon"
-                  className={`h-8 w-8 ${currentPage === page ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                  className={`h-8 w-8 ${pagination.currentPage === page ? 'bg-green-600 hover:bg-green-700' : ''}`}
                   onClick={() => changePage(page)}
+                  disabled={loading}
                 >
                   {page}
                 </Button>
@@ -371,8 +408,8 @@ export default function AllProduct() {
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={() => changePage(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              onClick={() => changePage(pagination.currentPage + 1)}
+              disabled={!pagination.hasNextPage || loading}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -380,14 +417,14 @@ export default function AllProduct() {
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={() => changePage(totalPages)}
-              disabled={currentPage === totalPages}
+              onClick={() => changePage(pagination.totalPages)}
+              disabled={!pagination.hasNextPage || loading}
             >
               <ChevronsRight className="h-4 w-4" />
             </Button>
 
             <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md ml-2">
-              Page {currentPage} of {totalPages}
+              Page {pagination.currentPage} of {pagination.totalPages}
             </div>
           </div>
         </div>

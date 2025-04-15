@@ -157,6 +157,8 @@ export const getAllProducts = async ({
 }) => {
     try {
         const queryParams = new URLSearchParams();
+        
+        // Add all filter parameters
         if (search?.trim()) queryParams.append('search', search.trim());
         if (category) queryParams.append('category', category);
         if (subCategory) queryParams.append('subCategory', subCategory);
@@ -166,26 +168,38 @@ export const getAllProducts = async ({
         if (maxPrice) queryParams.append('maxPrice', maxPrice);
         if (gender) queryParams.append('gender', gender);
         if (typeOfShoes) queryParams.append('typeOfShoes', typeOfShoes);
+        
+        // Pagination parameters
         queryParams.append('page', page);
         queryParams.append('limit', limit);
+        
+        // Sorting parameters
         if (sortBy) queryParams.append('sortBy', sortBy);
         if (sortOrder) queryParams.append('sortOrder', sortOrder);
 
-        const response = await axiosClient.get(`/products/query?${queryParams.toString()}`);
+        // Make the API call with cache control headers
+        const response = await axiosClient.get(`/products/query?${queryParams.toString()}`, {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+        
+        // Ensure we have all required pagination data
+        const paginationData = response.data.pagination || {};
         
         return {
             products: response.data.products || [],
-            total: response.data.pagination?.total || 0,
-            currentPage: response.data.pagination?.currentPage || page,
-            totalPages: response.data.pagination?.totalPages || 1,
-            itemsPerPage: response.data.pagination?.itemsPerPage || limit,
-            hasNextPage: response.data.pagination?.hasNextPage || false,
-            hasPreviousPage: response.data.pagination?.hasPreviousPage || false
+            total: paginationData.total || 0,
+            currentPage: paginationData.currentPage || page,
+            totalPages: paginationData.totalPages || 1,
+            itemsPerPage: paginationData.itemsPerPage || limit,
+            hasNextPage: paginationData.hasNextPage || false,
+            hasPreviousPage: paginationData.hasPreviousPage || false
         };
     } catch (error) {
         console.error('API Error:', error);
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch products';
-        throw new Error(errorMessage);
+        throw new Error(error.response?.data?.message || error.message || 'Failed to fetch products');
     }
 }
 
