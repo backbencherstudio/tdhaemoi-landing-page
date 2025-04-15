@@ -1,14 +1,16 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { IoClose } from 'react-icons/io5'
 import { HiPencilAlt, HiCollection, HiCog, HiArrowRightOnRectangle } from 'react-icons/hi'
 import { useAuth } from '@/context/AuthContext'
+// import toast from 'react-hot-toast'
 
 export default function Sidebar({ onClose }) {
     const pathname = usePathname();
     const { logout } = useAuth()
+    const router = useRouter()
     const menuItems = [
         // { icon: HiHome, label: 'Dashboard', href: '/dashboard' },
         { icon: HiPencilAlt, label: 'Create Post', href: '/dashboard/create-products' },
@@ -16,7 +18,11 @@ export default function Sidebar({ onClose }) {
         { icon: HiCog, label: 'Settings', href: '/dashboard/settings' },
     ];
 
+    const handleLogout = () => {
+        logout()
+        router.push('/login')
 
+    }
 
     return (
         <div className="w-64 h-screen bg-white shadow-lg flex flex-col">
@@ -57,7 +63,7 @@ export default function Sidebar({ onClose }) {
             {/* Logout button */}
             <div className="border-t border-gray-200 p-4">
                 <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="flex items-center cursor-pointer w-full px-4 py-2 text-gray-700 hover:bg-green-600 hover:text-white rounded-md transition-colors duration-300 group"
                 >
                     {/* <HiArrowRightOnRectangle className="h-5 w-5 mr-3 transition-transform duration-300 group-hover:translate-x-1" /> */}

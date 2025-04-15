@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { loginUser } from '@/apis/authApis'
 import { useAuth } from '@/context/AuthContext'
+import toast from 'react-hot-toast'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -25,6 +26,7 @@ export default function LoginPage() {
             const response = await loginUser(email, password)
             login(response.user, response.token)
             router.push('/dashboard/create-products')
+            toast.success('Login successful')
         } catch (error) {
             setError(error.message || 'Login failed. Please try again.')
         } finally {
