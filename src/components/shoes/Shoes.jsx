@@ -221,11 +221,11 @@ export default function Shoes() {
                                     <p className="text-gray-600 text-sm line-clamp-2">{shoe.description}</p>
                                     <p className="text-sm">{shoe.color} Farbe</p>
                                     <p className="font-semibold text-lg">{Number(shoe.price).toFixed(2)} €</p>
-                                    <div className="flex items-center space-x-2">
+                                    {/* <div className="flex items-center space-x-2">
                                         <span className="bg-[#62A07B] text-white text-xs font-medium px-2.5 py-0.5 rounded">
                                             {shoe.offer}% FIT
                                         </span>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </Link>
