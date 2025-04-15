@@ -32,3 +32,47 @@ export const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
 };
+
+
+// update user profile
+export const updateUserProfile = async (id, userData) => {
+    try {
+        const formData = new FormData();
+        if (userData.name) formData.append('name', userData.name);
+        if (userData.email) {
+            formData.append('email', userData.email.toLowerCase().trim());
+        }
+        if (userData.image instanceof File) {
+            formData.append('image', userData.image);
+        }
+        const response = await axiosClient.put(`/users/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        if (!response.data.user || !response.data.user.email) {
+            throw new Error('Invalid response from server');
+        }
+        return {
+            success: true,
+            user: {
+                ...response.data.user,
+                email: response.data.user.email.toLowerCase().trim()
+            },
+            message: response.data.message || 'Profile updated successfully'
+        };
+    } catch (error) {
+        if (error.response?.data?.message?.toLowerCase().includes('email')) {
+            throw new Error('This email address is already in use');
+        }
+        const errorMessage = error.response?.data?.message || 'Error updating profile';
+        throw new Error(errorMessage);
+    }
+};
+
+
+// change password
+export const changePassword = async (id, password) => {
+    const response = await axiosClient.put(`/users/${id}/change-password`, { password });
+    return response.data;
+};

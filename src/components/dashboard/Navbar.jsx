@@ -9,7 +9,7 @@ export default function Navbar({ onMenuClick }) {
 
   return (
     <nav className="bg-white shadow-md">
-      <div className="px-4 py-3 md:py-1 flex items-center justify-between">
+      <div className="px-4 py-3 flex items-center justify-between">
         <button
           onClick={onMenuClick}
           className="text-gray-600 hover:text-gray-800 md:hidden"
@@ -23,13 +23,13 @@ export default function Navbar({ onMenuClick }) {
 
         <div className="flex items-center">
           {user && (
-            <div className="relative h-16 w-16 rounded-full overflow-hidden">
+            <div className="relative h-12 w-12 rounded-full ">
               <Image
                 src={user.image}
                 alt={user.name}
                 width={100}
                 height={100}
-                className="object-cover"
+                className="rounded-full object-cover h-full w-full"
               />
             </div>
           )}
