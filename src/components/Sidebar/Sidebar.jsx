@@ -24,7 +24,8 @@ export default function Sidebar() {
     });
 
     const [filters, setFilters] = useState({
-        category: searchParams.get('category') || '',
+        // category: searchParams.get('category') || '',
+        typeOfShoes: searchParams.get('typeOfShoes') || '',
         gender: searchParams.get('gender') || '',
         brand: searchParams.get('brand') || '',
         size: searchParams.get('size')?.split(',') || [],
@@ -40,7 +41,7 @@ export default function Sidebar() {
     ]);
 
     // Filter Options
-    const categories = ['running', 'walking', 'training', 'hiking'];
+    const typeOfShoes = ['running', 'walking', 'training', 'hiking'];
     const genders = ['MALE', 'FEMALE', 'UNISEX'];
 
     const sizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
@@ -140,7 +141,8 @@ export default function Sidebar() {
 
     const resetFilters = () => {
         setFilters({
-            category: '',
+            // category: '',
+            typeOfShoes: '',
             gender: '',
             brand: '',
             size: [],
@@ -176,14 +178,14 @@ export default function Sidebar() {
                     </button>
                     {openSections.schuhtyp && (
                         <div className="py-2 px-4">
-                            {categories.map((category) => (
-                                <div key={category} className="flex items-center space-x-2 py-1">
+                            {typeOfShoes.map((typeOfShoes) => (
+                                <div key={typeOfShoes} className="flex items-center space-x-2 py-1">
                                     <Checkbox
-                                        id={category}
-                                        checked={filters.category === category}
-                                        onCheckedChange={() => handleFilterChange('category', filters.category === category ? '' : category)}
+                                        id={typeOfShoes}
+                                        checked={filters.typeOfShoes === typeOfShoes}
+                                        onCheckedChange={() => handleFilterChange('typeOfShoes', filters.typeOfShoes === typeOfShoes ? '' : typeOfShoes)}
                                     />
-                                    <Label htmlFor={category} className="capitalize">{category}</Label>
+                                    <Label htmlFor={typeOfShoes} className="capitalize">{typeOfShoes}</Label>
                                 </div>
                             ))}
                         </div>

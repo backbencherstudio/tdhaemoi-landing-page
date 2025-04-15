@@ -25,40 +25,17 @@ export default function Shoes() {
     const [totalPages, setTotalPages] = useState(0);
     const searchParams = useSearchParams();
     const router = useRouter();
-
-    // Get current page from URL or default to 1
+    const [typeOfShoes, setTypeOfShoes] = useState('');
     const currentPage = Number(searchParams.get('page')) || 1;
     const itemsPerPage = 8;
 
-    useEffect(() => {
-        fetchShoes();
-    }, [searchParams]);
-
-    // Remove the first useEffect that watches searchParams
-
-    useEffect(() => {
-        const params = new URLSearchParams(searchParams);
-        if (debouncedSearchTerm) {
-            params.set('search', debouncedSearchTerm);
-        } else {
-            params.delete('search');
-        }
-        router.push(`/shoes?${params.toString()}`);
-        fetchShoes();
-    }, [debouncedSearchTerm]); // Only watch debouncedSearchTerm
-
-    // Update handleSearch to only update searchTerm
-    const handleSearch = (value) => {
-        setSearchTerm(value);
-    };
-
+    // Update fetchShoes to use the new search pattern
     const fetchShoes = async () => {
         try {
             setLoading(true);
             const filters = {
-                name: debouncedSearchTerm || '',
-                brand: searchParams.get('brand') || '',
-                category: searchParams.get('category') || '',
+                search: searchParams.get('search') || '', 
+                typeOfShoes: searchParams.get('typeOfShoes') || '',
                 subCategory: searchParams.get('subCategory') || '',
                 color: searchParams.get('color') || '',
                 size: searchParams.get('size') || '',
@@ -80,15 +57,48 @@ export default function Shoes() {
             });
 
             setShoes(filteredProducts);
-            // Calculate total pages
             setTotalPages(Math.ceil(response.total / itemsPerPage));
-
         } catch (error) {
             console.error('Error fetching shoes:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    // Update search params handling
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams);
+        if (debouncedSearchTerm) {
+            params.set('search', debouncedSearchTerm);
+            params.set('page', '1'); 
+        } else {
+            params.delete('search');
+        }
+        if (typeOfShoes) {
+            params.set('typeOfShoes', typeOfShoes);
+        } else {
+            params.delete('typeOfShoes');
+        }
+        router.push(`/shoes?${params.toString()}`);
+    }, [debouncedSearchTerm, typeOfShoes]);
+
+    // Watch for URL parameter changes
+    useEffect(() => {
+        fetchShoes();
+    }, [searchParams]);
+
+    // Update search handler
+    const handleSearch = (value) => {
+        setSearchTerm(value);
+    };
+
+    // Initialize searchTerm from URL on component mount
+    useEffect(() => {
+        const searchFromUrl = searchParams.get('search');
+        if (searchFromUrl) {
+            setSearchTerm(searchFromUrl);
+        }
+    }, []);
 
     const handlePageChange = (page) => {
         const params = new URLSearchParams(searchParams);
@@ -140,8 +150,8 @@ export default function Shoes() {
         <>
             {/* Search Bar */}
             <div className="pb-5">
-                <div className="flex justify-end mt-3 mb-7"> {/* Changed justify-between to justify-end */}
-                    <div className="relative w-full max-w-md ml-auto"> {/* Added ml-auto */}
+                <div className="flex justify-end mt-3 mb-7">
+                    <div className="relative w-full max-w-md ml-auto">
                         <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
                             <FiSearch className="ml-4 text-gray-500 text-xl" />
                             <input

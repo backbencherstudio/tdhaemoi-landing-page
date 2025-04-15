@@ -1,6 +1,6 @@
 import axiosClient from "../../lip/axiosClient";
 
-// create products 
+// create products admin
 export const createProducts = async (productData) => {
     try {
         const formData = new FormData();
@@ -43,13 +43,93 @@ export const createProducts = async (productData) => {
     }
 }
 
+// admin get all product
+export const getAllProduct = async ({
+    search = '',
+    page = 1,
+    limit = 2
+} = {}) => {
+    try {
+        const queryParams = new URLSearchParams();
+        if (search?.trim()) queryParams.append('search', search.trim());
+        queryParams.append('page', page);
+        queryParams.append('limit', limit);
+
+        const response = await axiosClient.get(`/products/query?${queryParams}`);
+
+        return {
+            products: response.data.products || [],
+            total: response.data.pagination?.total || 0,
+            currentPage: response.data.pagination?.currentPage || page,
+            totalPages: response.data.pagination?.totalPages || 1,
+            itemsPerPage: response.data.pagination?.itemsPerPage || limit,
+            hasNextPage: response.data.pagination?.hasNextPage || false,
+            hasPreviousPage: response.data.pagination?.hasPreviousPage || false
+        };
+    } catch (error) {
+        console.error('API Error:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch products';
+        throw new Error(errorMessage);
+    }
+}
+
+// update product admin
+export const updateProduct = async (id, productData) => {
+    try {
+        const formData = new FormData();
+        
+        // Add all product fields to formData
+        formData.append('name', productData.name);
+        formData.append('brand', productData.brand);
+        formData.append('Category', productData.Category);
+        formData.append('Sub_Category', productData.Sub_Category);
+        formData.append('typeOfShoes', productData.typeOfShoes);
+        formData.append('productDesc', productData.productDesc);
+        formData.append('price', productData.price);
+        formData.append('availability', String(productData.availability));
+        formData.append('offer', productData.offer);
+        formData.append('size', JSON.stringify(productData.size));
+        formData.append('feetFirstFit', productData.feetFirstFit);
+        formData.append('footLength', productData.footLength);
+        formData.append('color', productData.color);
+        formData.append('technicalData', productData.technicalData);
+        formData.append('Company', productData.Company);
+        formData.append('gender', productData.gender);
+
+        // Handle multiple images
+        if (productData.images && productData.images.length > 0) {
+            productData.images.forEach((image) => {
+                formData.append('images', image);
+            });
+        }
+
+        const response = await axiosClient.put(`/products/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to update product';
+        throw new Error(errorMessage);
+    }
+}
+
+// delete product admin
+export const deleteProduct = async (id) => {
+    try {
+        const response = await axiosClient.delete(`/products/${id}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(error.message || 'Failed to delete product');
+    }
+}
 
 
 
-// Get all products with filters
+// Get all products with filters client site 
 export const getAllProducts = async ({
-    name,
-    brand,
+    search = '',
     minPrice,
     maxPrice,
     category,
@@ -65,10 +145,7 @@ export const getAllProducts = async ({
 }) => {
     try {
         const queryParams = new URLSearchParams();
-
-        // Add all filters to query params
-        if (name) queryParams.append('name', name);
-        if (brand) queryParams.append('brand', brand);
+        if (search?.trim()) queryParams.append('search', search.trim());
         if (category) queryParams.append('category', category);
         if (subCategory) queryParams.append('subCategory', subCategory);
         if (size) queryParams.append('size', size);
@@ -77,15 +154,10 @@ export const getAllProducts = async ({
         if (maxPrice) queryParams.append('maxPrice', maxPrice);
         if (gender) queryParams.append('gender', gender);
         if (typeOfShoes) queryParams.append('typeOfShoes', typeOfShoes);
-        
-        // Add pagination params
         queryParams.append('page', page);
         queryParams.append('limit', limit);
-
-        // Add sorting
         if (sortBy) queryParams.append('sortBy', sortBy);
         if (sortOrder) queryParams.append('sortOrder', sortOrder);
-
         const response = await axiosClient.get(`/products/query?${queryParams.toString()}`);
         return {
             products: response.data.products || [],
@@ -99,7 +171,7 @@ export const getAllProducts = async ({
 }
 
 
-// Get product by ID
+// Get product by ID client site 
 export const getProductById = async (id) => {
     try {
         const response = await axiosClient.get(`/products/${id}`);

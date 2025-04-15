@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   Card,
   CardContent,
@@ -29,12 +29,16 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
-import { createProducts } from "@/apis/productsApis";
-import { useRouter } from "next/navigation";
+import { createProducts, getProductById, updateProduct } from "@/apis/productsApis";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 export default function CreateProducts() {
   const router = useRouter();
+  const searchParams = useSearchParams()
+  const editId = searchParams.get('edit')
+  const isEditMode = Boolean(editId)
+
   // State for form fields
   const [formData, setFormData] = useState({
     productName: '',
@@ -65,6 +69,58 @@ export default function CreateProducts() {
 
   // Gender options
   const genderOptions = ['Male', 'Female', 'Unisex']
+
+  // Add this effect to fetch product data when in edit mode
+  useEffect(() => {
+    if (isEditMode) {
+      fetchProductData()
+    }
+  }, [editId])
+
+  const fetchProductData = async () => {
+    try {
+      const product = await getProductById(editId)
+      if (product) {
+        // Parse the size array from string
+        const parsedSize = product.size ? JSON.parse(product.size) : []
+        
+        // Set form data with existing product data
+        setFormData({
+          productName: product.name,
+          brand: product.brand,
+          category: product.Category.toLowerCase(),
+          subCategory: product.Sub_Category,
+          typeOfShoes: product.typeOfShoes,
+          productDesc: product.productDesc,
+          price: product.price,
+          availability: product.availability,
+          offer: product.offer,
+          size: parsedSize,
+          feetFirstFit: product.feetFirstFit,
+          footLength: product.footLength,
+          color: product.color,
+          technicalData: product.technicalData,
+          company: product.Company,
+          gender: product.gender.toLowerCase()
+        })
+
+        // Handle existing images
+        if (product.images && product.images.length > 0) {
+          const existingImages = product.images.map((url, index) => ({
+            id: `existing-${index}`,
+            preview: url,
+            name: `Image ${index + 1}`,
+            isExisting: true,
+            url: url
+          }))
+          setUploadedImages(existingImages)
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to fetch product data")
+      console.error(error)
+    }
+  }
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -184,73 +240,80 @@ export default function CreateProducts() {
     setUploadedImages([]);
   };
   
-  // Update handleSubmit function
+  // Update handleSubmit to handle both create and update
   const handleSubmit = async (e) => {
-      e.preventDefault();
-  
-      // Validate required fields
-      const requiredFields = ['productName', 'brand', 'category', 'price'];
-      const missingFields = requiredFields.filter(field => !formData[field]);
-      
-      if (missingFields.length > 0) {
-          toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-          return;
+    e.preventDefault()
+    
+    // Validate required fields
+    const requiredFields = ['productName', 'brand', 'category', 'price'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Validate size selection
+    if (formData.size.length === 0) {
+      toast.error('Please select at least one size');
+      return;
+    }
+
+    setIsLoading(true)
+
+    try {
+      const productData = {
+        name: formData.productName,
+        brand: formData.brand,
+        Category: formData.category,
+        Sub_Category: formData.subCategory || null,
+        typeOfShoes: formData.typeOfShoes || null,
+        productDesc: formData.productDesc,
+        price: formData.price,
+        availability: Boolean(formData.availability),
+        offer: formData.offer || null,
+        size: formData.size,
+        feetFirstFit: formData.feetFirstFit || null,
+        footLength: formData.footLength || null,
+        color: formData.color || null,
+        technicalData: formData.technicalData || null,
+        Company: formData.company || null,
+        gender: formData.gender?.toUpperCase() || null,
+        images: uploadedImages
+          .filter(img => !img.isExisting)
+          .map(img => img.file)
       }
-  
-      // Validate size selection
-      if (formData.size.length === 0) {
-          toast.error('Please select at least one size');
-          return;
+
+      let response
+      if (isEditMode) {
+        response = await updateProduct(editId, productData)
+      } else {
+        response = await createProducts(productData)
       }
-  
-      setIsLoading(true); // Start loading
-  
-      try {
-          // Prepare the product data according to API requirements
-          const productData = {
-              name: formData.productName,
-              brand: formData.brand,
-              Category: formData.category,
-              Sub_Category: formData.subCategory || null,
-              typeOfShoes: formData.typeOfShoes || null,
-              productDesc: formData.productDesc,
-              price: formData.price,
-              availability: Boolean(formData.availability),
-              offer: formData.offer || null,
-              size: formData.size,
-              feetFirstFit: formData.feetFirstFit || null,
-              footLength: formData.footLength || null,
-              color: formData.color || null,
-              technicalData: formData.technicalData || null,
-              Company: formData.company || null,
-              gender: formData.gender?.toUpperCase() || null,
-              images: uploadedImages.map(img => img.file)
-          };
-  
-          const response = await createProducts(productData);
-  
-          if (response.success) {
-              toast.success(response.message || "Product created successfully!");
-              resetForm(); // Reset form after successful creation
-              // router.push("/dashboard/products");
-          } else {
-              throw new Error(response.message || "Failed to create product");
-          }
-      } catch (error) {
-          toast.error(error.message);
-          console.error("Error creating product:", error);
-      } finally {
-          setIsLoading(false); // Stop loading
+
+      if (response.success) {
+        toast.success(isEditMode ? "Product updated successfully!" : "Product created successfully!")
+        router.push("/dashboard/products")
       }
-  };
+    } catch (error) {
+      toast.error(error.message)
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
   
   // Update the submit button in the return statement
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Create New Product</h1>
-          <p className="text-gray-500 mt-1">Add a new product to your inventory</p>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {isEditMode ? 'Edit Product' : 'Create New Product'}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {isEditMode ? 'Update product information' : 'Add a new product to your inventory'}
+          </p>
         </div>
         {/* <Button variant="outline" className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
