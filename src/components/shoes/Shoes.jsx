@@ -15,6 +15,13 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useDebounce } from 'use-debounce';
+import { Button } from "@/components/ui/button"
+import {
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight
+} from "lucide-react"
 
 export default function Shoes() {
     const [shoes, setShoes] = useState([]);
@@ -28,6 +35,7 @@ export default function Shoes() {
     const [typeOfShoes, setTypeOfShoes] = useState('');
     const currentPage = Number(searchParams.get('page')) || 1;
     const itemsPerPage = 8;
+    const [totalItems, setTotalItems] = useState(0);
 
     // Update fetchShoes to use the new search pattern
     const fetchShoes = async () => {
@@ -47,17 +55,9 @@ export default function Shoes() {
             };
 
             const response = await getAllProducts(filters);
-
-            // Filter products based on price range
-            const filteredProducts = response.products.filter(product => {
-                const price = Number(product.price);
-                const min = Number(filters.minPrice) || 0;
-                const max = Number(filters.maxPrice) || 5000;
-                return price >= min && price <= max;
-            });
-
-            setShoes(filteredProducts);
-            setTotalPages(Math.ceil(response.total / itemsPerPage));
+            setShoes(response.products);
+            setTotalItems(response.total);
+            setTotalPages(response.totalPages);
         } catch (error) {
             console.error('Error fetching shoes:', error);
         } finally {
@@ -226,43 +226,69 @@ export default function Shoes() {
             )}
 
             {/* Pagination */}
-            <div className="flex justify-center mt-8">
-                <Pagination>
-                    <PaginationContent>
-                        {/* Previous button */}
-                        <PaginationItem>
-                            <PaginationPrevious
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                            />
-                        </PaginationItem>
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} shoes
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePageChange(1)}
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronsLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
 
-                        {/* Page numbers */}
-                        {getPageNumbers().map((page, index) => (
-                            <PaginationItem key={index}>
-                                {page === '...' ? (
-                                    <PaginationEllipsis />
-                                ) : (
-                                    <PaginationLink
-                                        onClick={() => handlePageChange(page)}
-                                        isActive={currentPage === page}
-                                        className="cursor-pointer"
-                                    >
-                                        {page}
-                                    </PaginationLink>
-                                )}
-                            </PaginationItem>
-                        ))}
+                    {getPageNumbers().map((page, index) => (
+                        page === '...' ? (
+                            <span key={`ellipsis-${index}`} className="px-2">...</span>
+                        ) : (
+                            <Button
+                                key={`page-${page}`}
+                                variant={currentPage === page ? "default" : "outline"}
+                                size="icon"
+                                className={`h-8 w-8 ${currentPage === page ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                onClick={() => handlePageChange(page)}
+                            >
+                                {page}
+                            </Button>
+                        )
+                    ))}
 
-                        {/* Next button */}
-                        <PaginationItem>
-                            <PaginationNext
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={currentPage === totalPages}
+                    >
+                        <ChevronsRight className="h-4 w-4" />
+                    </Button>
+
+                    <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md ml-2">
+                        Page {currentPage} of {totalPages}
+                    </div>
+                </div>
             </div>
         </>
     )

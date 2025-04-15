@@ -115,6 +115,18 @@ export const updateProduct = async (id, productData) => {
     }
 }
 
+
+// delete single image product admin
+export const deleteSingleImage = async (id, imageFilename) => {
+    try {
+        const response = await axiosClient.delete(`/products/${id}/${imageFilename}`);
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete image';
+        throw new Error(errorMessage);
+    }
+}
+
 // delete product admin
 export const deleteProduct = async (id) => {
     try {
@@ -158,15 +170,22 @@ export const getAllProducts = async ({
         queryParams.append('limit', limit);
         if (sortBy) queryParams.append('sortBy', sortBy);
         if (sortOrder) queryParams.append('sortOrder', sortOrder);
+
         const response = await axiosClient.get(`/products/query?${queryParams.toString()}`);
+        
         return {
             products: response.data.products || [],
-            total: response.data.total || 0,
-            currentPage: response.data.currentPage || page,
-            totalPages: response.data.totalPages || Math.ceil((response.data.total || 0) / limit)
+            total: response.data.pagination?.total || 0,
+            currentPage: response.data.pagination?.currentPage || page,
+            totalPages: response.data.pagination?.totalPages || 1,
+            itemsPerPage: response.data.pagination?.itemsPerPage || limit,
+            hasNextPage: response.data.pagination?.hasNextPage || false,
+            hasPreviousPage: response.data.pagination?.hasPreviousPage || false
         };
     } catch (error) {
-        throw new Error(error.message || 'Failed to fetch products');
+        console.error('API Error:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch products';
+        throw new Error(errorMessage);
     }
 }
 

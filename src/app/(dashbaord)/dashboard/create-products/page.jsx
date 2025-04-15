@@ -29,9 +29,18 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
-import { createProducts, getProductById, updateProduct } from "@/apis/productsApis";
+import { createProducts, getProductById, updateProduct, deleteSingleImage } from "@/apis/productsApis";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+
+
+// extract image filename from url with base url
+const extractImageFilename = (url) => {
+  if (!url) return null;
+  const parts = url.split('/uploads/');
+  if (parts.length < 2) return null;
+  return parts[1];
+};
 
 export default function CreateProducts() {
   const router = useRouter();
@@ -83,7 +92,7 @@ export default function CreateProducts() {
       if (product) {
         // Parse the size array from string
         const parsedSize = product.size ? JSON.parse(product.size) : []
-        
+
         // Set form data with existing product data
         setFormData({
           productName: product.name,
@@ -188,7 +197,7 @@ export default function CreateProducts() {
   // Process new images
   const addNewImages = (files) => {
     if (!files || files.length === 0) return;
-    
+
     const newImages = files.map(file => ({
       id: Date.now() + Math.random().toString(36).substring(2, 9),
       file,
@@ -206,17 +215,37 @@ export default function CreateProducts() {
   }
 
   // Remove an image
-  const removeImage = (id) => {
-    setUploadedImages(prev => {
-      const filtered = prev.filter(image => image.id !== id)
-      return filtered
-    })
-  }
+  const removeImage = async (id, image) => {
+    try {
+      if (image.isExisting && editId) {
+        // Extract filename from full URL
+        const filename = extractImageFilename(image.url);
+        if (!filename) {
+          throw new Error('Invalid image URL');
+        }
+
+        // Call the API to delete the image
+        const response = await deleteSingleImage(editId, filename);
+
+        if (response.success) {
+          // Remove from state only if API call was successful
+          setUploadedImages(prev => prev.filter(img => img.id !== id));
+          toast.success('Image deleted successfully');
+        }
+      } else {
+        // For new images, just remove from state
+        setUploadedImages(prev => prev.filter(img => img.id !== id));
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete image');
+      console.error('Error deleting image:', error);
+    }
+  };
 
   // Handle form submission
   // Add loading state
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Add reset form function
   const resetForm = () => {
     setFormData({
@@ -239,15 +268,15 @@ export default function CreateProducts() {
     });
     setUploadedImages([]);
   };
-  
+
   // Update handleSubmit to handle both create and update
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     // Validate required fields
     const requiredFields = ['productName', 'brand', 'category', 'price'];
     const missingFields = requiredFields.filter(field => !formData[field]);
-    
+
     if (missingFields.length > 0) {
       toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
       return;
@@ -293,7 +322,7 @@ export default function CreateProducts() {
 
       if (response.success) {
         toast.success(isEditMode ? "Product updated successfully!" : "Product created successfully!")
-        router.push("/dashboard/products")
+        router.push("/dashboard/all-product")
       }
     } catch (error) {
       toast.error(error.message)
@@ -302,7 +331,7 @@ export default function CreateProducts() {
       setIsLoading(false)
     }
   }
-  
+
   // Update the submit button in the return statement
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -326,9 +355,8 @@ export default function CreateProducts() {
           <div className="lg:col-span-1">
             <CardContent className="pt-6">
               <div
-                className={`border-2 border-dashed rounded-lg p-6  transition-colors ${
-                  isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-gray-400'
-                }`}
+                className={`border-2 border-dashed rounded-lg p-6  transition-colors ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-gray-400'
+                  }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -364,7 +392,7 @@ export default function CreateProducts() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            removeImage(image.id);
+                            removeImage(image.id, image);
                           }}
                           className="absolute top-2 cursor-pointer  right-2 bg-white text-red-500 rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-500 hover:text-white"
                         >
@@ -424,12 +452,12 @@ export default function CreateProducts() {
               />
             </CardContent>
           </div>
-          
+
           <CardHeader>
             <CardTitle>Product Information</CardTitle>
             <CardDescription>Enter the details of your product</CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
@@ -698,8 +726,8 @@ export default function CreateProducts() {
 
         {/* Submit Button */}
         <div className="flex justify-end">
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             className="bg-green-600 hover:bg-green-700"
             disabled={isLoading}
           >
@@ -736,21 +764,3 @@ export default function CreateProducts() {
     </div>
   )
 }
-
-
-
-
-// Basic filtering: /products/query?name=nike&brand=nike
- 
-// Price range: /products/query?minPrice=50&maxPrice=100
- 
-// Category filtering: /products/query?category=running&subCategory=trail
- 
-// Size and color: /products/query?size=10&color=black
- 
-// Pagination: /products/query?page=2&limit=10
- 
-// Sorting: /products/query?sortBy=price&sortOrder=desc
-
-
-// query?name=Ora Hopkins&brand=Qui laborum ullam qu&minPrice=50&maxPrice=60&category=running&subCategory=boots&size=37&color=Perspiciatis ea nat&page=1&limit=10&sortBy=price&sortOrder=desc
