@@ -56,10 +56,19 @@ export default function Sidebar() {
 
 
     const toggleSection = (section) => {
-        setOpenSections(prev => ({
-            ...prev,
-            [section]: !prev[section]
-        }));
+        setOpenSections(prev => {
+            // Create a new object with all sections set to false
+            const allClosed = Object.keys(prev).reduce((acc, key) => {
+                acc[key] = false;
+                return acc;
+            }, {});
+            
+            // Toggle only the clicked section
+            return {
+                ...allClosed,
+                [section]: !prev[section]
+            };
+        });
     };
 
     const handleFilterChange = (key, value) => {
@@ -128,7 +137,6 @@ export default function Sidebar() {
 
     const resetFilters = () => {
         setFilters({
-            // category: '',
             typeOfShoes: '',
             gender: '',
             brand: '',
@@ -138,7 +146,11 @@ export default function Sidebar() {
             maxPrice: '',
             availability: false,
         });
-        router.push('/shoes');
+        
+        // Add page=1 when resetting filters
+        const params = new URLSearchParams();
+        params.set('page', '1');
+        router.replace(`/shoes?${params.toString()}`);
     };
 
     return (

@@ -37,6 +37,31 @@ export default function Shoes() {
     const itemsPerPage = 8;
     const [totalItems, setTotalItems] = useState(0);
 
+    // Add this useEffect at the top of your existing useEffects
+    useEffect(() => {
+        const handleInitialLoad = () => {
+            const params = new URLSearchParams(searchParams);
+            const currentPage = params.get('page');
+            
+            // If no page parameter and no other filters are present
+            if (!currentPage && !hasActiveFilters()) {
+                params.set('page', '1');
+                router.replace(`/shoes?${params.toString()}`, { scroll: false });
+            }
+        };
+
+        const hasActiveFilters = () => {
+            const params = new URLSearchParams(searchParams);
+            const filterParams = [
+                'search', 'typeOfShoes', 'gender', 'color',
+                'size', 'minPrice', 'maxPrice', 'availability'
+            ];
+            return filterParams.some(param => params.has(param));
+        };
+
+        handleInitialLoad();
+    }, []);
+
     // Update fetchShoes to use the new search pattern
     const fetchShoes = async () => {
         try {
@@ -75,9 +100,13 @@ export default function Shoes() {
         const params = new URLSearchParams(searchParams);
         if (debouncedSearchTerm) {
             params.set('search', debouncedSearchTerm);
-            params.set('page', '1'); 
+            params.set('page', '1');
         } else {
             params.delete('search');
+            // Ensure page parameter exists when removing search
+            if (!params.has('page')) {
+                params.set('page', '1');
+            }
         }
         if (typeOfShoes) {
             params.set('typeOfShoes', typeOfShoes);
@@ -153,6 +182,14 @@ export default function Shoes() {
 
         return pages;
     };
+
+    useEffect(() => {
+        if (!searchParams.get('page')) {
+            const params = new URLSearchParams(searchParams);
+            params.set('page', '1');
+            router.replace(`/shoes?${params.toString()}`);
+        }
+    }, []);
 
     return (
         <>

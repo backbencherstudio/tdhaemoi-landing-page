@@ -14,6 +14,7 @@ import scannerImg from "../../../public/shoesDetails/scanner.png"
 import RecommendShoes from './Recommend';
 import { IoChevronDown, IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { getProductById } from '@/apis/productsApis';
+import { useSearchParams } from 'next/navigation';
 
 
 export default function ShoesDetails({ params }) {
@@ -26,6 +27,8 @@ export default function ShoesDetails({ params }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [sizes, setSizes] = useState([]);
     const id = params?.id;
+    const searchParams = useSearchParams();
+    const productName = searchParams.get('name');
 
     useEffect(() => {
         fetchShoeDetails();
@@ -38,6 +41,10 @@ export default function ShoesDetails({ params }) {
             const data = await getProductById(id);
             if (data) {
                 setShoe(data);
+                if (data.name && (!productName || decodeURIComponent(productName) !== data.name)) {
+                    const newUrl = `/shoes/details/${id}?name=${encodeURIComponent(data.name)}`;
+                    window.history.replaceState({}, '', newUrl);
+                }
                 if (data.size) {
                     try {
                         const parsedSizes = JSON.parse(data.size);

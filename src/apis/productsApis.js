@@ -1,4 +1,5 @@
 import axiosClient from "../../lip/axiosClient";
+import { cache } from 'react';
 
 // create products admin
 export const createProducts = async (productData) => {
@@ -140,68 +141,27 @@ export const deleteProduct = async (id) => {
 
 
 // Get all products with filters client site 
-export const getAllProducts = async ({
-    search = '',
-    minPrice,
-    maxPrice,
-    category,
-    typeOfShoes,
-    gender,
-    subCategory,
-    size,
-    color,
-    page = 1,
-    limit = 8,
-    sortBy,
-    sortOrder
-}) => {
-    try {
-        const queryParams = new URLSearchParams();
-        
-        // Add all filter parameters
-        if (search?.trim()) queryParams.append('search', search.trim());
-        if (category) queryParams.append('category', category);
-        if (subCategory) queryParams.append('subCategory', subCategory);
-        if (size) queryParams.append('size', size);
-        if (color) queryParams.append('color', color);
-        if (minPrice) queryParams.append('minPrice', minPrice);
-        if (maxPrice) queryParams.append('maxPrice', maxPrice);
-        if (gender) queryParams.append('gender', gender);
-        if (typeOfShoes) queryParams.append('typeOfShoes', typeOfShoes);
-        
-        // Pagination parameters
-        queryParams.append('page', page);
-        queryParams.append('limit', limit);
-        
-        // Sorting parameters
-        if (sortBy) queryParams.append('sortBy', sortBy);
-        if (sortOrder) queryParams.append('sortOrder', sortOrder);
+export const getAllProducts = cache(async (filters) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value) queryParams.append(key, value);
+    });
 
-        // Make the API call with cache control headers
-        const response = await axiosClient.get(`/products/query?${queryParams.toString()}`, {
+    try {
+        const response = await axiosClient.get(`/products/query?${queryParams}`, {
             headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
+                'Cache-Control': 'max-age=300',
             }
         });
-        
-        // Ensure we have all required pagination data
-        const paginationData = response.data.pagination || {};
-        
+
         return {
             products: response.data.products || [],
-            total: paginationData.total || 0,
-            currentPage: paginationData.currentPage || page,
-            totalPages: paginationData.totalPages || 1,
-            itemsPerPage: paginationData.itemsPerPage || limit,
-            hasNextPage: paginationData.hasNextPage || false,
-            hasPreviousPage: paginationData.hasPreviousPage || false
+            ...response.data.pagination
         };
     } catch (error) {
-        console.error('API Error:', error);
-        throw new Error(error.response?.data?.message || error.message || 'Failed to fetch products');
+        throw new Error(error.response?.data?.message || 'Failed to fetch products');
     }
-}
+});
 
 
 // Get product by ID client site 
