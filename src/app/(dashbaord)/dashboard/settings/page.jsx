@@ -1,8 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { updateUserProfile } from '@/apis/authApis'
+import { updateUserProfile, changePassword } from '@/apis/authApis'
 import { toast } from 'react-hot-toast'
+import { Eye, EyeOff } from 'lucide-react'
+import { useForm } from 'react-hook-form'
 
 export default function Settings() {
     const { user, updateUser } = useAuth()
@@ -18,6 +20,18 @@ export default function Settings() {
         email: false
     });
     const [hasChanges, setHasChanges] = useState(false);
+    const [showPasswords, setShowPasswords] = useState({
+        current: false,
+        new: false,
+        confirm: false
+    });
+    const { register, handleSubmit: handlePasswordSubmit, reset: resetPasswordForm, formState: { errors } } = useForm({
+        defaultValues: {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        }
+    });
 
     useEffect(() => {
         if (user) {
@@ -43,6 +57,7 @@ export default function Settings() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('Form submitted, activeTab:', activeTab);
 
         if (activeTab === 'profile') {
             try {
@@ -50,32 +65,59 @@ export default function Settings() {
                     name: username,
                     email: email,
                 };
-
-                // Only include image if it's a File object (new upload)
                 if (profileImage instanceof File) {
                     userData.image = profileImage;
                 }
-
                 const response = await updateUserProfile(user.id, userData);
 
                 if (response.success) {
-                    // Update the local user state with the new data
                     updateUser({
                         name: username,
                         email: email,
-                        image: response.user.image || profileImage // Use the returned image URL or keep existing
+                        image: response.user.image || profileImage
                     });
 
                     // Show success message
                     toast.success('Profile updated successfully!');
                 }
             } catch (error) {
-                console.error('Error updating profile:', error);
+                // console.error('Error updating profile:', error);
                 toast.error(error.message || 'Failed to update profile');
             }
         } else if (activeTab === 'security') {
-            // Handle password change logic here
-            // ... implement password change functionality
+            try {
+                // Validate passwords
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    toast.error('All password fields are required');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    toast.error('New passwords do not match');
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    toast.error('New password must be at least 6 characters long');
+                    return;
+                }
+
+                // Call the API to change password
+                const response = await changePassword(currentPassword, newPassword);
+
+                if (response.success) {
+                    // Clear password fields
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+
+                    // Show success message
+                    toast.success('Password changed successfully');
+                }
+            } catch (error) {
+                console.error('Detailed error:', error); // More detailed error logging
+                toast.error(error.message || 'Failed to change password');
+            }
         }
     };
 
@@ -96,6 +138,41 @@ export default function Settings() {
             ...prev,
             [field]: !prev[field]
         }));
+    };
+
+    const togglePasswordVisibility = (field) => {
+        setShowPasswords(prev => ({
+            ...prev,
+            [field]: !prev[field]
+        }));
+    };
+
+    const onPasswordSubmit = async (data) => {
+        try {
+            // Validate passwords match
+            if (data.newPassword !== data.confirmPassword) {
+                toast.error('New passwords do not match');
+                return;
+            }
+
+            if (data.newPassword.length < 6) {
+                toast.error('New password must be at least 6 characters long');
+                return;
+            }
+
+            // Call the API to change password
+            const response = await changePassword(data.currentPassword, data.newPassword);
+
+            if (response.success) {
+                // Reset form
+                resetPasswordForm();
+                // Show success message
+                toast.success('Password changed successfully');
+            }
+        } catch (error) {
+            console.error('Error changing password:', error);
+            toast.error(error.message || 'Failed to change password');
+        }
     };
 
     // Update the form fields to include edit buttons
@@ -250,7 +327,7 @@ export default function Settings() {
 
             {/* Security Tab Content */}
             {activeTab === 'security' && (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-6">
                     <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
                         <h2 className="text-lg font-medium text-gray-800 mb-5">Change Password</h2>
                         <div className="space-y-5">
@@ -265,15 +342,30 @@ export default function Settings() {
                                         </svg>
                                     </div>
                                     <input
-                                        type="password"
-                                        id="currentPassword"
-                                        value={currentPassword}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                        className="pl-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                                        type={showPasswords.current ? "text" : "password"}
+                                        {...register("currentPassword", { 
+                                            required: "Current password is required" 
+                                        })}
+                                        className={`pl-10 pr-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 ${errors.currentPassword ? 'border-red-500' : ''}`}
                                         placeholder="Enter current password"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => togglePasswordVisibility('current')}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                    >
+                                        {showPasswords.current ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        )}
+                                    </button>
                                 </div>
+                                {errors.currentPassword && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.currentPassword.message}</p>
+                                )}
                             </div>
+
                             <div>
                                 <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
                                     New Password
@@ -285,15 +377,34 @@ export default function Settings() {
                                         </svg>
                                     </div>
                                     <input
-                                        type="password"
-                                        id="newPassword"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        className="pl-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                                        type={showPasswords.new ? "text" : "password"}
+                                        {...register("newPassword", { 
+                                            required: "New password is required",
+                                            minLength: {
+                                                value: 6,
+                                                message: "Password must be at least 6 characters"
+                                            }
+                                        })}
+                                        className={`pl-10 pr-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 ${errors.newPassword ? 'border-red-500' : ''}`}
                                         placeholder="Enter new password"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => togglePasswordVisibility('new')}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                    >
+                                        {showPasswords.new ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        )}
+                                    </button>
                                 </div>
+                                {errors.newPassword && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.newPassword.message}</p>
+                                )}
                             </div>
+
                             <div>
                                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                                     Confirm New Password
@@ -305,14 +416,30 @@ export default function Settings() {
                                         </svg>
                                     </div>
                                     <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="pl-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                                        type={showPasswords.confirm ? "text" : "password"}
+                                        {...register("confirmPassword", { 
+                                            required: "Please confirm your password",
+                                            validate: (value, formValues) => 
+                                                value === formValues.newPassword || "Passwords do not match"
+                                        })}
+                                        className={`pl-10 pr-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                                         placeholder="Confirm new password"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => togglePasswordVisibility('confirm')}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                    >
+                                        {showPasswords.confirm ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        )}
+                                    </button>
                                 </div>
+                                {errors.confirmPassword && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                                )}
                             </div>
                         </div>
                     </div>

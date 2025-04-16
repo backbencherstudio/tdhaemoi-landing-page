@@ -72,7 +72,24 @@ export const updateUserProfile = async (id, userData) => {
 
 
 // change password
-export const changePassword = async (id, password) => {
-    const response = await axiosClient.put(`/users/${id}/change-password`, { password });
-    return response.data;
+export const changePassword = async (oldPassword, newPassword) => {
+    try {
+        const response = await axiosClient.patch('/users/change-password', {
+            oldPassword,
+            newPassword
+        });
+
+        if (!response.data) {
+            throw new Error('Invalid response from server');
+        }
+
+        return {
+            success: true,
+            message: response.data.message || 'Password changed successfully'
+        };
+    } catch (error) {
+        // console.error('Password change error:', error.response || error);
+        const errorMessage = error.response?.data?.message || 'Failed to change password';
+        throw new Error(errorMessage);
+    }
 };

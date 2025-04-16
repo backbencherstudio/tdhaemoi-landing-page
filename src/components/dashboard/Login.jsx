@@ -25,10 +25,14 @@ export default function LoginPage() {
         try {
             const response = await loginUser(email, password)
             login(response.user, response.token)
-            router.push('/dashboard/create-products')
             toast.success('Login successful')
+            router.push('/dashboard/create-products')
+  
         } catch (error) {
-            setError(error.message || 'Login failed. Please try again.')
+            // Check if error response contains a message
+            const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please try again.'
+            setError(errorMessage)
+            toast.error(errorMessage)
         } finally {
             setIsLoading(false)
         }

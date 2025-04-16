@@ -30,6 +30,7 @@ export default function ShoesDetails({ params }) {
     const searchParams = useSearchParams();
     const productName = searchParams.get('name');
 
+    // Group all useEffect hooks together
     useEffect(() => {
         fetchShoeDetails();
     }, [id]);
@@ -49,12 +50,12 @@ export default function ShoesDetails({ params }) {
                     try {
                         const parsedSizes = JSON.parse(data.size);
                         if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
-                            setSizes(parsedSizes); 
-                            setSelectedSize(parsedSizes[0]); 
+                            setSizes(parsedSizes);
+                            setSelectedSize(parsedSizes[0]);
                         }
                     } catch (e) {
                         console.error('Error parsing sizes:', e);
-                        setSizes([]); 
+                        setSizes([]);
                     }
                 }
             }
@@ -89,25 +90,25 @@ export default function ShoesDetails({ params }) {
 
     const demoImages = shoe?.images || [];
 
-    const handlePrevious = () => {
-        setCurrentIndex((prev) => (prev === 0 ? demoImages.length - 1 : prev - 1));
-    };
-
-    const handleNext = () => {
-        setCurrentIndex((prev) => (prev === demoImages.length - 1 ? 0 : prev + 1));
-    };
-
-    // Calculate visible thumbnails
-    const getVisibleThumbnails = () => {
-        const visibleIndexes = [];
-        for (let i = 0; i < 3; i++) {
-            const index = (currentIndex + i) % demoImages.length;
-            visibleIndexes.push({
-                index,
-                id: `thumb-${index}-${i}-${Date.now()}`
-            });
+    const handleThumbnailScroll = (direction) => {
+        if (direction === 'up') {
+            const newIndex = currentIndex === 0 ? (shoe?.images?.length - 1 || 0) : currentIndex - 1;
+            setCurrentIndex(newIndex);
+            setSelectedImage(newIndex);
+        } else {
+            const newIndex = currentIndex === (shoe?.images?.length - 1 || 0) ? 0 : currentIndex + 1;
+            setCurrentIndex(newIndex);
+            setSelectedImage(newIndex);
         }
-        return visibleIndexes;
+    };
+
+    // Modified function to show only available unique images
+    const getVisibleThumbnails = () => {
+        const totalImages = demoImages.length;
+        return demoImages.map((_, index) => ({
+            index,
+            id: `thumb-${index}-${Date.now()}`
+        }));
     };
 
     const handleTabClick = (tabName) => {
@@ -119,13 +120,13 @@ export default function ShoesDetails({ params }) {
             <Navbar />
             <div className="w-full px-4 py-8 ">
                 <div className="grid lg:grid-cols-2 gap-8 mt-6">
-                    <div className="flex md:flex-row flex-col gap-4 h-full ">
-                        {/* Thumbnails Section - Different for mobile and desktop */}
-                        <div className="relative flex md:flex-col flex-row order-2 md:order-1">
-                            {/* Mobile Thumbnails */}
+                    <div className="flex md:flex-row flex-col gap-4 h-full">
+                        {/* Thumbnails Section - Already on the left */}
+                        <div className="relative flex md:flex-col flex-row order-2 md:order-1 md:justify-center">
+                            {/* Mobile view */}
                             <div className="md:hidden relative flex items-center w-full">
                                 <button
-                                    onClick={handlePrevious}
+                                    onClick={() => handleThumbnailScroll('up')}
                                     className="absolute left-0 z-10 h-full px-2 flex items-center justify-center"
                                     aria-label="Previous"
                                 >
@@ -154,7 +155,7 @@ export default function ShoesDetails({ params }) {
                                 </div>
 
                                 <button
-                                    onClick={handleNext}
+                                    onClick={() => handleThumbnailScroll('down')}
                                     className="absolute right-0 z-10 h-full px-2 flex items-center justify-center"
                                     aria-label="Next"
                                 >
@@ -162,38 +163,59 @@ export default function ShoesDetails({ params }) {
                                 </button>
                             </div>
 
-                            {/* Desktop Thumbnails - Original vertical layout */}
-                            <div className="hidden md:flex md:flex-col px-1 py-1 gap-5 overflow-y-auto max-h-[600px]">
-                                {demoImages?.map((img, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setSelectedImage(index)}
-                                        className={`bg-[#e8e8e8] rounded-lg p-2 transition-all w-20 flex-shrink-0
-                                            ${selectedImage === index ? 'ring-2  ring-green-500' : ''}`}
-                                    >
-                                        <div className="relative aspect-square">
-                                            <Image
-                                                src={img}
-                                                fill
-                                                sizes="80px"
-                                                alt={`View ${index + 1}`}
-                                                className="object-contain p-1"
-                                            />
-                                        </div>
-                                    </button>
-                                ))}
+                            {/* Updated Desktop Thumbnails */}
+                            <div className="hidden md:flex md:flex-col relative items-center">
+                                {/* Up arrow button */}
+                                <button
+                                    onClick={() => handleThumbnailScroll('up')}
+                                    className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-all duration-300"
+                                    aria-label="Scroll up"
+                                >
+                                    <IoChevronBack className="transform rotate-90 text-xl" />
+                                </button>
+
+                                {/* Thumbnails container */}
+                                <div className="px-1 py-6 flex flex-col gap-4 overflow-hidden h-[500px] items-center">
+                                    {getVisibleThumbnails().map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => setSelectedImage(item.index)}
+                                            className={`bg-[#e8e8e8] rounded-lg p-2 transition-all w-20 flex-shrink-0 hover:shadow-md transform hover:scale-105 duration-300
+                                                ${selectedImage === item.index ? 'ring-2 ring-green-500 shadow-lg' : ''}`}
+                                        >
+                                            <div className="relative aspect-square">
+                                                <Image
+                                                    src={demoImages[item.index]}
+                                                    fill
+                                                    sizes="80px"
+                                                    alt={`View ${item.index + 1}`}
+                                                    className="object-contain p-1"
+                                                />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Down arrow button */}
+                                <button
+                                    onClick={() => handleThumbnailScroll('down')}
+                                    className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-all duration-300"
+                                    aria-label="Scroll down"
+                                >
+                                    <IoChevronBack className="transform -rotate-90 text-xl" />
+                                </button>
                             </div>
                         </div>
 
-                        {/* Main image - Updated classes */}
-                        <div className="flex-1 bg-[#e8e8e8] rounded-lg p-4 order-1 md:order-2 relative flex items-center justify-center min-h-[400px] md:min-h-[600px]">
-                            <div className="relative w-full h-full">
+                        {/* Main image */}
+                        <div className="flex-1 border rounded-lg p-4 order-1 md:order-2 relative flex items-center justify-center min-h-[300px] md:min-h-[400px]">
+                            <div className="relative w-3/4 h-full transition-all duration-500 ease-in-out">
                                 <Image
                                     src={demoImages[selectedImage]}
                                     fill
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
                                     alt={shoe?.name}
-                                    className="object-contain p-2 md:p-4"
+                                    className="object-contain p-2 md:p-4 transition-opacity duration-300"
                                     priority
                                     quality={100}
                                 />
@@ -410,5 +432,4 @@ export default function ShoesDetails({ params }) {
                 </div>
             </div>
         </>
-    );
-}
+    );}

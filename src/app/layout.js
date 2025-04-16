@@ -1,6 +1,7 @@
 import { Pathway_Extreme, Josefin_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 const pathwayExtreme = Pathway_Extreme({
   variable: "--font-pathway-extreme",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           {children}
         </AuthProvider>
+        <Toaster />
       </body>
     </html>
   );
