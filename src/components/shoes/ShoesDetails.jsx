@@ -1,9 +1,7 @@
 'use client'
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Navbar from '../Navbar/Navbar';
-import { RiArrowLeftSLine } from "react-icons/ri";
+import Navbar from '../Navbar/Navbar';;
 import icon from "../../../public/shoesDetails/icon.png"
 import icon1 from "../../../public/shoesDetails/icon1.png"
 import icon2 from "../../../public/shoesDetails/icon2.png"
@@ -14,57 +12,36 @@ import scannerImg from "../../../public/shoesDetails/scanner.png"
 import RecommendShoes from './Recommend';
 import { IoChevronDown, IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { getProductById } from '@/apis/productsApis';
-import { useSearchParams } from 'next/navigation';
 
-
-export default function ShoesDetails({ params }) {
+export default function ShoesDetails({ productId }) {
     const [shoe, setShoe] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
-    const [selectedSize, setSelectedSize] = useState('36');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('app');
     const [currentIndex, setCurrentIndex] = useState(0);
     const [sizes, setSizes] = useState([]);
-    const id = params?.id;
-    const searchParams = useSearchParams();
-    const productName = searchParams.get('name');
-
-    // Group all useEffect hooks together
+    const [selectedSize, setSelectedSize] = useState(null);
     useEffect(() => {
-        fetchShoeDetails();
-    }, [id]);
-
-    const fetchShoeDetails = async () => {
-        if (!id) return;
-        try {
-            setLoading(true);
-            const data = await getProductById(id);
-            if (data) {
-                setShoe(data);
-                if (data.name && (!productName || decodeURIComponent(productName) !== data.name)) {
-                    const newUrl = `/shoes/details/${id}?name=${encodeURIComponent(data.name)}`;
-                    window.history.replaceState({}, '', newUrl);
+        const fetchProduct = async () => {
+            try {
+                if (!productId) return;
+                const product = await getProductById(productId);
+                setShoe(product);
+                if (product?.size) {
+                    const parsedSizes = JSON.parse(product.size);
+                    setSizes(parsedSizes);
+                    setSelectedSize(parsedSizes[0]);
                 }
-                if (data.size) {
-                    try {
-                        const parsedSizes = JSON.parse(data.size);
-                        if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
-                            setSizes(parsedSizes);
-                            setSelectedSize(parsedSizes[0]);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing sizes:', e);
-                        setSizes([]);
-                    }
-                }
+            } catch (error) {
+                console.error('Error fetching product:', error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error fetching shoe details:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+
+        fetchProduct();
+    }, [productId]);
 
     if (loading) {
         return (
@@ -118,7 +95,7 @@ export default function ShoesDetails({ params }) {
     return (
         <>
             <Navbar />
-            <div className="w-full px-4 py-8 ">
+            <div className="w-full px-4 py-8">
                 <div className="grid lg:grid-cols-2 gap-8 mt-6">
                     <div className="flex md:flex-row flex-col gap-4 h-full">
                         {/* Thumbnails Section - Already on the left */}
@@ -279,9 +256,9 @@ export default function ShoesDetails({ params }) {
                                 <div className="relative">
                                     <button
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                        className=" text-white font-semibold text-xl px-4 py-2 rounded flex items-center gap-2"
+                                        className="text-white font-semibold text-xl px-4 py-2 rounded flex items-center gap-2"
                                     >
-                                        {selectedSize || '36'}
+                                        {selectedSize || (sizes.length > 0 ? sizes[0] : '--')}
                                         <svg
                                             className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                                             fill="none"
@@ -432,4 +409,5 @@ export default function ShoesDetails({ params }) {
                 </div>
             </div>
         </>
-    );}
+    );
+}

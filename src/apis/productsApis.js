@@ -168,7 +168,6 @@ export const getAllProducts = cache(async (filters) => {
 export const getProductById = async (id) => {
     try {
         const response = await axiosClient.get(`/products/${id}`);
-        // Check if response.data exists and has the correct structure
         if (response.data && response.data.success && response.data.product) {
             return response.data.product;
         }

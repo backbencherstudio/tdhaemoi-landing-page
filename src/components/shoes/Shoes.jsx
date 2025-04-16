@@ -5,15 +5,6 @@ import React, { useEffect, useState } from 'react'
 import { FiSearch } from 'react-icons/fi';
 import { getAllProducts } from '@/apis/productsApis';
 import { useSearchParams, useRouter } from 'next/navigation';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
 import { useDebounce } from 'use-debounce';
 import { Button } from "@/components/ui/button"
 import {
@@ -235,7 +226,10 @@ export default function Shoes() {
             {!loading && shoes.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {shoes.map((shoe) => (
-                        <Link href={`/shoes/details/${shoe.id}`} key={shoe.id}>
+                        <Link 
+                            href={`/shoes/details/${shoe.id}`} 
+                            key={shoe.id}
+                        >
                             <div className="bg-white rounded-lg shadow-md transform transition-all duration-300 hover:shadow-xl cursor-pointer max-w-sm mx-auto">
                                 <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
                                     {shoe?.images && shoe?.images?.length > 0 ? (
