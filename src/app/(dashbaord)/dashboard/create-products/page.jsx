@@ -33,6 +33,24 @@ import { createProducts, getProductById, updateProduct, deleteSingleImage } from
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
+// Add this color mapping object at the top level of your component
+const colorMap = {
+  '#000000': 'Black',
+  '#FFFFFF': 'White',
+  '#FF0000': 'Red',
+  '#0000FF': 'Blue',
+  '#008000': 'Green',
+  '#FFFF00': 'Yellow',
+  '#FFA500': 'Orange',
+  '#800080': 'Purple',
+  '#A52A2A': 'Brown',
+  '#808080': 'Gray',
+  '#FFC0CB': 'Pink',
+  '#40E0D0': 'Turquoise',
+  '#FFD700': 'Gold',
+  '#C0C0C0': 'Silver',
+  '#8B4513': 'Brown',
+};
 
 // extract image filename from url with base url
 const extractImageFilename = (url) => {
@@ -653,13 +671,39 @@ export default function CreateProducts() {
 
                 <div className="space-y-2">
                   <Label htmlFor="color">Color</Label>
-                  <Input
-                    id="color"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleChange}
-                    placeholder="e.g., Black, Red, Blue"
-                  />
+                  <div className="flex gap-2">
+                    <Select
+                      value={formData.color}
+                      onValueChange={(value) => handleSelectChange('color', value)}
+                    >
+                      <SelectTrigger id="color" className="w-[180px]">
+                        <SelectValue placeholder="Select color" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(colorMap).map(([hex, name]) => (
+                          <SelectItem key={hex} value={name}>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-4 h-4 rounded-full border"
+                                style={{ backgroundColor: hex }}
+                              />
+                              {name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formData.color && (
+                      <div
+                        className="w-10 h-10 rounded border"
+                        style={{
+                          backgroundColor: Object.entries(colorMap).find(
+                            ([_, name]) => name === formData.color
+                          )?.[0]
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
