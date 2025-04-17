@@ -71,8 +71,21 @@ export const getAllProduct = async ({
 
         const response = await axiosClient.get(`/products/query?${queryParams}`);
 
+        // Transform the response to include color information
+        const transformedProducts = response.data.products.map(product => ({
+            ...product,
+            // Parse size string to array if it's a string
+            size: typeof product.size === 'string' ? JSON.parse(product.size) : product.size,
+            // Get all unique colors
+            allColors: product.colors.map(color => ({
+                name: color.colorName,
+                code: color.colorCode,
+                mainImage: color.images[0]?.url || null
+            }))
+        }));
+
         return {
-            products: response.data.products || [],
+            products: transformedProducts,
             total: response.data.pagination?.total || 0,
             currentPage: response.data.pagination?.currentPage || page,
             totalPages: response.data.pagination?.totalPages || 1,

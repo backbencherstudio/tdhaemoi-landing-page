@@ -257,6 +257,7 @@ export default function AllProduct() {
               <TableRow className="bg-gray-50 hover:bg-gray-50">
                 <TableHead className="w-[80px] text-center">Index</TableHead>
                 <TableHead className="w-[250px]">Product</TableHead>
+                <TableHead className="w-[150px] text-center">Colors</TableHead>
                 <TableHead className="w-[120px] text-center">Gender</TableHead>
                 <TableHead className="w-[120px] text-center">Price</TableHead>
                 <TableHead className="w-[100px] text-center">Brand</TableHead>
@@ -296,12 +297,49 @@ export default function AllProduct() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="h-10 w-10 rounded-md object-cover border border-gray-200"
-                        />
-                        <span className="font-medium">{product.name}</span>
+                        {product.colors && product.colors[0] && product.colors[0].images && product.colors[0].images[0] ? (
+                          <div className="relative">
+                            <img
+                              src={product.colors[0].images[0].url}
+                              alt={product.name}
+                              className="h-10 w-10 rounded-md object-cover border border-gray-200"
+                            />
+                            {product.colors.length > 1 && (
+                              <div className="absolute -top-2 -right-2">
+                                <Badge variant="secondary" className="text-xs">
+                                  +{product.colors.length - 1}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center">
+                            <span className="text-gray-400 text-xs">No image</span>
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-medium">{product.name}</span>
+                          <span className="text-sm text-gray-500">{product.typeOfShoes}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        {product.colors.map((color) => (
+                          <div
+                            key={color.id}
+                            className="group relative"
+                            title={color.colorName}
+                          >
+                            <div
+                              className="w-5 h-5 rounded-full border border-gray-200"
+                              style={{ backgroundColor: color.colorCode }}
+                            />
+                            <div className="absolute hidden group-hover:block z-10 -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                              {color.colorName}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
@@ -312,8 +350,18 @@ export default function AllProduct() {
                         {product.gender}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-center font-medium">€{product.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="font-medium">€{product.price.toFixed(2)}</span>
+                        {product.offer > 0 && (
+                          <Badge variant="outline" className="text-xs text-green-600">
+                            {product.offer}% OFF
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-center">{product.brand}</TableCell>
+
                     <TableCell className="text-center text-gray-500">
                       {format(new Date(product.createdAt), 'MMM d, yyyy')}
                     </TableCell>
@@ -325,23 +373,18 @@ export default function AllProduct() {
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[160px] bg-white border border-gray-100 shadow-md">
-                          <DropdownMenuLabel className="text-gray-700">Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-gray-100" />
-                          {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50">
-                            <Eye className="mr-2 h-4 w-4 text-gray-500" />
-                            <span>View Details</span>
-                          </DropdownMenuItem> */}
+                        <DropdownMenuContent align="end" className="w-[160px]">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                            className="cursor-pointer"
                             onClick={() => router.push(`/dashboard/create-products?edit=${product.id}`)}
                           >
-                            <Edit className="mr-2 h-4 w-4 text-gray-500" />
+                            <Edit className="mr-2 h-4 w-4" />
                             <span>Edit Product</span>
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-gray-100" />
                           <DropdownMenuItem
-                            className="cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-50 focus:text-red-600"
+                            className="cursor-pointer text-red-600"
                             onClick={() => openDeleteModal(product)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
