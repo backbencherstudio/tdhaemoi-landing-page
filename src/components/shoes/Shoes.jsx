@@ -13,7 +13,45 @@ import {
     ChevronsLeft,
     ChevronsRight
 } from "lucide-react"
-
+const colorMap = {
+    '#000000': 'Black',
+    '#FFFFFF': 'White',
+    '#FF0000': 'Red',
+    '#0000FF': 'Blue',
+    '#008000': 'Green',
+    '#FFFF00': 'Yellow',
+    '#FFA500': 'Orange',
+    '#800080': 'Purple',
+    '#A52A2A': 'Brown',
+    '#808080': 'Gray',
+    '#FFC0CB': 'Pink',
+    '#40E0D0': 'Turquoise',
+    '#FFD700': 'Gold',
+    '#C0C0C0': 'Silver',
+    '#ADD8E6': 'Light Blue',
+    '#90EE90': 'Light Green',
+    '#FFB6C1': 'Light Pink',
+    '#D3D3D3': 'Light Gray',
+    '#F08080': 'Light Coral',
+    '#E6E6FA': 'Lavender',
+    '#00FFFF': 'Cyan',
+    '#8B0000': 'Dark Red',
+    '#006400': 'Dark Green',
+    '#00008B': 'Dark Blue',
+    '#B22222': 'Fire Brick',
+    '#DAA520': 'Goldenrod',
+    '#F5DEB3': 'Wheat',
+    '#FFE4C4': 'Bisque',
+    '#D2691E': 'Chocolate',
+    '#FA8072': 'Salmon',
+    '#FF1493': 'Deep Pink',
+    '#7FFFD4': 'Aquamarine',
+    '#B0E0E6': 'Powder Blue',
+    '#DC143C': 'Crimson',
+    '#4B0082': 'Indigo',
+    '#2F4F4F': 'Dark Slate Gray',
+    '#708090': 'Slate Gray',
+};
 export default function Shoes() {
     const [shoes, setShoes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +71,7 @@ export default function Shoes() {
         const handleInitialLoad = () => {
             const params = new URLSearchParams(searchParams);
             const currentPage = params.get('page');
-            
+
             // If no page parameter and no other filters are present
             if (!currentPage && !hasActiveFilters()) {
                 params.set('page', '1');
@@ -58,7 +96,7 @@ export default function Shoes() {
         try {
             setLoading(true);
             const filters = {
-                search: searchParams.get('search') || '', 
+                search: searchParams.get('search') || '',
                 typeOfShoes: searchParams.get('typeOfShoes') || '',
                 subCategory: searchParams.get('subCategory') || '',
                 color: searchParams.get('color') || '',
@@ -72,7 +110,7 @@ export default function Shoes() {
 
             // Keep the old data while loading new data
             const response = await getAllProducts(filters);
-            
+
             // Only update state if the component is still mounted and the page hasn't changed
             if (currentPage === Number(searchParams.get('page'))) {
                 setShoes(response.products);
@@ -128,7 +166,7 @@ export default function Shoes() {
     // Update page change handler
     const handlePageChange = (page) => {
         if (page === currentPage || loading) return;
-        
+
         const params = new URLSearchParams(searchParams);
         params.set('page', page);
         router.push(`/shoes?${params.toString()}`, { scroll: false });
@@ -182,6 +220,91 @@ export default function Shoes() {
         }
     }, []);
 
+    const ProductCard = ({ shoe }) => {
+        const [currentImageIndex, setCurrentImageIndex] = useState(0);
+        const [currentColorIndex, setCurrentColorIndex] = useState(0);
+        const currentVariant = shoe.colorVariants[currentColorIndex];
+
+        // Create array of first images from each color variant
+        const colorImages = shoe.colorVariants.map(variant => variant.mainImage);
+
+        useEffect(() => {
+            let interval;
+            if (currentImageIndex >= colorImages.length) {
+                setCurrentImageIndex(0);
+            }
+            return () => clearInterval(interval);
+        }, [currentImageIndex, colorImages.length]);
+
+        const handleMouseEnter = () => {
+            // Start cycling through color variants
+            setCurrentImageIndex(0);
+            const interval = setInterval(() => {
+                setCurrentImageIndex(prev => (prev + 1) % colorImages.length);
+            }, 1000); // Change image every second
+            return interval;
+        };
+
+        const handleMouseLeave = (interval) => {
+            clearInterval(interval);
+            setCurrentImageIndex(0);
+        };
+
+        return (
+            <Link
+                href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+                <div
+                    className="bg-white rounded-lg shadow-md transform transition-all duration-300 hover:shadow-xl cursor-pointer max-w-sm mx-auto"
+                    onMouseEnter={() => {
+                        const interval = handleMouseEnter();
+                        // Store the interval ID as a data attribute
+                        document.getElementById(`shoe-${shoe.id}`).dataset.intervalId = interval;
+                    }}
+                    onMouseLeave={() => {
+                        const interval = document.getElementById(`shoe-${shoe.id}`).dataset.intervalId;
+                        handleMouseLeave(interval);
+                    }}
+                    id={`shoe-${shoe.id}`}
+                >
+                    <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
+                        {colorImages.length > 0 ? (
+                            <Image
+                                src={colorImages[currentImageIndex]}
+                                width={300}
+                                height={300}
+                                alt={`${shoe.name} - ${shoe.colorVariants[currentImageIndex]?.name}`}
+                                className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105"
+                                priority
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                                No image available
+                            </div>
+                        )}
+                    </div>
+                    <div className="space-y-2 px-4 pb-4">
+                        <h3 className="font-pathway-extreme font-bold text-lg truncate">{shoe.name}</h3>
+                        <p className="text-gray-600 text-sm line-clamp-2">{shoe.description}</p>
+
+                        <div className="flex items-center gap-2">
+                            <p>Farbe: </p>
+                            {shoe.colorVariants.map((variant, index) => (
+                                <div
+                                    key={index}
+                                    className={`w-4 h-4 rounded-full border border-gray-200`}
+                                    style={{ backgroundColor: variant.code }}
+                                    title={variant.name}
+                                />
+                            ))}
+                        </div>
+                        <p className="font-semibold text-lg">{Number(shoe.price).toFixed(2)} €</p>
+                    </div>
+                </div>
+            </Link>
+        );
+    };
+
     return (
         <>
             {/* Search Bar */}
@@ -226,40 +349,7 @@ export default function Shoes() {
             {!loading && shoes.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {shoes.map((shoe) => (
-                        <Link 
-                            href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}
-                            key={shoe.id}
-                        >
-                            <div className="bg-white rounded-lg shadow-md transform transition-all duration-300 hover:shadow-xl cursor-pointer max-w-sm mx-auto">
-                                <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
-                                    {shoe?.images && shoe?.images?.length > 0 ? (
-                                        <Image
-                                            src={shoe?.images[0]}
-                                            width={300}
-                                            height={300}
-                                            alt={shoe?.name}
-                                            className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105"
-                                            priority
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-                                            No image available
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="space-y-2 px-4 pb-4">
-                                    <h3 className="font-pathway-extreme font-bold text-lg truncate">{shoe.name}</h3>
-                                    <p className="text-gray-600 text-sm line-clamp-2">{shoe.description}</p>
-                                    <p className="text-sm">{shoe.color} Farbe</p>
-                                    <p className="font-semibold text-lg">{Number(shoe.price).toFixed(2)} €</p>
-                                    {/* <div className="flex items-center space-x-2">
-                                        <span className="bg-[#62A07B] text-white text-xs font-medium px-2.5 py-0.5 rounded">
-                                            {shoe.offer}% FIT
-                                        </span>
-                                    </div> */}
-                                </div>
-                            </div>
-                        </Link>
+                        <ProductCard key={shoe.id} shoe={shoe} />
                     ))}
                 </div>
             )}

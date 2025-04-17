@@ -183,15 +183,28 @@ export const getAllProducts = cache(async (filters) => {
     });
 
     try {
-        const response = await axiosClient.get(`/products/query?${queryParams}`, {
-            headers: {
-                'Cache-Control': 'max-age=300',
-            }
-        });
+        const response = await axiosClient.get(`/products/query?${queryParams}`);
+        
+        // Transform the products to include color variant images
+        const transformedProducts = response.data.products.map(product => ({
+            ...product,
+            size: typeof product.size === 'string' ? JSON.parse(product.size) : product.size,
+            colorVariants: product.colors.map(color => ({
+                name: color.colorName,
+                code: color.colorCode,
+                mainImage: color.images[0]?.url || null,
+                images: color.images.map(img => img.url)
+            }))
+        }));
 
         return {
-            products: response.data.products || [],
-            ...response.data.pagination
+            products: transformedProducts,
+            total: response.data.pagination?.total || 0,
+            currentPage: response.data.pagination?.currentPage || filters.page,
+            totalPages: response.data.pagination?.totalPages || 1,
+            itemsPerPage: response.data.pagination?.itemsPerPage || filters.limit,
+            hasNextPage: response.data.pagination?.hasNextPage || false,
+            hasPreviousPage: response.data.pagination?.hasPreviousPage || false
         };
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to fetch products');
