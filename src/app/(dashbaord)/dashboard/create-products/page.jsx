@@ -19,11 +19,9 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import {
-  Upload,
   X,
   Image as ImageIcon,
-  Plus,
-  ArrowLeft
+  Plus
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -33,7 +31,7 @@ import { createProducts, getProductById, updateProduct, deleteSingleImage } from
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-// Add this color mapping object at the top level of your component
+
 const colorMap = {
   '#000000': 'Black',
   '#FFFFFF': 'White',
@@ -49,8 +47,31 @@ const colorMap = {
   '#40E0D0': 'Turquoise',
   '#FFD700': 'Gold',
   '#C0C0C0': 'Silver',
-  '#8B4513': 'Brown',
+  '#ADD8E6': 'Light Blue',
+  '#90EE90': 'Light Green',
+  '#FFB6C1': 'Light Pink',
+  '#D3D3D3': 'Light Gray',
+  '#F08080': 'Light Coral',
+  '#E6E6FA': 'Lavender',
+  '#00FFFF': 'Cyan',
+  '#8B0000': 'Dark Red',
+  '#006400': 'Dark Green',
+  '#00008B': 'Dark Blue',
+  '#B22222': 'Fire Brick',
+  '#DAA520': 'Goldenrod',
+  '#F5DEB3': 'Wheat',
+  '#FFE4C4': 'Bisque',
+  '#D2691E': 'Chocolate',
+  '#FA8072': 'Salmon',
+  '#FF1493': 'Deep Pink',
+  '#7FFFD4': 'Aquamarine',
+  '#B0E0E6': 'Powder Blue',
+  '#DC143C': 'Crimson',
+  '#4B0082': 'Indigo',
+  '#2F4F4F': 'Dark Slate Gray',
+  '#708090': 'Slate Gray',
 };
+
 
 // extract image filename from url with base url
 const extractImageFilename = (url) => {
@@ -83,8 +104,12 @@ export default function CreateProducts() {
     color: '',
     technicalData: '',
     company: '',
-    gender: ''
+    gender: '',
+    colorVariants: [] 
   })
+
+  // Add new state for managing current color selection
+  const [currentColor, setCurrentColor] = useState(null);
 
   // State for image uploads
   const [uploadedImages, setUploadedImages] = useState([])
@@ -92,7 +117,7 @@ export default function CreateProducts() {
   const fileInputRef = useRef(null)
 
   // Available sizes for shoes
-  const availableSizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46']
+  const availableSizes = ['35','36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47']
 
   // Gender options
   const genderOptions = ['Male', 'Female', 'Unisex']
@@ -126,7 +151,8 @@ export default function CreateProducts() {
           color: product.color || '',
           technicalData: product.technicalData || '',
           company: product.Company || '',
-          gender: (product.gender || '').toLowerCase()
+          gender: (product.gender || '').toLowerCase(),
+          colorVariants: product.colorVariants || []
         })
 
         // Handle existing images
@@ -175,35 +201,57 @@ export default function CreateProducts() {
     setFormData(prev => ({ ...prev, availability: checked }))
   }
 
-  // Handle image upload
-  const handleImageUpload = (e) => {
-    e.stopPropagation()
-    const files = e.target.files
-    if (files && files.length > 0) {
-      addNewImages(Array.from(files))
-    }
-  }
-
   // Handle drag events
   const handleDragOver = (e) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = (e) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
 
   const handleDrop = (e) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
 
-    const droppedFiles = Array.from(e.dataTransfer.files)
-    if (droppedFiles.length > 0) {
-      addNewImages(droppedFiles)
+    // Check if a color is selected
+    if (!currentColor) {
+      toast.error('Please select a color variant first');
+      return;
     }
-  }
+
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+
+    if (files.length === 0) {
+      toast.error('Please drop image files only');
+      return;
+    }
+
+    // Process the dropped files
+    const newImages = files.map(file => ({
+      id: Date.now() + Math.random().toString(36).substring(2, 9),
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name
+    }));
+
+    // Update the formData with new images for current color
+    setFormData(prev => ({
+      ...prev,
+      colorVariants: prev.colorVariants.map(variant =>
+        variant.colorCode === currentColor.colorCode
+          ? { ...variant, images: [...variant.images, ...newImages] }
+          : variant
+      )
+    }));
+  };
 
   // Process new images
   const addNewImages = (files) => {
@@ -275,73 +323,170 @@ export default function CreateProducts() {
       color: '',
       technicalData: '',
       company: '',
-      gender: ''
+      gender: '',
+      colorVariants: []
     });
     setUploadedImages([]);
   };
 
-  // Update handleSubmit to handle both create and update
   const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    // Validate required fields
-    const requiredFields = ['productName', 'brand', 'category', 'price']
-    const missingFields = requiredFields.filter(field => !formData[field])
-
-    if (missingFields.length > 0) {
-      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`)
-      return
-    }
-
-    // Validate size selection
-    if (formData.size.length === 0) {
-      toast.error('Please select at least one size')
-      return
-    }
-
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const productData = {
-        name: formData.productName,
-        brand: formData.brand,
-        Category: formData.category,
-        Sub_Category: formData.subCategory || null,
-        typeOfShoes: formData.typeOfShoes || null,
-        productDesc: formData.productDesc,
-        price: parseFloat(formData.price) || 0,
-        availability: Boolean(formData.availability),
-        offer: parseFloat(formData.offer) || 0,
-        size: formData.size,
-        feetFirstFit: formData.feetFirstFit ? parseFloat(formData.feetFirstFit) : null,
-        footLength: formData.footLength || null,
-        color: formData.color || null,
-        technicalData: formData.technicalData || null,
-        Company: formData.company || null,
-        gender: formData.gender?.toUpperCase() || null,
-        images: uploadedImages
-          .filter(img => !img.isExisting)
-          .map(img => img.file)
-      }
+        // Validate required fields
+        if (!formData.productName || !formData.brand) {
+            toast.error('Name and brand are required fields');
+            setIsLoading(false);
+            return;
+        }
+        if (formData.colorVariants.length === 0) {
+            toast.error('At least one color variant is required');
+            setIsLoading(false);
+            return;
+        }
 
-      let response
-      if (isEditMode) {
-        response = await updateProduct(editId, productData)
-      } else {
-        response = await createProducts(productData)
-      }
+        const hasEmptyImages = formData.colorVariants.some(variant => variant.images.length === 0);
+        if (hasEmptyImages) {
+            toast.error('Each color variant must have at least one image');
+            setIsLoading(false);
+            return;
+        }
+        const hasInvalidImages = formData.colorVariants.some(variant => 
+            variant.images.some(img => !img.file || !(img.file instanceof File))
+        );
+        if (hasInvalidImages) {
+            toast.error('Invalid image files detected');
+            setIsLoading(false);
+            return;
+        }
 
-      if (response.success) {
-        toast.success(isEditMode ? "Product updated successfully!" : "Product created successfully!")
-        router.push("/dashboard/all-product")
-      }
+        const productData = {
+            name: formData.productName,
+            brand: formData.brand,
+            Category: formData.category,
+            Sub_Category: formData.subCategory,
+            typeOfShoes: formData.typeOfShoes,
+            productDesc: formData.productDesc,
+            price: formData.price,
+            availability: formData.availability,
+            offer: formData.offer || '0',
+            size: formData.size,
+            feetFirstFit: formData.feetFirstFit,
+            footLength: formData.footLength,
+            technicalData: formData.technicalData,
+            Company: formData.company,
+            gender: formData.gender?.toUpperCase(),
+            colorVariants: formData.colorVariants
+        };
+
+        console.log('Submitting data:', productData); // Debug log
+
+        const response = await createProducts(productData);
+
+        if (response.success) {
+            toast.success('Product created successfully!');
+            router.push('/dashboard/all-product');
+        } else {
+            throw new Error(response.message || 'Failed to create product');
+        }
     } catch (error) {
-      toast.error(error.message)
-      console.error(error)
+        console.error('Error:', error);
+        toast.error(error.message || 'Failed to create product');
     } finally {
-      setIsLoading(false)
+        setIsLoading(false);
     }
-  }
+  };
+
+  const handleAddColorVariant = (colorName) => {
+    const colorCode = Object.entries(colorMap).find(([_, name]) => name === colorName)[0];
+    const newVariant = {
+      colorName,
+      colorCode,
+      images: []
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      colorVariants: [...prev.colorVariants, newVariant]
+    }));
+    setCurrentColor(newVariant);
+  };
+
+  const handleRemoveColorVariant = (index) => {
+    setFormData(prev => {
+      const newColorVariants = prev.colorVariants.filter((_, i) => i !== index);
+      if (currentColor?.colorCode === prev.colorVariants[index].colorCode) {
+        const nextColor = newColorVariants[index] || newColorVariants[index - 1] || null;
+        setCurrentColor(nextColor);
+      }
+
+      return {
+        ...prev,
+        colorVariants: newColorVariants
+      };
+    });
+  };
+
+  const handleImageUpload = (e, colorCode) => {
+    const files = Array.from(e.target.files || []);
+    const newImages = files.map(file => ({
+      id: Date.now() + Math.random().toString(36).substring(2, 9),
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name
+    }));
+
+    setFormData(prev => {
+      const updatedColorVariants = prev.colorVariants.map(variant =>
+        variant.colorCode === colorCode
+          ? { ...variant, images: [...variant.images, ...newImages] }
+          : variant
+      );
+
+      // Update current color with new images immediately
+      if (currentColor?.colorCode === colorCode) {
+        setCurrentColor(updatedColorVariants.find(v => v.colorCode === colorCode));
+      }
+
+      return {
+        ...prev,
+        colorVariants: updatedColorVariants
+      };
+    });
+  };
+
+  const handleRemoveImage = (colorCode, imageId) => {
+    setFormData(prev => {
+      const updatedColorVariants = prev.colorVariants.map(variant =>
+        variant.colorCode === colorCode
+          ? { ...variant, images: variant.images.filter(img => img.id !== imageId) }
+          : variant
+      );
+
+      // Update current color immediately after removing image
+      if (currentColor?.colorCode === colorCode) {
+        setCurrentColor(updatedColorVariants.find(v => v.colorCode === colorCode));
+      }
+
+      return {
+        ...prev,
+        colorVariants: updatedColorVariants
+      };
+    });
+  };
+
+  // Add useEffect to sync currentColor with formData changes
+  useEffect(() => {
+    if (currentColor) {
+      const updatedCurrentColor = formData.colorVariants.find(
+        variant => variant.colorCode === currentColor.colorCode
+      );
+      if (updatedCurrentColor) {
+        setCurrentColor(updatedCurrentColor);
+      }
+    }
+  }, [formData.colorVariants]);
 
   // Update the submit button in the return statement
   return (
@@ -355,112 +500,175 @@ export default function CreateProducts() {
             {isEditMode ? 'Update product information' : 'Add a new product to your inventory'}
           </p>
         </div>
-        {/* <Button variant="outline" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Products
-        </Button> */}
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 ">
         <Card>
-          <div className="lg:col-span-1">
-            <CardContent className="pt-6">
-              <div
-                className={`border-2 border-dashed rounded-lg p-6  transition-colors ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={(e) => {
-                  e.preventDefault()
-                  fileInputRef.current?.click()
-                }}
-              >
-                {uploadedImages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <div className="bg-gray-50 rounded-full p-4 mb-4">
-                      <Upload className="h-12 w-12 text-gray-400" />
-                    </div>
-                    <p className="text-lg font-medium text-gray-700 mb-2">Drag & drop product images here</p>
-                    <p className="text-gray-500">or click to browse files</p>
-                    {/* <p className="text-xs text-gray-400 mt-2">Supported formats: PNG, JPG, JPEG</p> */}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {uploadedImages.map(image => (
-                      <div key={image.id} className="relative group">
-                        <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                          <Image
-                            src={image.preview}
-                            alt={image.name}
-                            width={200}
-                            height={200}
-                            className="object-cover hover:scale-105 transition-transform duration-200"
-                          />
-                        </div>
-                        <div className="absolute inset-0 hover:bg-black/50 bg-opacity-50 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg" />
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeImage(image.id, image);
-                          }}
-                          className="absolute top-2 cursor-pointer  right-2 bg-white text-red-500 rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-500 hover:text-white"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                          <p className="text-xs text-white truncate bg-black/70 bg-opacity-50 rounded-md px-2 py-1">
-                            {image.name}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+          {/* Color Variants and Images - Updated Design */}
+          <div className="mb-6">
+            <CardHeader>
+              <CardTitle>Product Colors & Images*</CardTitle>
+              <CardDescription>Add color variants and their respective images</CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6 mt-3">
+              {/* Color Selection Bar */}
+              <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                {formData.colorVariants.map((variant, index) => (
+                  <div
+                    key={variant.colorCode}
+                    onClick={() => setCurrentColor(variant)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all ${currentColor?.colorCode === variant.colorCode
+                        ? 'bg-green-50 border border-green-500'
+                        : 'bg-gray-50 border border-gray-200 hover:border-gray-300'
+                      }`}
+                  >
+                    <div
+                      className="w-4 h-4 rounded-full border shadow-sm"
+                      style={{ backgroundColor: variant.colorCode }}
+                    />
+                    <span className="text-sm font-medium whitespace-nowrap">{variant.colorName}</span>
                     <button
-                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (fileInputRef.current) {
-                          fileInputRef.current.click();
-                        }
+                        handleRemoveColorVariant(index);
                       }}
-                      className="aspect-square rounded-lg cursor-pointer  border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 hover:border-gray-400 hover:bg-gray-50 transition-all"
+                      className="ml-1 text-gray-400 hover:text-red-500  transition-colors"
                     >
-                      <Plus className="h-8 w-8 text-gray-400" />
-                      <span className="text-sm text-gray-500">Add More</span>
+                      <X className="h-3.5 w-3.5 cursor-pointer" />
                     </button>
                   </div>
-                )}
+                ))}
+
+                <Select
+                  value=""
+                  onValueChange={(colorName) => handleAddColorVariant(colorName)}
+                >
+                  <SelectTrigger className="w-[140px] h-9 px-4 bg-gray-50 border border-dashed cursor-pointer">
+                    <SelectValue placeholder="Add Color"  />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(colorMap)
+                      .filter(([hex, name]) =>
+                        !formData.colorVariants.some(v => v.colorName === name)
+                      )
+                      .map(([hex, name]) => (
+                        <SelectItem key={hex} value={name}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full border"
+                              style={{ backgroundColor: hex }}
+                            />
+                            <span className="text-sm">{name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
-              {uploadedImages.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-500 mb-2">{uploadedImages.length} image(s) selected</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (fileInputRef.current) {
-                        fileInputRef.current.click();
-                      }
-                    }}
+
+              {/* Image Upload Area */}
+              {currentColor ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Images for {currentColor.colorName}
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                          {currentColor.colorCode}
+                        </span>
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Upload up to 5 images for this color variant
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      variant="outline"
+                      size="sm"
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Images
+                    </Button>
+                  </div>
+
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`grid ${
+                      currentColor.images.length > 0
+                        ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-5'
+                        : 'grid-cols-1'
+                    } gap-4 ${
+                      isDragging 
+                        ? 'border-2 border-dashed border-primary bg-primary/5' 
+                        : ''
+                    }`}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add More Images
-                  </Button>
+                    {currentColor.images.length > 0 ? (
+                      currentColor.images.map((image) => (
+                        <div key={image.id} className="group relative">
+                          <div className="aspect-square rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+                            <Image
+                              src={image.preview}
+                              alt={image.name}
+                              width={200}
+                              height={200}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
+                          <button
+                            onClick={() => handleRemoveImage(currentColor.colorCode, image.id)}
+                            className="absolute cursor-pointer -top-2 -right-2 bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          >
+                            <X className="h-4 w-4 text-red-500" />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`border-2 border-dashed ${
+                          isDragging 
+                            ? 'border-primary bg-primary/5' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        } rounded-lg p-8 text-center cursor-pointer transition-colors`}
+                      >
+                        <div className="mx-auto w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+                          <ImageIcon className="h-6 w-6 text-gray-400" />
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-medium text-primary">Click to upload</span> or drag and drop
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          PNG, JPG, GIF up to 10MB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => handleImageUpload(e, currentColor.colorCode)}
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <ImageIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-700">No Color Selected</h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select or add a color variant to manage images
+                  </p>
                 </div>
               )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                multiple
-                accept="image/*"
-                className="hidden"
-                style={{ display: 'none' }}
-              />
             </CardContent>
           </div>
 
@@ -669,42 +877,6 @@ export default function CreateProducts() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="color">Color</Label>
-                  <div className="flex gap-2">
-                    <Select
-                      value={formData.color}
-                      onValueChange={(value) => handleSelectChange('color', value)}
-                    >
-                      <SelectTrigger id="color" className="w-[180px]">
-                        <SelectValue placeholder="Select color" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(colorMap).map(([hex, name]) => (
-                          <SelectItem key={hex} value={name}>
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="w-4 h-4 rounded-full border"
-                                style={{ backgroundColor: hex }}
-                              />
-                              {name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {formData.color && (
-                      <div
-                        className="w-10 h-10 rounded border"
-                        style={{
-                          backgroundColor: Object.entries(colorMap).find(
-                            ([_, name]) => name === formData.color
-                          )?.[0]
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -758,6 +930,10 @@ export default function CreateProducts() {
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+
           </CardContent>
         </Card>
 

@@ -227,7 +227,7 @@ export default function Shoes() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {shoes.map((shoe) => (
                         <Link 
-                            href={`/shoes/details/${shoe.id}`} 
+                            href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}
                             key={shoe.id}
                         >
                             <div className="bg-white rounded-lg shadow-md transform transition-all duration-300 hover:shadow-xl cursor-pointer max-w-sm mx-auto">
