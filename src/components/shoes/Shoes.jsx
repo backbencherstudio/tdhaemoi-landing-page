@@ -13,45 +13,8 @@ import {
     ChevronsLeft,
     ChevronsRight
 } from "lucide-react"
-const colorMap = {
-    '#000000': 'Black',
-    '#FFFFFF': 'White',
-    '#FF0000': 'Red',
-    '#0000FF': 'Blue',
-    '#008000': 'Green',
-    '#FFFF00': 'Yellow',
-    '#FFA500': 'Orange',
-    '#800080': 'Purple',
-    '#A52A2A': 'Brown',
-    '#808080': 'Gray',
-    '#FFC0CB': 'Pink',
-    '#40E0D0': 'Turquoise',
-    '#FFD700': 'Gold',
-    '#C0C0C0': 'Silver',
-    '#ADD8E6': 'Light Blue',
-    '#90EE90': 'Light Green',
-    '#FFB6C1': 'Light Pink',
-    '#D3D3D3': 'Light Gray',
-    '#F08080': 'Light Coral',
-    '#E6E6FA': 'Lavender',
-    '#00FFFF': 'Cyan',
-    '#8B0000': 'Dark Red',
-    '#006400': 'Dark Green',
-    '#00008B': 'Dark Blue',
-    '#B22222': 'Fire Brick',
-    '#DAA520': 'Goldenrod',
-    '#F5DEB3': 'Wheat',
-    '#FFE4C4': 'Bisque',
-    '#D2691E': 'Chocolate',
-    '#FA8072': 'Salmon',
-    '#FF1493': 'Deep Pink',
-    '#7FFFD4': 'Aquamarine',
-    '#B0E0E6': 'Powder Blue',
-    '#DC143C': 'Crimson',
-    '#4B0082': 'Indigo',
-    '#2F4F4F': 'Dark Slate Gray',
-    '#708090': 'Slate Gray',
-};
+import ProductCard from '../shared/ProductCard';
+
 export default function Shoes() {
     const [shoes, setShoes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -91,16 +54,29 @@ export default function Shoes() {
         handleInitialLoad();
     }, []);
 
-    // Update fetchShoes to use the new search pattern
+
+    useEffect(() => {
+        const currentSizes = searchParams.getAll('size[]');
+        if (currentSizes.length > 0) {
+            
+            const timeoutId = setTimeout(() => {
+                fetchShoes();
+            }, 100); 
+            
+            return () => clearTimeout(timeoutId);
+        }
+    }, [searchParams]);
+
+
     const fetchShoes = async () => {
         try {
             setLoading(true);
             const filters = {
                 search: searchParams.get('search') || '',
-                typeOfShoes: searchParams.get('typeOfShoes') || '',
+                typeOfShoes: Array.from(searchParams.getAll('typeOfShoes[]')),
                 subCategory: searchParams.get('subCategory') || '',
-                color: searchParams.get('color') || '',
-                size: searchParams.get('size') || '',
+                colors: Array.from(searchParams.getAll('colorName[]')),
+                size: Array.from(searchParams.getAll('size[]')).sort(),
                 minPrice: searchParams.get('minPrice') || '',
                 maxPrice: searchParams.get('maxPrice') || '',
                 gender: searchParams.get('gender') || '',
@@ -108,10 +84,8 @@ export default function Shoes() {
                 limit: itemsPerPage
             };
 
-            // Keep the old data while loading new data
             const response = await getAllProducts(filters);
-
-            // Only update state if the component is still mounted and the page hasn't changed
+            
             if (currentPage === Number(searchParams.get('page'))) {
                 setShoes(response.products);
                 setTotalItems(response.total);
@@ -119,6 +93,9 @@ export default function Shoes() {
             }
         } catch (error) {
             console.error('Error fetching shoes:', error);
+            setShoes([]);
+            setTotalItems(0);
+            setTotalPages(0);
         } finally {
             setLoading(false);
         }
@@ -132,7 +109,6 @@ export default function Shoes() {
             params.set('page', '1');
         } else {
             params.delete('search');
-            // Ensure page parameter exists when removing search
             if (!params.has('page')) {
                 params.set('page', '1');
             }
@@ -145,17 +121,13 @@ export default function Shoes() {
         router.push(`/shoes?${params.toString()}`);
     }, [debouncedSearchTerm, typeOfShoes]);
 
-    // Watch for URL parameter changes
     useEffect(() => {
         fetchShoes();
     }, [searchParams]);
-
-    // Update search handler
     const handleSearch = (value) => {
         setSearchTerm(value);
     };
 
-    // Initialize searchTerm from URL on component mount
     useEffect(() => {
         const searchFromUrl = searchParams.get('search');
         if (searchFromUrl) {
@@ -165,13 +137,9 @@ export default function Shoes() {
 
     // Update page change handler
     const handlePageChange = (page) => {
-        // Don't allow page changes if there are no products or we're loading
         if (loading || totalItems === 0) return;
 
-        // Validate page number is within bounds
         if (page < 1 || page > totalPages) return;
-
-        // Don't update if clicking current page
         if (page === currentPage) return;
 
         const params = new URLSearchParams(searchParams);
@@ -179,40 +147,27 @@ export default function Shoes() {
         router.push(`/shoes?${params.toString()}`, { scroll: false });
     };
 
-    // Generate array of page numbers
     const getPageNumbers = () => {
         const pages = [];
         const maxVisiblePages = 5;
 
         if (totalPages <= maxVisiblePages) {
-            // Show all pages if total pages are less than max visible
             for (let i = 1; i <= totalPages; i++) {
                 pages.push(i);
             }
         } else {
-            // Always show first page
             pages.push(1);
-
-            // Calculate start and end of visible pages
             let start = Math.max(2, currentPage - 1);
             let end = Math.min(totalPages - 1, currentPage + 1);
-
-            // Add ellipsis after first page if needed
             if (start > 2) {
                 pages.push('...');
             }
-
-            // Add visible pages
             for (let i = start; i <= end; i++) {
                 pages.push(i);
             }
-
-            // Add ellipsis before last page if needed
             if (end < totalPages - 1) {
                 pages.push('...');
             }
-
-            // Always show last page
             pages.push(totalPages);
         }
 
@@ -227,97 +182,16 @@ export default function Shoes() {
         }
     }, []);
 
-    const ProductCard = ({ shoe }) => {
-        const [currentImageIndex, setCurrentImageIndex] = useState(0);
-        const colorImages = shoe.colorVariants.map(variant => variant.mainImage);
-
-        // Function to cycle through images
-        const startImageCycle = () => {
-            const interval = setInterval(() => {
-                setCurrentImageIndex(prev => (prev + 1) % colorImages.length);
-            }, 1000); // Change image every 1 second
-
-            return interval;
-        };
-
-        return (
-            <Link href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                <div
-                    className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group"
-                    onMouseEnter={() => {
-                        const interval = startImageCycle();
-                        // Store the interval ID on the element
-                        window._imageInterval = interval;
-                    }}
-                    onMouseLeave={() => {
-                        // Clear the interval when mouse leaves
-                        if (window._imageInterval) {
-                            clearInterval(window._imageInterval);
-                            setCurrentImageIndex(0); // Reset to first image
-                        }
-                    }}
-                >
-                    {/* Image Container */}
-                    <div className="aspect-square bg-[#f8f8f8] relative rounded-t-xl overflow-hidden">
-                        <Image
-                            src={colorImages[currentImageIndex]}
-                            width={300}
-                            height={400}
-                            alt={shoe.name}
-                            className="object-contain p-2 w-full h-full transition-all duration-500"
-                            priority
-                        />
-                        {/* Badges */}
-                        <div className="absolute top-3 right-3 flex gap-2">
-                            {/* <span className="bg-black text-white px-2 py-1 rounded-full text-xs font-medium">
-                                {shoe.brand}
-                            </span> */}
-                            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
-                                {shoe.gender}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-4 space-y-3">
-                        {/* Title and Price */}
-                        <div className="space-y-1">
-                            <h3 className="font-semibold text-lg truncate">{shoe.name}</h3>
-                            <p className="text-green-600 font-medium text-lg">
-                                {Number(shoe.price).toFixed(2)}€
-                            </p>
-                        </div>
-
-                        {/* Type and Category */}
-                        <div className="flex  items-center gap-2 text-sm text-gray-600">
-                            <span className='bg-gray-100 px-2 py-1 rounded-full text-xs font-medium capitalize'>{shoe.typeOfShoes}</span>
-                            <span className='text-gray-400'>-</span>
-                            <span className='bg-gray-100 px-2 py-1 rounded-full text-xs font-medium capitalize'>{shoe.Category}</span>
-                        </div>
-
-                        {/* Color Variants */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">Farben:</span>
-                            <div className="flex gap-1">
-                                {shoe.colorVariants.map((variant, index) => (
-                                    <div
-                                        key={index}
-                                        className={`w-4 h-4 rounded-full border shadow-sm transition-transform hover:scale-110
-                                            ${currentImageIndex === index ? 'ring-2 ring-green-500' : ''}`}
-                                        style={{ backgroundColor: variant.code }}
-                                        title={variant.name}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Link>
-        );
-    };
+    const filteredShoes = shoes.filter(shoe => {
+        const selectedColorNames = Array.from(searchParams.getAll('colorName[]'));
+        return selectedColorNames.length === 0 || 
+            shoe.colorVariants.some(variant => 
+                selectedColorNames.includes(variant.name.toLowerCase())
+            );
+    });
 
     return (
-        <>
+        <div className="container mx-auto px-4 py-8">
             {/* Search Bar */}
             <div className="pb-5">
                 <div className="flex justify-end mt-3 mb-7">
@@ -339,27 +213,23 @@ export default function Shoes() {
             </div>
 
             {/* Loading state */}
-            {loading && (
-                <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#62A07B]"></div>
+            {loading ? (
+                <div className="min-h-[400px] flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
                 </div>
-            )}
-
-            {/* No results */}
-            {!loading && shoes.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12">
-                    <FiSearch className="text-6xl text-gray-400 mb-4" />
-                    <h3 className="text-2xl font-semibold text-gray-700 mb-2">Keine Ergebnisse gefunden</h3>
-                    <p className="text-gray-500">
-                        Leider konnten wir keine Schuhe finden, die Ihrer Suche entsprechen.
+            ) : filteredShoes.length === 0 ? (
+                <div className="min-h-[400px] flex flex-col items-center justify-center text-gray-500">
+                    <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 20h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 className="text-xl font-semibold mb-2">No Products Found</h3>
+                    <p className="text-center">
+                        No products available. Please try different filters.
                     </p>
                 </div>
-            )}
-
-            {/* Shoes Grid */}
-            {!loading && shoes.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {shoes.map((shoe) => (
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredShoes.map((shoe) => (
                         <ProductCard key={shoe.id} shoe={shoe} />
                     ))}
                 </div>
@@ -433,6 +303,6 @@ export default function Shoes() {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     )
 }

@@ -11,15 +11,15 @@ import footImg from "../../../public/shoesDetails/footImg.png"
 import scannerImg from "../../../public/shoesDetails/scanner.png"
 import RecommendShoes from './Recommend';
 import { IoChevronDown, IoChevronBack, IoChevronForward } from "react-icons/io5";
-import { getProductById } from '@/apis/productsApis';
+import { getProductByIdclient } from '@/apis/productsApis';
 
 export default function ShoesDetails({ productId }) {
     const [shoe, setShoe] = useState(null);
+    const [recommendedProducts, setRecommendedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('app');
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [sizes, setSizes] = useState([]);
     const [selectedSize, setSelectedSize] = useState(null);
     const [selectedColorVariant, setSelectedColorVariant] = useState(0);
@@ -27,17 +27,17 @@ export default function ShoesDetails({ productId }) {
         const fetchProduct = async () => {
             try {
                 if (!productId) return;
-                const product = await getProductById(productId);
-                setShoe(product);
-                if (product?.size) {
-                    // Check if size is already an array
-                    if (Array.isArray(product.size)) {
-                        setSizes(product.size);
-                        setSelectedSize(product.size[0]);
+                const data = await getProductByIdclient(productId);
+                setShoe(data.product);
+                setRecommendedProducts(data.recommendedProducts);
+
+                if (data.product?.size) {
+                    if (Array.isArray(data.product.size)) {
+                        setSizes(data.product.size);
+                        setSelectedSize(data.product.size[0]);
                     } else {
                         try {
-                            // If it's a string, try to parse it
-                            const parsedSizes = JSON.parse(product.size);
+                            const parsedSizes = JSON.parse(data.product.size);
                             setSizes(parsedSizes);
                             setSelectedSize(parsedSizes[0]);
                         } catch (e) {
@@ -55,6 +55,8 @@ export default function ShoesDetails({ productId }) {
 
         fetchProduct();
     }, [productId]);
+
+
 
     if (loading) {
         return (
@@ -78,8 +80,6 @@ export default function ShoesDetails({ productId }) {
         );
     }
 
-    const demoImages = shoe?.images || [];
-
     const handleThumbnailScroll = (direction) => {
         const currentVariant = shoe?.colors?.[selectedColorVariant];
         if (!currentVariant?.images?.length) return;
@@ -93,7 +93,6 @@ export default function ShoesDetails({ productId }) {
         }
     };
 
-    // Modified function to show only available unique images
     const getVisibleThumbnails = () => {
         const currentVariant = shoe?.colors?.[selectedColorVariant];
         if (!currentVariant) return [];
@@ -443,7 +442,9 @@ export default function ShoesDetails({ productId }) {
 
                 {/* recommend shoes  */}
                 <div>
-                    <RecommendShoes />
+                    {recommendedProducts && recommendedProducts.length > 0 && (
+                        <RecommendShoes recommendedProducts={recommendedProducts} />
+                    )}
                 </div>
             </div>
         </>
