@@ -44,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import Image from 'next/image'
 
 export default function AllProduct() {
   const router = useRouter()
@@ -298,11 +299,13 @@ export default function AllProduct() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         {product.colors && product.colors[0] && product.colors[0].images && product.colors[0].images[0] ? (
-                          <div className="relative">
-                            <img
+                          <div className="relative w-14 h-14">
+                            <Image
                               src={product.colors[0].images[0].url}
+                              width={100}
+                              height={100}
                               alt={product.name}
-                              className="h-10 w-10 rounded-md object-cover border border-gray-200"
+                              className="w-full h-full rounded-md object-cover border border-gray-200"
                             />
                             {product.colors.length > 1 && (
                               <div className="absolute -top-2 -right-2">

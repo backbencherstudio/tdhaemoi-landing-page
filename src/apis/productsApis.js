@@ -104,7 +104,7 @@ export const getAllProduct = async ({
 export const updateProduct = async (id, productData) => {
     try {
         const formData = new FormData();
-
+        
         // Add basic product fields
         formData.append('name', productData.name);
         formData.append('brand', productData.brand);
@@ -114,7 +114,7 @@ export const updateProduct = async (id, productData) => {
         formData.append('productDesc', productData.productDesc);
         formData.append('price', productData.price);
         formData.append('availability', String(productData.availability));
-        formData.append('offer', productData.offer);
+        formData.append('offer', productData.offer || '0');
         formData.append('size', JSON.stringify(productData.size));
         formData.append('feetFirstFit', productData.feetFirstFit);
         formData.append('footLength', productData.footLength);
@@ -123,20 +123,57 @@ export const updateProduct = async (id, productData) => {
         formData.append('gender', productData.gender);
 
         // Handle color variants and their images
-        productData.colors.forEach((colorVariant, colorIndex) => {
-            formData.append(`colors[${colorIndex}][colorName]`, colorVariant.colorName);
-            formData.append(`colors[${colorIndex}][colorCode]`, colorVariant.colorCode);
+        const colorsArray = productData.colorVariants.map(variant => ({
+            id: variant.id,
+            colorName: variant.colorName,
+            colorCode: variant.colorCode,
+            images: variant.images.map(img => {
+                if (img.isExisting) {
+                    // Keep existing image data
+                    return {
+                        id: img.id,
+                        url: img.url,
+                    };
+                }
+                return null;
+            }).filter(Boolean)
+        }));
 
-            // Append images for each color variant
-            colorVariant.images.forEach((image, imageIndex) => {
-                // If it's an existing image URL, send the URL
-                if (typeof image === 'string') {
-                    formData.append(`colors[${colorIndex}][existingImages]`, image);
-                } else {
-                    // If it's a new file, send the file
-                    formData.append(`colors[${colorIndex}][images]`, image);
+        // Handle new image uploads
+        let imageIndex = 0;
+        productData.colorVariants.forEach((variant, colorIndex) => {
+            variant.images.forEach(img => {
+                if (!img.isExisting && img.file instanceof File) {
+                    const fileExtension = img.file.name.split('.').pop();
+                    const uniqueFileName = `${Date.now()}_${colorIndex}_${imageIndex}.${fileExtension}`;
+                    
+                    const renamedFile = new File([img.file], uniqueFileName, {
+                        type: img.file.type
+                    });
+                    
+                    formData.append('images', renamedFile);
+                    
+                    // Add new image reference to the corresponding color
+                    colorsArray[colorIndex].images.push({
+                        filename: uniqueFileName,
+                        isNew: true
+                    });
+                    
+                    imageIndex++;
                 }
             });
+        });
+
+        // Add color data to formData
+        formData.append('colors', JSON.stringify(colorsArray));
+
+        // Log the data being sent (for debugging)
+        console.log('Update Data:', {
+            colors: colorsArray,
+            formDataEntries: Array.from(formData.entries()).map(([key, value]) => ({
+                key,
+                value: key === 'colors' ? JSON.parse(value) : value
+            }))
         });
 
         const response = await axiosClient.put(`/products/${id}`, formData, {
@@ -144,22 +181,28 @@ export const updateProduct = async (id, productData) => {
                 'Content-Type': 'multipart/form-data',
             },
         });
+
         return response.data;
     } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to update product';
-        throw new Error(errorMessage);
+        console.error('Update Error:', error);
+        throw new Error(error.response?.data?.message || error.message || 'Failed to update product');
     }
-}
+};
 
 
 // delete single image product admin
-export const deleteSingleImage = async (id, imageFilename) => {
+export const deleteSingleImage = async (productId, imageFilename) => {
     try {
-        const response = await axiosClient.delete(`/products/${id}/${imageFilename}`);
+        const response = await axiosClient.delete(`/products/${productId}/${imageFilename}`);
+        
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to delete image');
+        }
+        
         return response.data;
     } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete image';
-        throw new Error(errorMessage);
+        console.error('Error deleting image:', error);
+        throw new Error(error.response?.data?.message || error.message || 'Failed to delete image');
     }
 }
 
@@ -212,33 +255,34 @@ export const getAllProducts = cache(async (filters) => {
 });
 
 
-// Get product by ID client site 
 export const getProductById = async (id) => {
     try {
         const response = await axiosClient.get(`/products/${id}`);
         if (response.data && response.data.success && response.data.product) {
             const product = response.data.product;
 
-            // Transform the color variants data if needed
-            if (product.colors) {
-                product.colorVariants = product.colors.map(color => ({
+            return {
+                ...product,
+                size: Array.isArray(product.size) ? product.size : 
+                      typeof product.size === 'string' ? JSON.parse(product.size) : [],
+                colorVariants: product.colors?.map(color => ({
+                    id: color.id,
                     colorName: color.colorName,
                     colorCode: color.colorCode,
-                    images: color.images.map((url, index) => ({
-                        id: `existing-${index}`,
-                        preview: url,
-                        name: `Image ${index + 1}`,
+                    images: color.images.map(img => ({
+                        id: img.id,
+                        url: img.url,
+                        preview: img.url,
+                        name: `Image ${img.id}`,
                         isExisting: true,
-                        url: url
+                        file: null // Add this to maintain structure
                     }))
-                }));
-            }
-
-            return product;
+                })) || []
+            };
         }
         throw new Error('Product not found');
     } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch product';
-        throw new Error(errorMessage);
+        console.error('Error fetching product:', error);
+        throw new Error(error.response?.data?.message || 'Failed to fetch product');
     }
 }

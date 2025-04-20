@@ -165,7 +165,14 @@ export default function Shoes() {
 
     // Update page change handler
     const handlePageChange = (page) => {
-        if (page === currentPage || loading) return;
+        // Don't allow page changes if there are no products or we're loading
+        if (loading || totalItems === 0) return;
+
+        // Validate page number is within bounds
+        if (page < 1 || page > totalPages) return;
+
+        // Don't update if clicking current page
+        if (page === currentPage) return;
 
         const params = new URLSearchParams(searchParams);
         params.set('page', page);
@@ -222,83 +229,87 @@ export default function Shoes() {
 
     const ProductCard = ({ shoe }) => {
         const [currentImageIndex, setCurrentImageIndex] = useState(0);
-        const [currentColorIndex, setCurrentColorIndex] = useState(0);
-        const currentVariant = shoe.colorVariants[currentColorIndex];
-
-        // Create array of first images from each color variant
         const colorImages = shoe.colorVariants.map(variant => variant.mainImage);
 
-        useEffect(() => {
-            let interval;
-            if (currentImageIndex >= colorImages.length) {
-                setCurrentImageIndex(0);
-            }
-            return () => clearInterval(interval);
-        }, [currentImageIndex, colorImages.length]);
-
-        const handleMouseEnter = () => {
-            // Start cycling through color variants
-            setCurrentImageIndex(0);
+        // Function to cycle through images
+        const startImageCycle = () => {
             const interval = setInterval(() => {
                 setCurrentImageIndex(prev => (prev + 1) % colorImages.length);
-            }, 1000); // Change image every second
+            }, 1000); // Change image every 1 second
+
             return interval;
         };
 
-        const handleMouseLeave = (interval) => {
-            clearInterval(interval);
-            setCurrentImageIndex(0);
-        };
-
         return (
-            <Link
-                href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}
-            >
+            <Link href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}>
                 <div
-                    className="bg-white rounded-lg shadow-md transform transition-all duration-300 hover:shadow-xl cursor-pointer max-w-sm mx-auto"
+                    className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group"
                     onMouseEnter={() => {
-                        const interval = handleMouseEnter();
-                        // Store the interval ID as a data attribute
-                        document.getElementById(`shoe-${shoe.id}`).dataset.intervalId = interval;
+                        const interval = startImageCycle();
+                        // Store the interval ID on the element
+                        window._imageInterval = interval;
                     }}
                     onMouseLeave={() => {
-                        const interval = document.getElementById(`shoe-${shoe.id}`).dataset.intervalId;
-                        handleMouseLeave(interval);
+                        // Clear the interval when mouse leaves
+                        if (window._imageInterval) {
+                            clearInterval(window._imageInterval);
+                            setCurrentImageIndex(0); // Reset to first image
+                        }
                     }}
-                    id={`shoe-${shoe.id}`}
                 >
-                    <div className="aspect-square bg-[#e8e8e8] relative mb-4 flex items-center justify-center rounded-t-lg overflow-hidden">
-                        {colorImages.length > 0 ? (
-                            <Image
-                                src={colorImages[currentImageIndex]}
-                                width={300}
-                                height={300}
-                                alt={`${shoe.name} - ${shoe.colorVariants[currentImageIndex]?.name}`}
-                                className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105"
-                                priority
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-                                No image available
-                            </div>
-                        )}
-                    </div>
-                    <div className="space-y-2 px-4 pb-4">
-                        <h3 className="font-pathway-extreme font-bold text-lg truncate">{shoe.name}</h3>
-                        <p className="text-gray-600 text-sm line-clamp-2">{shoe.description}</p>
-
-                        <div className="flex items-center gap-2">
-                            <p>Farbe: </p>
-                            {shoe.colorVariants.map((variant, index) => (
-                                <div
-                                    key={index}
-                                    className={`w-4 h-4 rounded-full border border-gray-200`}
-                                    style={{ backgroundColor: variant.code }}
-                                    title={variant.name}
-                                />
-                            ))}
+                    {/* Image Container */}
+                    <div className="aspect-square bg-[#f8f8f8] relative rounded-t-xl overflow-hidden">
+                        <Image
+                            src={colorImages[currentImageIndex]}
+                            width={300}
+                            height={400}
+                            alt={shoe.name}
+                            className="object-contain p-2 w-full h-full transition-all duration-500"
+                            priority
+                        />
+                        {/* Badges */}
+                        <div className="absolute top-3 right-3 flex gap-2">
+                            {/* <span className="bg-black text-white px-2 py-1 rounded-full text-xs font-medium">
+                                {shoe.brand}
+                            </span> */}
+                            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
+                                {shoe.gender}
+                            </span>
                         </div>
-                        <p className="font-semibold text-lg">{Number(shoe.price).toFixed(2)} €</p>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 space-y-3">
+                        {/* Title and Price */}
+                        <div className="space-y-1">
+                            <h3 className="font-semibold text-lg truncate">{shoe.name}</h3>
+                            <p className="text-green-600 font-medium text-lg">
+                                {Number(shoe.price).toFixed(2)}€
+                            </p>
+                        </div>
+
+                        {/* Type and Category */}
+                        <div className="flex  items-center gap-2 text-sm text-gray-600">
+                            <span className='bg-gray-100 px-2 py-1 rounded-full text-xs font-medium capitalize'>{shoe.typeOfShoes}</span>
+                            <span className='text-gray-400'>-</span>
+                            <span className='bg-gray-100 px-2 py-1 rounded-full text-xs font-medium capitalize'>{shoe.Category}</span>
+                        </div>
+
+                        {/* Color Variants */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Farben:</span>
+                            <div className="flex gap-1">
+                                {shoe.colorVariants.map((variant, index) => (
+                                    <div
+                                        key={index}
+                                        className={`w-4 h-4 rounded-full border shadow-sm transition-transform hover:scale-110
+                                            ${currentImageIndex === index ? 'ring-2 ring-green-500' : ''}`}
+                                        style={{ backgroundColor: variant.code }}
+                                        title={variant.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </Link>
@@ -355,70 +366,73 @@ export default function Shoes() {
             )}
 
             {/* Pagination */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md">
-                    Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} shoes
-                </div>
-                <div className="flex items-center space-x-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handlePageChange(1)}
-                        disabled={currentPage === 1}
-                    >
-                        <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
+            {totalItems > 0 && (
+                <div className="flex items-center justify-between px-6 py-4  ">
+                    <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md">
+                        Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} shoes
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handlePageChange(1)}
+                            disabled={currentPage === 1 || loading || totalItems === 0}
+                        >
+                            <ChevronsLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1 || loading || totalItems === 0}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
 
-                    {getPageNumbers().map((page, index) => (
-                        page === '...' ? (
-                            <span key={`ellipsis-${index}`} className="px-2">...</span>
-                        ) : (
-                            <Button
-                                key={`page-${page}`}
-                                variant={currentPage === page ? "default" : "outline"}
-                                size="icon"
-                                className={`h-8 w-8 ${currentPage === page ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                                onClick={() => handlePageChange(page)}
-                            >
-                                {page}
-                            </Button>
-                        )
-                    ))}
+                        {getPageNumbers().map((page, index) => (
+                            page === '...' ? (
+                                <span key={`ellipsis-${index}`} className="px-2">...</span>
+                            ) : (
+                                <Button
+                                    key={`page-${page}`}
+                                    variant={currentPage === page ? "default" : "outline"}
+                                    size="icon"
+                                    className={`h-8 w-8 ${currentPage === page ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                    onClick={() => handlePageChange(page)}
+                                    disabled={loading || totalItems === 0}
+                                >
+                                    {page}
+                                </Button>
+                            )
+                        ))}
 
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handlePageChange(totalPages)}
-                        disabled={currentPage === totalPages}
-                    >
-                        <ChevronsRight className="h-4 w-4" />
-                    </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages || loading || totalItems === 0}
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handlePageChange(totalPages)}
+                            disabled={currentPage === totalPages || loading || totalItems === 0}
+                        >
+                            <ChevronsRight className="h-4 w-4" />
+                        </Button>
 
-                    <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md ml-2">
-                        Page {currentPage} of {totalPages}
+                        <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md ml-2">
+                            Page {currentPage} of {totalPages}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </>
     )
 }

@@ -22,6 +22,7 @@ export default function ShoesDetails({ productId }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [sizes, setSizes] = useState([]);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedColorVariant, setSelectedColorVariant] = useState(0);
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -29,9 +30,21 @@ export default function ShoesDetails({ productId }) {
                 const product = await getProductById(productId);
                 setShoe(product);
                 if (product?.size) {
-                    const parsedSizes = JSON.parse(product.size);
-                    setSizes(parsedSizes);
-                    setSelectedSize(parsedSizes[0]);
+                    // Check if size is already an array
+                    if (Array.isArray(product.size)) {
+                        setSizes(product.size);
+                        setSelectedSize(product.size[0]);
+                    } else {
+                        try {
+                            // If it's a string, try to parse it
+                            const parsedSizes = JSON.parse(product.size);
+                            setSizes(parsedSizes);
+                            setSelectedSize(parsedSizes[0]);
+                        } catch (e) {
+                            console.error('Error parsing sizes:', e);
+                            setSizes([]);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching product:', error);
@@ -68,23 +81,27 @@ export default function ShoesDetails({ productId }) {
     const demoImages = shoe?.images || [];
 
     const handleThumbnailScroll = (direction) => {
+        const currentVariant = shoe?.colors?.[selectedColorVariant];
+        if (!currentVariant?.images?.length) return;
+
+        const maxIndex = currentVariant.images.length - 1;
+
         if (direction === 'up') {
-            const newIndex = currentIndex === 0 ? (shoe?.images?.length - 1 || 0) : currentIndex - 1;
-            setCurrentIndex(newIndex);
-            setSelectedImage(newIndex);
+            setSelectedImage(prev => (prev === 0 ? maxIndex : prev - 1));
         } else {
-            const newIndex = currentIndex === (shoe?.images?.length - 1 || 0) ? 0 : currentIndex + 1;
-            setCurrentIndex(newIndex);
-            setSelectedImage(newIndex);
+            setSelectedImage(prev => (prev === maxIndex ? 0 : prev + 1));
         }
     };
 
     // Modified function to show only available unique images
     const getVisibleThumbnails = () => {
-        const totalImages = demoImages.length;
-        return demoImages.map((_, index) => ({
+        const currentVariant = shoe?.colors?.[selectedColorVariant];
+        if (!currentVariant) return [];
+
+        return currentVariant.images.map((image, index) => ({
             index,
-            id: `thumb-${index}-${Date.now()}`
+            id: `thumb-${index}-${Date.now()}`,
+            url: image.url
         }));
     };
 
@@ -120,7 +137,7 @@ export default function ShoesDetails({ productId }) {
                                         >
                                             <div className="relative aspect-square">
                                                 <Image
-                                                    src={demoImages[item.index]}
+                                                    src={item.url}
                                                     fill
                                                     sizes="80px"
                                                     alt={`View ${item.index + 1}`}
@@ -146,28 +163,33 @@ export default function ShoesDetails({ productId }) {
                                 <button
                                     onClick={() => handleThumbnailScroll('up')}
                                     className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-all duration-300"
-                                    aria-label="Scroll up"
+                                    aria-label="Previous image"
                                 >
                                     <IoChevronBack className="transform rotate-90 text-xl" />
                                 </button>
 
                                 {/* Thumbnails container */}
-                                <div className="px-1 py-6 flex flex-col gap-4 overflow-hidden h-[500px] items-center">
+                                <div className="px-1 py-6 flex flex-col gap-4 overflow-hidden items-center">
                                     {getVisibleThumbnails().map((item) => (
                                         <button
                                             key={item.id}
                                             onClick={() => setSelectedImage(item.index)}
-                                            className={`bg-[#e8e8e8] rounded-lg p-2 transition-all w-20 flex-shrink-0 hover:shadow-md transform hover:scale-105 duration-300
-                                                ${selectedImage === item.index ? 'ring-2 ring-green-500 shadow-lg' : ''}`}
+                                            className={`border cursor-pointer rounded-lg transition-all flex-shrink-0 hover:shadow-md transform hover:scale-105 duration-300 relative group
+                                                ${selectedImage === item.index ? 'ring ring-green-500 shadow-lg' : ''}`}
                                         >
                                             <div className="relative aspect-square">
                                                 <Image
-                                                    src={demoImages[item.index]}
-                                                    fill
+                                                    src={item.url}
+                                                    width={100}
+                                                    height={100}
                                                     sizes="80px"
                                                     alt={`View ${item.index + 1}`}
-                                                    className="object-contain p-1"
+                                                    className="object-contain p-1 w-full h-full"
                                                 />
+                                                {/* Thumbnail tooltip */}
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute bottom-0 left-0 right-0 bg-black/80 bg-opacity-10 text-white p-1 text-center text-xs rounded-b-lg">
+                                                    {shoe?.name}
+                                                </div>
                                             </div>
                                         </button>
                                     ))}
@@ -177,7 +199,7 @@ export default function ShoesDetails({ productId }) {
                                 <button
                                     onClick={() => handleThumbnailScroll('down')}
                                     className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-all duration-300"
-                                    aria-label="Scroll down"
+                                    aria-label="Next image"
                                 >
                                     <IoChevronBack className="transform -rotate-90 text-xl" />
                                 </button>
@@ -185,17 +207,18 @@ export default function ShoesDetails({ productId }) {
                         </div>
 
                         {/* Main image */}
-                        <div className="flex-1 border rounded-lg p-4 order-1 md:order-2 relative flex items-center justify-center min-h-[300px] md:min-h-[400px]">
-                            <div className="relative w-3/4 h-full transition-all duration-500 ease-in-out">
+                        <div className="flex-1 border rounded-lg p-4 order-1 md:order-2 relative flex items-center justify-center min-h-[300px] md:min-h-[400px] group">
+                            <div className="relative w-3/4 h-full">
                                 <Image
-                                    src={demoImages[selectedImage]}
+                                    src={shoe?.colors?.[selectedColorVariant]?.images?.[selectedImage]?.url || ''}
                                     fill
                                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-                                    alt={shoe?.name}
-                                    className="object-contain p-2 md:p-4 transition-opacity duration-300"
+                                    alt={`${shoe?.name} - ${shoe?.colors?.[selectedColorVariant]?.colorName}`}
+                                    className="object-contain  transition-all duration-500 ease-in-out transform"
                                     priority
                                     quality={100}
                                 />
+
                             </div>
                         </div>
                     </div>
@@ -206,28 +229,43 @@ export default function ShoesDetails({ productId }) {
                         <div className="space-y-2">
                             <p className="text-lg">{shoe?.description}</p>
                             <p className="text-2xl font-semibold">{(shoe.price).toFixed(2)}€</p>
-                            <p className="text-lg">{shoe?.Farbe ? `${shoe.Farbe} Farben` : '1 Farben'}</p>
+                            <div className='flex items-center gap-2'>
+                                <p className="text-lg flex items-center gap-2">
+                                    Farbe: {shoe?.colors?.[selectedColorVariant]?.colorName || 'N/A'}
+                                    <span
+                                        className='w-6 h-6 rounded-full border'
+                                        style={{ backgroundColor: shoe?.colors?.[selectedColorVariant]?.colorCode || '#fff' }}
+                                    ></span>
+                                </p>
+                                <p className='text-lg'>|</p>
+                                <p className='text-lg'>{shoe?.gender}</p>
+                            </div>
                         </div>
 
                         {/* Color variants */}
-                        <div className="flex gap-4 overflow-x-auto md:overflow-x-visible">
-                            <div className="bg-[#e8e8e8] rounded-lg p-2 w-24 h-24 flex-shrink-0">
-                                <Image
-                                    src={shoe?.images?.[0] || ''}
-                                    width={100}
-                                    height={100}
-                                    alt="Color variant 1"
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
-                            <div className="bg-[#e8e8e8] rounded-lg p-2 w-24 h-24 flex-shrink-0">
-                                <Image
-                                    src={shoe?.images?.[1] || shoe?.images?.[0] || ''}
-                                    width={100}
-                                    height={100}
-                                    alt="Color variant 2"
-                                    className="w-full h-full object-contain"
-                                />
+                        <div className="space-y-4">
+                            <div className="flex gap-4 overflow-x-auto md:overflow-x-visible">
+                                {shoe?.colors?.map((variant, index) => (
+                                    <button
+                                        key={variant.id}
+                                        onClick={() => {
+                                            setSelectedColorVariant(index);
+                                            setSelectedImage(0); // Reset to first image when changing color
+                                        }}
+                                        className={`border rounded-lg p-2 w-24 h-24 flex-shrink-0 transition-all duration-300
+                                            ${selectedColorVariant === index ? 'ring ring-green-500 shadow-lg' : ''}`}
+                                    >
+                                        <div className="relative w-full h-full">
+                                            <Image
+                                                src={variant.images[0]?.url || ''}
+                                                fill
+                                                sizes="96px"
+                                                alt={variant.colorName}
+                                                className="object-contain p-1"
+                                            />
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 

@@ -31,8 +31,8 @@ export default function Navbar() {
     };
 
     return (
-        <nav className=" py-2 bg-black w-full sticky top-0 z-40">
-            <div className="flex items-center justify-between px-4 py-2 bg-black w-full ">
+        <nav className=" py-2 shadow-sm bg-white w-full sticky top-0 z-40">
+            <div className="flex items-center justify-between px-4 py-2  w-full ">
                 {/* Back button */}
                 <div className="w-10">
                     <button 
@@ -51,19 +51,19 @@ export default function Navbar() {
                 {/* Right side icons with labels */}
                 <div className="flex items-center gap-10 ">
                     <div className="flex flex-col items-center">
-                        <FaApple className='text-white text-4xl' />
-                        <span className="text-white text-xs font-pathway-extreme mt-2">iOS Zugriff</span>
+                        <FaApple className='text-black text-4xl' />
+                        <span className="text-black text-xs font-pathway-extreme mt-2">iOS Zugriff</span>
                     </div>
 
                     <div className="flex flex-col items-center">
-                        <BsAndroid2 className='text-white text-4xl' />
-                        <span className="text-white text-xs font-pathway-extreme mt-2">App Zugriff</span>
+                        <BsAndroid2 className='text-black text-4xl' />
+                        <span className="text-black text-xs font-pathway-extreme mt-2">App Zugriff</span>
                     </div>
 
                     <div className="flex flex-col items-center relative" ref={searchRef}>
                         <button onClick={() => setIsSearchOpen(!isSearchOpen)}>
-                            <FiSearch className='text-white text-4xl cursor-pointer' />
-                            <span className="text-white text-xs font-pathway-extreme mt-2">Suchen</span>
+                            <FiSearch className='text-black text-4xl cursor-pointer' />
+                            <span className="text-black text-xs font-pathway-extreme mt-2">Suchen</span>
                         </button>
                         
                         {isSearchOpen && (

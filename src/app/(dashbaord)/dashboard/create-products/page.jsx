@@ -131,10 +131,20 @@ export default function CreateProducts() {
 
   const fetchProductData = async () => {
     try {
-      const product = await getProductById(editId)
+      const product = await getProductById(editId);
       if (product) {
-        const parsedSize = product.size ? JSON.parse(product.size) : []
+        let parsedSize = [];
+        try {
+          parsedSize = product.size ? 
+            (typeof product.size === 'string' ? JSON.parse(product.size) : product.size) 
+            : [];
+        } catch (parseError) {
+          console.error('Error parsing size data:', parseError);
+          parsedSize = Array.isArray(product.size) ? product.size : [];
+        }
 
+        const colorVariants = product.colorVariants || [];
+        
         setFormData({
           productName: product.name || '',
           brand: product.brand || '',
@@ -152,26 +162,19 @@ export default function CreateProducts() {
           technicalData: product.technicalData || '',
           company: product.Company || '',
           gender: (product.gender || '').toLowerCase(),
-          colorVariants: product.colorVariants || []
-        })
+          colorVariants: colorVariants
+        });
 
-        // Handle existing images
-        if (product.images && product.images.length > 0) {
-          const existingImages = product.images.map((url, index) => ({
-            id: `existing-${index}`,
-            preview: url,
-            name: `Image ${index + 1}`,
-            isExisting: true,
-            url: url
-          }))
-          setUploadedImages(existingImages)
+        // Automatically select the first color variant if available
+        if (colorVariants.length > 0) {
+          setCurrentColor(colorVariants[0]);
         }
       }
     } catch (error) {
-      toast.error("Failed to fetch product data")
-      console.error(error)
+      console.error('Error fetching product data:', error);
+      toast.error("Failed to fetch product data");
     }
-  }
+  };
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -352,8 +355,12 @@ export default function CreateProducts() {
             setIsLoading(false);
             return;
         }
+
+        // Modified image validation to handle both new and existing images
         const hasInvalidImages = formData.colorVariants.some(variant => 
-            variant.images.some(img => !img.file || !(img.file instanceof File))
+            variant.images.some(img => 
+                !img.isExisting && (!img.file || !(img.file instanceof File))
+            )
         );
         if (hasInvalidImages) {
             toast.error('Invalid image files detected');
@@ -380,19 +387,22 @@ export default function CreateProducts() {
             colorVariants: formData.colorVariants
         };
 
-        console.log('Submitting data:', productData); // Debug log
-
-        const response = await createProducts(productData);
+        let response;
+        if (isEditMode) {
+            response = await updateProduct(editId, productData);
+        } else {
+            response = await createProducts(productData);
+        }
 
         if (response.success) {
-            toast.success('Product created successfully!');
+            toast.success(isEditMode ? 'Product updated successfully!' : 'Product created successfully!');
             router.push('/dashboard/all-product');
         } else {
-            throw new Error(response.message || 'Failed to create product');
+            throw new Error(response.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
         }
     } catch (error) {
         console.error('Error:', error);
-        toast.error(error.message || 'Failed to create product');
+        toast.error(error.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
     } finally {
         setIsLoading(false);
     }
@@ -456,27 +466,68 @@ export default function CreateProducts() {
     });
   };
 
-  const handleRemoveImage = (colorCode, imageId) => {
-    setFormData(prev => {
-      const updatedColorVariants = prev.colorVariants.map(variant =>
-        variant.colorCode === colorCode
-          ? { ...variant, images: variant.images.filter(img => img.id !== imageId) }
-          : variant
-      );
+  // Remove image single  image
+  const handleRemoveImage = async (colorCode, imageId) => {
+    try {
+      const variant = formData.colorVariants.find(v => v.colorCode === colorCode);
+      const image = variant?.images.find(img => img.id === imageId);
 
-      // Update current color immediately after removing image
-      if (currentColor?.colorCode === colorCode) {
-        setCurrentColor(updatedColorVariants.find(v => v.colorCode === colorCode));
+      if (!image) {
+        throw new Error('Image not found');
       }
+      if (image.isExisting && editId) {
+        const filename = extractImageFilename(image.url);
+        if (!filename) {
+          throw new Error('Invalid image URL');
+        }
+        const response = await deleteSingleImage(editId, filename);
+        if (response.success) {
+          setFormData(prev => ({
+            ...prev,
+            colorVariants: prev.colorVariants.map(variant =>
+              variant.colorCode === colorCode
+                ? {
+                    ...variant,
+                    images: variant.images.filter(img => img.id !== imageId)
+                  }
+                : variant
+            )
+          }));
 
-      return {
-        ...prev,
-        colorVariants: updatedColorVariants
-      };
-    });
+          if (currentColor?.colorCode === colorCode) {
+            setCurrentColor(prev => ({
+              ...prev,
+              images: prev.images.filter(img => img.id !== imageId)
+            }));
+          }
+
+          toast.success('Image deleted successfully');
+        }
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          colorVariants: prev.colorVariants.map(variant =>
+            variant.colorCode === colorCode
+              ? {
+                  ...variant,
+                  images: variant.images.filter(img => img.id !== imageId)
+                }
+              : variant
+          )
+        }));
+        if (currentColor?.colorCode === colorCode) {
+          setCurrentColor(prev => ({
+            ...prev,
+            images: prev.images.filter(img => img.id !== imageId)
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error removing image:', error);
+      toast.error(error.message || 'Failed to delete image');
+    }
   };
 
-  // Add useEffect to sync currentColor with formData changes
   useEffect(() => {
     if (currentColor) {
       const updatedCurrentColor = formData.colorVariants.find(
@@ -497,7 +548,7 @@ export default function CreateProducts() {
             {isEditMode ? 'Edit Product' : 'Create New Product'}
           </h1>
           <p className="text-gray-500 mt-1">
-            {isEditMode ? 'Update product information' : 'Add a new product to your inventory'}
+            {isEditMode ? 'Update the details of your product' : 'Enter the details of your new product'}
           </p>
         </div>
       </div>
@@ -851,7 +902,7 @@ export default function CreateProducts() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="feetFirstFit">Feet First Fit (%)</Label>
                   <Input
@@ -877,7 +928,7 @@ export default function CreateProducts() {
                   />
                 </div>
 
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="technicalData">Technical Data</Label>
@@ -966,10 +1017,10 @@ export default function CreateProducts() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Creating Product...
+                {isEditMode ? 'Updating Product...' : 'Creating Product...'}
               </>
             ) : (
-              'Create Product'
+              isEditMode ? 'Update Product' : 'Create Product'
             )}
           </Button>
         </div>
