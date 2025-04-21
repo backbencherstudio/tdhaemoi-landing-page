@@ -46,9 +46,12 @@ const colorMap = {
   '#A52A2A': 'Brown',
   '#808080': 'Gray',
   '#FFC0CB': 'Pink',
+  '#FF914D': 'Peel',
+  '#D4DCDE': 'Ice Melt',
   '#40E0D0': 'Turquoise',
   '#FFD700': 'Gold',
   '#C0C0C0': 'Silver',
+  '#222738': 'Navy',
   '#ADD8E6': 'Light Blue',
   '#90EE90': 'Light Green',
   '#FFB6C1': 'Light Pink',
@@ -56,6 +59,7 @@ const colorMap = {
   '#F08080': 'Light Coral',
   '#E6E6FA': 'Lavender',
   '#00FFFF': 'Cyan',
+  "#CAEA5B": "Citron",
   '#8B0000': 'Dark Red',
   '#006400': 'Dark Green',
   '#00008B': 'Dark Blue',
@@ -201,8 +205,8 @@ export default function CreateProducts() {
 
         // Handle characteristics - they are now objects in the array
         const characteristicIds = product.characteristics ?
-          (Array.isArray(product.characteristics) ? 
-            product.characteristics.map(char => char.id.toString()) : 
+          (Array.isArray(product.characteristics) ?
+            product.characteristics.map(char => char.id.toString()) :
             [])
           : [];
 
@@ -769,7 +773,7 @@ export default function CreateProducts() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="footwear">Footwear</SelectItem>
+                      <SelectItem value="scarpe sportive">Scarpe sportive</SelectItem>
                       <SelectItem value="running">Running</SelectItem>
                       <SelectItem value="hiking">Hiking</SelectItem>
                       <SelectItem value="casual">Casual</SelectItem>
@@ -787,7 +791,7 @@ export default function CreateProducts() {
                       <SelectValue placeholder="Select sub-category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sneakers">Sneakers</SelectItem>
+                      <SelectItem value="scarpe da running">Scarpe da Running</SelectItem>
                       <SelectItem value="boots">Boots</SelectItem>
                       <SelectItem value="sandals">Sandals</SelectItem>
                       <SelectItem value="athletic">Athletic</SelectItem>
