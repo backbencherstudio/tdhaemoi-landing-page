@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
-import { createProducts, getProductById, updateProduct, deleteSingleImage } from "@/apis/productsApis";
+import { createProducts, getProductById, updateProduct, deleteSingleImage, getCharacteristics } from "@/apis/productsApis";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
@@ -86,8 +86,12 @@ export default function CreateProducts() {
   const searchParams = useSearchParams()
   const editId = searchParams.get('edit')
   const isEditMode = Boolean(editId)
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentColor, setCurrentColor] = useState(null);
+  const [characteristics, setCharacteristics] = useState([]);
 
-  // State for form fields
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef(null)
   const [formData, setFormData] = useState({
     productName: '',
     brand: '',
@@ -105,21 +109,10 @@ export default function CreateProducts() {
     technicalData: '',
     company: '',
     gender: '',
-    colorVariants: [] 
+    colorVariants: []
   })
 
-  // Add new state for managing current color selection
-  const [currentColor, setCurrentColor] = useState(null);
-
-  // State for image uploads
-  const [uploadedImages, setUploadedImages] = useState([])
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef(null)
-
-  // Available sizes for shoes
-  const availableSizes = ['35','36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47']
-
-  // Gender options
+  const availableSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47']
   const genderOptions = ['Male', 'Female', 'Unisex']
 
   // Add this effect to fetch product data when in edit mode
@@ -129,14 +122,31 @@ export default function CreateProducts() {
     }
   }, [editId])
 
+  // Add this useEffect to fetch characteristics when component mounts
+  useEffect(() => {
+    const fetchCharacteristics = async () => {
+      try {
+        const response = await getCharacteristics();
+        if (response.success) {
+          setCharacteristics(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching characteristics:', error);
+        toast.error('Failed to load characteristics');
+      }
+    };
+
+    fetchCharacteristics();
+  }, []);
+
   const fetchProductData = async () => {
     try {
       const product = await getProductById(editId);
       if (product) {
         let parsedSize = [];
         try {
-          parsedSize = product.size ? 
-            (typeof product.size === 'string' ? JSON.parse(product.size) : product.size) 
+          parsedSize = product.size ?
+            (typeof product.size === 'string' ? JSON.parse(product.size) : product.size)
             : [];
         } catch (parseError) {
           console.error('Error parsing size data:', parseError);
@@ -144,7 +154,7 @@ export default function CreateProducts() {
         }
 
         const colorVariants = product.colorVariants || [];
-        
+
         setFormData({
           productName: product.name || '',
           brand: product.brand || '',
@@ -164,8 +174,6 @@ export default function CreateProducts() {
           gender: (product.gender || '').toLowerCase(),
           colorVariants: colorVariants
         });
-
-        // Automatically select the first color variant if available
         if (colorVariants.length > 0) {
           setCurrentColor(colorVariants[0]);
         }
@@ -228,7 +236,7 @@ export default function CreateProducts() {
       return;
     }
 
-    const files = Array.from(e.dataTransfer.files).filter(file => 
+    const files = Array.from(e.dataTransfer.files).filter(file =>
       file.type.startsWith('image/')
     );
 
@@ -256,155 +264,81 @@ export default function CreateProducts() {
     }));
   };
 
-  // Process new images
-  const addNewImages = (files) => {
-    if (!files || files.length === 0) return;
 
-    const newImages = files.map(file => ({
-      id: Date.now() + Math.random().toString(36).substring(2, 9),
-      file,
-      preview: URL.createObjectURL(file),
-      name: file.name,
-      size: (file.size / 1024).toFixed(2)
-    }))
-
-    // Reset the file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-
-    setUploadedImages(prev => [...prev, ...newImages])
-  }
-
-  // Remove an image
-  const removeImage = async (id, image) => {
-    try {
-      if (image.isExisting && editId) {
-        // Extract filename from full URL
-        const filename = extractImageFilename(image.url);
-        if (!filename) {
-          throw new Error('Invalid image URL');
-        }
-
-        // Call the API to delete the image
-        const response = await deleteSingleImage(editId, filename);
-
-        if (response.success) {
-          // Remove from state only if API call was successful
-          setUploadedImages(prev => prev.filter(img => img.id !== id));
-          toast.success('Image deleted successfully');
-        }
-      } else {
-        // For new images, just remove from state
-        setUploadedImages(prev => prev.filter(img => img.id !== id));
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to delete image');
-      console.error('Error deleting image:', error);
-    }
-  };
-
-  // Handle form submission
-  // Add loading state
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Add reset form function
-  const resetForm = () => {
-    setFormData({
-      productName: '',
-      brand: '',
-      category: '',
-      subCategory: '',
-      typeOfShoes: '',
-      productDesc: '',
-      price: '',
-      availability: true,
-      offer: '',
-      size: [],
-      feetFirstFit: '',
-      footLength: '',
-      color: '',
-      technicalData: '',
-      company: '',
-      gender: '',
-      colorVariants: []
-    });
-    setUploadedImages([]);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-        // Validate required fields
-        if (!formData.productName || !formData.brand) {
-            toast.error('Name and brand are required fields');
-            setIsLoading(false);
-            return;
-        }
-        if (formData.colorVariants.length === 0) {
-            toast.error('At least one color variant is required');
-            setIsLoading(false);
-            return;
-        }
-
-        const hasEmptyImages = formData.colorVariants.some(variant => variant.images.length === 0);
-        if (hasEmptyImages) {
-            toast.error('Each color variant must have at least one image');
-            setIsLoading(false);
-            return;
-        }
-
-        // Modified image validation to handle both new and existing images
-        const hasInvalidImages = formData.colorVariants.some(variant => 
-            variant.images.some(img => 
-                !img.isExisting && (!img.file || !(img.file instanceof File))
-            )
-        );
-        if (hasInvalidImages) {
-            toast.error('Invalid image files detected');
-            setIsLoading(false);
-            return;
-        }
-
-        const productData = {
-            name: formData.productName,
-            brand: formData.brand,
-            Category: formData.category,
-            Sub_Category: formData.subCategory,
-            typeOfShoes: formData.typeOfShoes,
-            productDesc: formData.productDesc,
-            price: formData.price,
-            availability: formData.availability,
-            offer: formData.offer || '0',
-            size: formData.size,
-            feetFirstFit: formData.feetFirstFit,
-            footLength: formData.footLength,
-            technicalData: formData.technicalData,
-            Company: formData.company,
-            gender: formData.gender?.toUpperCase(),
-            colorVariants: formData.colorVariants
-        };
-
-        let response;
-        if (isEditMode) {
-            response = await updateProduct(editId, productData);
-        } else {
-            response = await createProducts(productData);
-        }
-
-        if (response.success) {
-            toast.success(isEditMode ? 'Product updated successfully!' : 'Product created successfully!');
-            router.push('/dashboard/all-product');
-        } else {
-            throw new Error(response.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        toast.error(error.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
-    } finally {
+      // Validate required fields
+      if (!formData.productName || !formData.brand) {
+        toast.error('Name and brand are required fields');
         setIsLoading(false);
+        return;
+      }
+      if (formData.colorVariants.length === 0) {
+        toast.error('At least one color variant is required');
+        setIsLoading(false);
+        return;
+      }
+
+      const hasEmptyImages = formData.colorVariants.some(variant => variant.images.length === 0);
+      if (hasEmptyImages) {
+        toast.error('Each color variant must have at least one image');
+        setIsLoading(false);
+        return;
+      }
+
+      // Modified image validation to handle both new and existing images
+      const hasInvalidImages = formData.colorVariants.some(variant =>
+        variant.images.some(img =>
+          !img.isExisting && (!img.file || !(img.file instanceof File))
+        )
+      );
+      if (hasInvalidImages) {
+        toast.error('Invalid image files detected');
+        setIsLoading(false);
+        return;
+      }
+
+      const productData = {
+        name: formData.productName,
+        brand: formData.brand,
+        Category: formData.category,
+        Sub_Category: formData.subCategory,
+        typeOfShoes: formData.typeOfShoes,
+        productDesc: formData.productDesc,
+        price: formData.price,
+        availability: formData.availability,
+        offer: formData.offer || '0',
+        size: formData.size,
+        feetFirstFit: formData.feetFirstFit,
+        footLength: formData.footLength,
+        technicalData: formData.technicalData,
+        Company: formData.company,
+        gender: formData.gender?.toUpperCase(),
+        colorVariants: formData.colorVariants
+      };
+
+      let response;
+      if (isEditMode) {
+        response = await updateProduct(editId, productData);
+      } else {
+        response = await createProducts(productData);
+      }
+
+      if (response.success) {
+        toast.success(isEditMode ? 'Product updated successfully!' : 'Product created successfully!');
+        router.push('/dashboard/all-product');
+      } else {
+        throw new Error(response.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(error.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -487,9 +421,9 @@ export default function CreateProducts() {
             colorVariants: prev.colorVariants.map(variant =>
               variant.colorCode === colorCode
                 ? {
-                    ...variant,
-                    images: variant.images.filter(img => img.id !== imageId)
-                  }
+                  ...variant,
+                  images: variant.images.filter(img => img.id !== imageId)
+                }
                 : variant
             )
           }));
@@ -509,9 +443,9 @@ export default function CreateProducts() {
           colorVariants: prev.colorVariants.map(variant =>
             variant.colorCode === colorCode
               ? {
-                  ...variant,
-                  images: variant.images.filter(img => img.id !== imageId)
-                }
+                ...variant,
+                images: variant.images.filter(img => img.id !== imageId)
+              }
               : variant
           )
         }));
@@ -539,13 +473,13 @@ export default function CreateProducts() {
     }
   }, [formData.colorVariants]);
 
-  // Update the submit button in the return statement
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
-            {isEditMode ? 'Edit Product' : 'Create New Product'}
+            {isEditMode ? 'Update Product' : 'Create New Product'}
           </h1>
           <p className="text-gray-500 mt-1">
             {isEditMode ? 'Update the details of your product' : 'Enter the details of your new product'}
@@ -570,8 +504,8 @@ export default function CreateProducts() {
                     key={variant.colorCode}
                     onClick={() => setCurrentColor(variant)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all ${currentColor?.colorCode === variant.colorCode
-                        ? 'bg-green-50 border border-green-500'
-                        : 'bg-gray-50 border border-gray-200 hover:border-gray-300'
+                      ? 'bg-green-50 border border-green-500'
+                      : 'bg-gray-50 border border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <div
@@ -596,7 +530,7 @@ export default function CreateProducts() {
                   onValueChange={(colorName) => handleAddColorVariant(colorName)}
                 >
                   <SelectTrigger className="w-[140px] h-9 px-4 bg-gray-50 border border-dashed cursor-pointer">
-                    <SelectValue placeholder="Add Color"  />
+                    <SelectValue placeholder="Add Color" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(colorMap)
@@ -648,15 +582,13 @@ export default function CreateProducts() {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`grid ${
-                      currentColor.images.length > 0
-                        ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-5'
-                        : 'grid-cols-1'
-                    } gap-4 ${
-                      isDragging 
-                        ? 'border-2 border-dashed border-primary bg-primary/5' 
+                    className={`grid ${currentColor.images.length > 0
+                      ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-5'
+                      : 'grid-cols-1'
+                      } gap-4 ${isDragging
+                        ? 'border-2 border-dashed border-primary bg-primary/5'
                         : ''
-                    }`}
+                      }`}
                   >
                     {currentColor.images.length > 0 ? (
                       currentColor.images.map((image) => (
@@ -681,11 +613,10 @@ export default function CreateProducts() {
                     ) : (
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className={`border-2 border-dashed ${
-                          isDragging 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-gray-200 hover:border-gray-300'
-                        } rounded-lg p-8 text-center cursor-pointer transition-colors`}
+                        className={`border-2 border-dashed ${isDragging
+                          ? 'border-primary bg-primary/5'
+                          : 'border-gray-200 hover:border-gray-300'
+                          } rounded-lg p-8 text-center cursor-pointer transition-colors`}
                       >
                         <div className="mx-auto w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
                           <ImageIcon className="h-6 w-6 text-gray-400" />
@@ -759,14 +690,14 @@ export default function CreateProducts() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                <div className="space-y-2 w-full">
                   <Label htmlFor="category">Category *</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) => handleSelectChange('category', value)}
                   >
-                    <SelectTrigger id="category">
+                    <SelectTrigger className="w-full" id="category">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -778,13 +709,13 @@ export default function CreateProducts() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <Label htmlFor="subCategory">Sub-Category</Label>
                   <Select
                     value={formData.subCategory}
                     onValueChange={(value) => handleSelectChange('subCategory', value)}
                   >
-                    <SelectTrigger id="subCategory">
+                    <SelectTrigger className="w-full" id="subCategory">
                       <SelectValue placeholder="Select sub-category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -796,13 +727,13 @@ export default function CreateProducts() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <Label htmlFor="typeOfShoes">Type of Shoes</Label>
                   <Select
                     value={formData.typeOfShoes}
                     onValueChange={(value) => handleSelectChange('typeOfShoes', value)}
                   >
-                    <SelectTrigger id="typeOfShoes">
+                    <SelectTrigger className="w-full" id="typeOfShoes">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -949,8 +880,8 @@ export default function CreateProducts() {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Additional Information</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                <div className="space-y-2 w-full">
                   <Label htmlFor="company">Company/Manufacturer</Label>
                   <Input
                     id="company"
@@ -958,22 +889,59 @@ export default function CreateProducts() {
                     value={formData.company}
                     onChange={handleChange}
                     placeholder="Enter company name"
+                    className="w-full"
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* GENDER */}
+                <div className="space-y-2 w-full">
                   <Label htmlFor="gender">Gender *</Label>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) => handleSelectChange('gender', value)}
                   >
-                    <SelectTrigger id="gender">
+                    <SelectTrigger className="w-full" id="gender">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
                       {genderOptions.map(option => (
                         <SelectItem key={option} value={option.toLowerCase()}>
                           {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* CHARACTERISTICS */}
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="characteristics">Characteristics *</Label>
+                  <Select
+                    value={formData.characteristics}
+                    onValueChange={(value) => handleSelectChange('characteristics', value)}
+                  >
+                    <SelectTrigger className="w-full" id="characteristics">
+                      <SelectValue placeholder="Select characteristics">
+                        {characteristics.find(item => item.id.toString() === formData.characteristics)?.text || "Select characteristics"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {characteristics.map((item) => (
+                        <SelectItem key={item.id} value={item.id.toString()}>
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div>
+                              <p>{item.text}</p>
+                            </div>
+                            <div className="w-12 h-12 rounded-full ">
+                              <Image
+                                src={item.image}
+                                alt={item.text}
+                                width={100}
+                                height={100}
+                                className="w-full h-full rounded-full "
+                              />
+                            </div>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

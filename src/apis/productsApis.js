@@ -221,7 +221,7 @@ export const deleteProduct = async (id) => {
 // Get all products with filters client site 
 export const getAllProducts = cache(async (filters) => {
     const queryParams = new URLSearchParams();
-    
+
     // Batch process all filters
     Object.entries(filters).forEach(([key, value]) => {
         if (value) {
@@ -354,5 +354,16 @@ export const getProductByIdclient = async (id) => {
     } catch (error) {
         console.error('Error fetching product:', error);
         throw new Error(error.response?.data?.message || 'Failed to fetch product');
+    }
+}
+
+
+// get CHARACTERISTICS
+export const getCharacteristics = async () => {
+    const response = await axiosClient.get('/products/technical-icons');
+    try {
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch characteristics');
     }
 }
