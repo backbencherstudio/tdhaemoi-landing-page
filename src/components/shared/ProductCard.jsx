@@ -65,9 +65,22 @@ export default function ProductCard({ shoe }) {
                                 {shoe?.gender}
                             </p>
                         </div>
-                        <p className="text-green-600 font-medium text-lg">
-                            {Number(shoe.price).toFixed(2)}€
-                        </p>
+                        <div className="flex items-center gap-2">
+                            {shoe?.offer ? (
+                                <>
+                                    <span className="text-gray-500 line-through">
+                                        {Number(shoe.price).toFixed(2)}€
+                                    </span>
+                                    <span className="text-green-600 font-medium text-lg">
+                                        {Number(shoe.price * (1 - shoe.offer / 100)).toFixed(2)}€
+                                    </span>
+                                </>
+                            ) : (
+                                <p className="text-green-600 font-medium text-lg">
+                                    {Number(shoe.price).toFixed(2)}€
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Type and Category */}

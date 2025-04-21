@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "fabric": "^6.6.1",
+    "jodit-react": "^5.2.19",
     "jspdf": "^3.0.0",
     "konva": "^9.3.18",
     "lucide-react": "^0.487.0",

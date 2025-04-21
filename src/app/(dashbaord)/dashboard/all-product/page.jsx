@@ -218,8 +218,8 @@ export default function AllProduct() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className=" max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-5">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Footwear Collection</h1>
           <p className="text-gray-500 mt-1">Manage your shoes inventory by gender and style</p>
@@ -355,10 +355,10 @@ export default function AllProduct() {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center">
-                        <span className="font-medium">€{product.price.toFixed(2)}</span>
-                        {product.offer > 0 && (
+                        <span className="font-medium">€{product?.price?.toFixed(2)}</span>
+                        {product?.offer > 0 && (
                           <Badge variant="outline" className="text-xs text-green-600">
-                            {product.offer}% OFF
+                            {product?.offer}% OFF
                           </Badge>
                         )}
                       </div>

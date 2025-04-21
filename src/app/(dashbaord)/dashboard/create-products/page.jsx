@@ -30,6 +30,7 @@ import Image from 'next/image'
 import { createProducts, getProductById, updateProduct, deleteSingleImage, getCharacteristics } from "@/apis/productsApis";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import JoditEditor from "jodit-react";
 
 
 const colorMap = {
@@ -39,6 +40,7 @@ const colorMap = {
   '#0000FF': 'Blue',
   '#008000': 'Green',
   '#FFFF00': 'Yellow',
+  "#C0D432": "Sunny Yellow",
   '#FFA500': 'Orange',
   '#800080': 'Purple',
   '#A52A2A': 'Brown',
@@ -81,6 +83,49 @@ const extractImageFilename = (url) => {
   return parts[1];
 };
 
+const editorConfig = {
+  readonly: false,
+  height: 300,
+  toolbar: true,
+  spellcheck: false,
+  language: "en",
+  toolbarButtonSize: "medium",
+  toolbarAdaptive: false,
+  showCharsCounter: false,
+  showWordsCounter: false,
+  showXPathInStatusbar: false,
+  askBeforePasteHTML: false,
+  askBeforePasteFromWord: false,
+  defaultActionOnPaste: "insert_clear_html",
+  buttons: [
+    "source",
+    "|",
+    "bold",
+    "italic",
+    "underline",
+    "strikethrough",
+    "|",
+    "ul",
+    "ol",
+    "|",
+    "center",
+    "left",
+    "right",
+    "justify",
+    "|",
+    "link",
+    "image",
+    "|",
+    "hr",
+    "eraser",
+    "|",
+    "undo",
+    "redo",
+    "|",
+    "fullsize",
+  ],
+};
+
 export default function CreateProducts() {
   const router = useRouter();
   const searchParams = useSearchParams()
@@ -109,7 +154,8 @@ export default function CreateProducts() {
     technicalData: '',
     company: '',
     gender: '',
-    colorVariants: []
+    colorVariants: [],
+    characteristics: []
   })
 
   const availableSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47']
@@ -122,22 +168,22 @@ export default function CreateProducts() {
     }
   }, [editId])
 
-  // Add this useEffect to fetch characteristics when component mounts
-  useEffect(() => {
-    const fetchCharacteristics = async () => {
-      try {
-        const response = await getCharacteristics();
-        if (response.success) {
-          setCharacteristics(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching characteristics:', error);
-        toast.error('Failed to load characteristics');
-      }
-    };
 
+  useEffect(() => {
     fetchCharacteristics();
   }, []);
+
+  const fetchCharacteristics = async () => {
+    try {
+      const response = await getCharacteristics();
+      if (response.success) {
+        setCharacteristics(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching characteristics:', error);
+      toast.error('Failed to load characteristics');
+    }
+  };
 
   const fetchProductData = async () => {
     try {
@@ -152,6 +198,13 @@ export default function CreateProducts() {
           console.error('Error parsing size data:', parseError);
           parsedSize = Array.isArray(product.size) ? product.size : [];
         }
+
+        // Handle characteristics - they are now objects in the array
+        const characteristicIds = product.characteristics ?
+          (Array.isArray(product.characteristics) ? 
+            product.characteristics.map(char => char.id.toString()) : 
+            [])
+          : [];
 
         const colorVariants = product.colorVariants || [];
 
@@ -172,8 +225,10 @@ export default function CreateProducts() {
           technicalData: product.technicalData || '',
           company: product.Company || '',
           gender: (product.gender || '').toLowerCase(),
-          colorVariants: colorVariants
+          colorVariants: colorVariants,
+          characteristics: characteristicIds  // Use the extracted IDs
         });
+
         if (colorVariants.length > 0) {
           setCurrentColor(colorVariants[0]);
         }
@@ -192,7 +247,16 @@ export default function CreateProducts() {
 
   // Handle select changes
   const handleSelectChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }))
+    if (name === 'characteristics') {
+      setFormData(prev => ({
+        ...prev,
+        characteristics: prev.characteristics.includes(value)
+          ? prev.characteristics.filter(id => id !== value)
+          : [...prev.characteristics, value]
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   }
 
   // Handle size selection
@@ -302,6 +366,9 @@ export default function CreateProducts() {
         return;
       }
 
+      // Convert characteristics to stringified array of IDs
+      const characteristicIds = JSON.stringify(formData.characteristics.map(id => parseInt(id)));
+
       const productData = {
         name: formData.productName,
         brand: formData.brand,
@@ -318,7 +385,8 @@ export default function CreateProducts() {
         technicalData: formData.technicalData,
         Company: formData.company,
         gender: formData.gender?.toUpperCase(),
-        colorVariants: formData.colorVariants
+        colorVariants: formData.colorVariants,
+        characteristics: characteristicIds
       };
 
       let response;
@@ -475,7 +543,7 @@ export default function CreateProducts() {
 
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className=" max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
@@ -748,19 +816,19 @@ export default function CreateProducts() {
 
               <div className="space-y-2">
                 <Label htmlFor="productDesc">Product Description *</Label>
-                <Textarea
-                  id="productDesc"
-                  name="productDesc"
-                  value={formData.productDesc}
-                  onChange={handleChange}
-                  placeholder="Enter detailed product description"
-                  className="min-h-[120px]"
-                  required
-                />
+                <div className="border rounded-md">
+                  <JoditEditor
+                    value={formData.productDesc}
+                    config={editorConfig}
+                    onChange={newContent => {
+                      setFormData(prev => ({ ...prev, productDesc: newContent }));
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
-            <Separator />
+            {/* <Separator /> */}
 
             {/* Pricing & Inventory */}
             <div className="space-y-4">
@@ -863,14 +931,15 @@ export default function CreateProducts() {
 
               <div className="space-y-2">
                 <Label htmlFor="technicalData">Technical Data</Label>
-                <Textarea
-                  id="technicalData"
-                  name="technicalData"
-                  value={formData.technicalData}
-                  onChange={handleChange}
-                  placeholder="Enter technical specifications, materials, etc."
-                  className="min-h-[100px]"
-                />
+                <div className="border rounded-md">
+                  <JoditEditor
+                    value={formData.technicalData}
+                    config={editorConfig}
+                    onChange={newContent => {
+                      setFormData(prev => ({ ...prev, technicalData: newContent }));
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -917,35 +986,72 @@ export default function CreateProducts() {
                 <div className="space-y-2 w-full">
                   <Label htmlFor="characteristics">Characteristics *</Label>
                   <Select
-                    value={formData.characteristics}
+                    value=""
                     onValueChange={(value) => handleSelectChange('characteristics', value)}
+                    multiple
                   >
                     <SelectTrigger className="w-full" id="characteristics">
                       <SelectValue placeholder="Select characteristics">
-                        {characteristics.find(item => item.id.toString() === formData.characteristics)?.text || "Select characteristics"}
+                        {formData.characteristics.length > 0
+                          ? `${formData.characteristics.length} selected`
+                          : "Select characteristics"}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {characteristics.map((item) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
+                        <SelectItem
+                          key={item.id}
+                          value={item.id.toString()}
+                        >
                           <div className="flex items-center justify-between w-full gap-2">
                             <div>
                               <p>{item.text}</p>
                             </div>
-                            <div className="w-12 h-12 rounded-full ">
-                              <Image
-                                src={item.image}
-                                alt={item.text}
-                                width={100}
-                                height={100}
-                                className="w-full h-full rounded-full "
-                              />
+                            <div className="flex items-center gap-2">
+
+                              <div className="w-12 h-12 rounded-full">
+                                <Image
+                                  src={item.image}
+                                  alt={item.text}
+                                  width={100}
+                                  height={100}
+                                  className="w-full h-full rounded-full"
+                                />
+                              </div>
+                              {formData.characteristics.includes(item.id.toString()) && (
+                                <span className="font-semibold text-lg text-green-600">✓</span>
+                              )}
                             </div>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.characteristics.map((charId) => {
+                      const char = characteristics.find(c => c.id.toString() === charId);
+                      return char ? (
+                        <Badge
+                          key={charId}
+                          variant="secondary"
+                          className="flex items-center gap-2"
+                        >
+                          {char.text}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleSelectChange('characteristics', charId);
+                            }}
+                            className="ml-1 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3 cursor-pointer" />
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
                 </div>
               </div>
             </div>

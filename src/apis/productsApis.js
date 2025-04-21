@@ -20,6 +20,10 @@ export const createProducts = async (productData) => {
         formData.append('technicalData', productData.technicalData);
         formData.append('Company', productData.Company);
         formData.append('gender', productData.gender);
+        
+        // Add characteristics as stringified array of IDs
+        formData.append('characteristics', JSON.stringify(productData.characteristics));
+
         // Add images with color information
         let imageIndex = 0;
         productData.colorVariants.forEach((variant, colorIndex) => {
@@ -44,6 +48,12 @@ export const createProducts = async (productData) => {
         }));
 
         formData.append('colors', JSON.stringify(colorsArray));
+
+        // Log formData for debugging
+        for (let pair of formData.entries()) {
+            console.log(pair[0], pair[1]);
+        }
+
         const response = await axiosClient.post('/products', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -121,6 +131,9 @@ export const updateProduct = async (id, productData) => {
         formData.append('technicalData', productData.technicalData);
         formData.append('Company', productData.Company);
         formData.append('gender', productData.gender);
+        
+        // Add characteristics as stringified array of IDs
+        formData.append('characteristics', JSON.stringify(productData.characteristics));
 
         // Handle color variants and their images
         const colorsArray = productData.colorVariants.map(variant => ({

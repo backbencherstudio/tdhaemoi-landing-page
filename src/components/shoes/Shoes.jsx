@@ -58,11 +58,11 @@ export default function Shoes() {
     useEffect(() => {
         const currentSizes = searchParams.getAll('size[]');
         if (currentSizes.length > 0) {
-            
+
             const timeoutId = setTimeout(() => {
                 fetchShoes();
-            }, 100); 
-            
+            }, 100);
+
             return () => clearTimeout(timeoutId);
         }
     }, [searchParams]);
@@ -85,7 +85,7 @@ export default function Shoes() {
             };
 
             const response = await getAllProducts(filters);
-            
+
             if (currentPage === Number(searchParams.get('page'))) {
                 setShoes(response.products);
                 setTotalItems(response.total);
@@ -184,8 +184,8 @@ export default function Shoes() {
 
     const filteredShoes = shoes.filter(shoe => {
         const selectedColorNames = Array.from(searchParams.getAll('colorName[]'));
-        return selectedColorNames.length === 0 || 
-            shoe.colorVariants.some(variant => 
+        return selectedColorNames.length === 0 ||
+            shoe.colorVariants.some(variant =>
                 selectedColorNames.includes(variant.name.toLowerCase())
             );
     });
@@ -193,8 +193,8 @@ export default function Shoes() {
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Search Bar */}
-            <div className="pb-5">
-                <div className="flex justify-end mt-3 mb-7">
+            <div className="pb-4">
+                <div className="flex justify-end  mb-7">
                     <div className="relative w-full max-w-md ml-auto">
                         <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
                             <FiSearch className="ml-4 text-gray-500 text-xl" />
@@ -222,9 +222,9 @@ export default function Shoes() {
                     <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 20h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h3 className="text-xl font-semibold mb-2">No Products Found</h3>
+                    <h3 className="text-xl font-semibold mb-2">No Products Found..</h3>
                     <p className="text-center">
-                        No products available. Please try different filters.
+                        Please try again later.
                     </p>
                 </div>
             ) : (

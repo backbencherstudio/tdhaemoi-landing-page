@@ -224,10 +224,32 @@ export default function ShoesDetails({ productId }) {
 
                     {/* Details section - Updated classes */}
                     <div className="space-y-6 order-2 max-w-2xl">
-                        <h1 className="text-3xl font-bold">{shoe?.name}</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold">{shoe?.name}</h1>
+                            {shoe?.offer > 0 && (
+                                <span className="bg-green-50 text-green-600 px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap">
+                                    {shoe.offer}% OFF
+                                </span>
+                            )}
+                        </div>
                         <div className="space-y-2">
                             <p className="text-lg">{shoe?.description}</p>
-                            <p className="text-2xl font-semibold">{(shoe.price).toFixed(2)}€</p>
+                            <div className="flex items-center gap-3">
+                                {shoe?.offer ? (
+                                    <>
+                                        <span className="text-gray-500 line-through text-2xl">
+                                            {Number(shoe.price).toFixed(2)}€
+                                        </span>
+                                        <span className="text-green-600 font-semibold text-2xl">
+                                            {Number(shoe.price * (1 - shoe.offer / 100)).toFixed(2)}€
+                                        </span>
+                                    </>
+                                ) : (
+                                    <p className="text-2xl font-semibold">
+                                        {Number(shoe.price).toFixed(2)}€
+                                    </p>
+                                )}
+                            </div>
                             <div className='flex items-center gap-2'>
                                 <p className="text-lg flex items-center gap-2">
                                     Farbe: {shoe?.colors?.[selectedColorVariant]?.colorName || 'N/A'}
@@ -272,18 +294,21 @@ export default function ShoesDetails({ productId }) {
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold">EIGENSCHAFTEN</h3>
                             <div className="flex gap-4 overflow-x-auto md:overflow-x-visible">
-                                <div className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0">
-                                    <Image width={100} height={100} src={icon4} alt='icon' className='w-14 h-14' />
-                                </div>
-                                <div className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0">
-                                    <Image width={100} height={100} src={icon3} alt='icon' className='w-14 h-14' />
-                                </div>
-                                <div className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0">
-                                    <Image width={100} height={100} src={icon2} alt='icon' className='w-14 h-14' />
-                                </div>
-                                <div className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0">
-                                    <Image width={100} height={100} src={icon1} alt='icon' className='w-14 h-14' />
-                                </div>
+                                {shoe?.characteristics?.map((characteristic) => (
+                                    <div 
+                                        key={characteristic.id} 
+                                        className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0"
+                                        title={characteristic.text}
+                                    >
+                                        <Image 
+                                            width={100} 
+                                            height={100} 
+                                            src={characteristic.image} 
+                                            alt={characteristic.text} 
+                                            className='w-14 h-14' 
+                                        />
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -391,22 +416,14 @@ export default function ShoesDetails({ productId }) {
                                         <IoChevronDown className={`transform transition-transform duration-300 ${activeTab === 'description' ? 'rotate-180' : ''}`} />
                                     </button>
                                     {activeTab === 'description' && (
-                                        <div className="animate-fadeIn py-1">
-                                            <h2 className="text-gray-900 font-semibold text-lg">
-                                                Brooks Adrenaline GTS 24 – Stabilität & Komfort für deinen Lauf
-                                            </h2>
-                                            <p className='text-gray-800 mt-3'>Der Brooks Adrenaline GTS 24 kombiniert optimale Stabilität mit angenehmer Dämpfung und ist ideal für Läufer mit Überpronation. Die neue DNA Loft v3-Zwischensohle und das verbesserte GuideRails® Support System bieten eine gezielte Unterstützung und sanfte Dämpfung – perfekt für lange Läufe und den täglichen Einsatz.</p>
-
-                                            <h1 className='text-gray-800 mt-5 font-semibold'>Warum der Brooks Adrenaline GTS 24 perfekt für dich ist:</h1>
-                                            <p className='text-gray-800 mt-3'>
-                                                -Die DNA LOFT v3-Dämpfung sorgt für maximalen Komfort, ist mit Stickstoff angereichert und bietet dir ein weiches Laufgefühl bei geringem Gewicht.
-                                            </p>
-                                            <p className='text-gray-800 mt-2'>
-                                                -Das GuideRails-Unterstützungssystem bietet sanfte Stabilität und hilft dir, dein natürliches Abrollen zu bewahren.
-                                            </p>
-                                            <p className='text-gray-800 mt-2'>
-                                                -Die RoadTack-Außensohle sorgt für besseren Grip und Haltbarkeit, was dir bei jedem Schritt mehr Sicherheit verleiht.
-                                            </p>
+                                        <div className="animate-fadeIn py-1 pl-4">
+                                            {/* <h2 className="text-gray-900 font-semibold text-lg mb-4">
+                                                {shoe?.name}
+                                            </h2> */}
+                                            <div 
+                                                className="text-gray-800 prose max-w-none"
+                                                dangerouslySetInnerHTML={{ __html: shoe?.productDesc || '' }}
+                                            />
                                         </div>
                                     )}
                                 </div>
@@ -419,18 +436,12 @@ export default function ShoesDetails({ productId }) {
                                         <IoChevronDown className={`transform transition-transform duration-300 ${activeTab === 'technical' ? 'rotate-180' : ''}`} />
                                     </button>
                                     {activeTab === 'technical' && (
-                                        <div className="animate-fadeIn">
-                                            <h1 className="text-gray-900 font-semibold text-lg">
-                                                Technische Daten:
-                                            </h1>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Schuhtyp:</span> Stabilitätsschuh / Allround-Trainingsschuh</p>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Obermaterial:</span>  Engineered Air Mesh für maximale Belüftung & sicheren Sitz</p>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Zwischensohle:</span> DNA Loft v3-Schaumstoff (stickstoffangereichert) für weiche & reaktive Dämpfung</p>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Fersenkappe:</span> Stabiler Halt für Knöchel und Ferse</p>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Laufsohle:</span> Robustes Gummi mit Flexkerben für hohe Haltbarkeit & guten Grip</p>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Sprengung:</span> 12 mm (35.1 mm Ferse / 22.7 mm Vorfuß)</p>
-                                            <p className='text-gray-800 mt-3'><span className='font-semibold'>Gewicht:</span> Ca. 269 g (Damen) / 286 g (Herren)</p>
-                                            <p className='text-gray-800 mt-3'>🏃‍♂️ Der perfekte Stabilitäts-Laufschuh für alle, die Unterstützung & Komfort bei langen und mittleren Läufen suchen!</p>
+                                        <div className="animate-fadeIn py-1 pl-4">
+                                            
+                                            <div 
+                                                className="text-gray-800 prose max-w-none"
+                                                dangerouslySetInnerHTML={{ __html: shoe?.technicalData || '' }}
+                                            />
                                         </div>
                                     )}
                                 </div>
