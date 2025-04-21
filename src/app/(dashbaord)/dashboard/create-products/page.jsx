@@ -138,7 +138,6 @@ export default function CreateProducts() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentColor, setCurrentColor] = useState(null);
   const [characteristics, setCharacteristics] = useState([]);
-
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
   const [formData, setFormData] = useState({
