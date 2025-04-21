@@ -265,7 +265,7 @@ export default function ShoesDetails({ productId }) {
 
                         {/* Color variants */}
                         <div className="space-y-4">
-                            <div className="flex gap-4 overflow-x-auto md:overflow-x-visible">
+                            <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
                                 {shoe?.colors?.map((variant, index) => (
                                     <button
                                         key={variant.id}
@@ -293,7 +293,7 @@ export default function ShoesDetails({ productId }) {
                         {/* Properties */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold">EIGENSCHAFTEN</h3>
-                            <div className="flex gap-4 overflow-x-auto md:overflow-x-visible">
+                            <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
                                 {shoe?.characteristics?.map((characteristic) => (
                                     <div 
                                         key={characteristic.id} 
