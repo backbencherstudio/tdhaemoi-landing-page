@@ -265,47 +265,47 @@ export default function ShoesDetails({ productId }) {
 
                         {/* Color variants */}
                         <div className="space-y-4">
-  <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
-    {shoe?.colors?.map((variant, index) => (
-      <button
-        key={variant.id}
-        onClick={() => {
-          setSelectedColorVariant(index);
-          setSelectedImage(0);
-        }}
-        className={`relative rounded-lg w-24 h-24 flex-shrink-0 transition-all duration-300 overflow-hidden
+                            <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
+                                {shoe?.colors?.map((variant, index) => (
+                                    <button
+                                        key={variant.id}
+                                        onClick={() => {
+                                            setSelectedColorVariant(index);
+                                            setSelectedImage(0);
+                                        }}
+                                        className={`relative rounded-lg w-24 h-24 flex-shrink-0 transition-all duration-300 overflow-hidden
           ${selectedColorVariant === index ? 'ring-2 ring-green-500' : 'border border-gray-200'}`}
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Image
-            src={variant.images[0]?.url || ''}
-            fill
-            sizes="96px"
-            alt={variant.colorName}
-            className="object-contain"
-          />
-        </div>
-      </button>
-    ))}
-  </div>
-</div>
+                                    >
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Image
+                                                src={variant.images[0]?.url || ''}
+                                                fill
+                                                sizes="96px"
+                                                alt={variant.colorName}
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
                         {/* Properties */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold">EIGENSCHAFTEN</h3>
                             <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
                                 {shoe?.characteristics?.map((characteristic) => (
-                                    <div 
-                                        key={characteristic.id} 
-                                        className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0"
+                                    <div
+                                        key={characteristic.id}
+                                        className="border rounded-full px-4 py-2 whitespace-nowrap flex-shrink-0 cursor-pointer"
                                         title={characteristic.text}
                                     >
-                                        <Image 
-                                            width={100} 
-                                            height={100} 
-                                            src={characteristic.image} 
-                                            alt={characteristic.text} 
-                                            className='w-14 h-14' 
+                                        <Image
+                                            width={100}
+                                            height={100}
+                                            src={characteristic.image}
+                                            alt={characteristic.text}
+                                            className='w-14 h-14'
                                         />
                                     </div>
                                 ))}
@@ -420,7 +420,7 @@ export default function ShoesDetails({ productId }) {
                                             {/* <h2 className="text-gray-900 font-semibold text-lg mb-4">
                                                 {shoe?.name}
                                             </h2> */}
-                                            <div 
+                                            <div
                                                 className="text-gray-800 prose max-w-none"
                                                 dangerouslySetInnerHTML={{ __html: shoe?.productDesc || '' }}
                                             />
@@ -437,8 +437,8 @@ export default function ShoesDetails({ productId }) {
                                     </button>
                                     {activeTab === 'technical' && (
                                         <div className="animate-fadeIn py-1 pl-4">
-                                            
-                                            <div 
+
+                                            <div
                                                 className="text-gray-800 prose max-w-none"
                                                 dangerouslySetInnerHTML={{ __html: shoe?.technicalData || '' }}
                                             />
