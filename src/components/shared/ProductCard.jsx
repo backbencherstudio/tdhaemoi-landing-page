@@ -71,7 +71,7 @@ export default function ProductCard({ shoe }) {
                         <div className="flex items-center gap-2">
                             {shoe?.offer ? (
                                 <>
-                                    <span className="text-gray-500 line-through ">
+                                    <span className="text-gray-500 line-through">
                                         {Number(shoe.price).toFixed(2)}€
                                     </span>
                                     <span className=" font-medium text-lg">
