@@ -265,30 +265,30 @@ export default function ShoesDetails({ productId }) {
 
                         {/* Color variants */}
                         <div className="space-y-4">
-                            <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
-                                {shoe?.colors?.map((variant, index) => (
-                                    <button
-                                        key={variant.id}
-                                        onClick={() => {
-                                            setSelectedColorVariant(index);
-                                            setSelectedImage(0); // Reset to first image when changing color
-                                        }}
-                                        className={`border rounded-lg p-2 w-24 h-24 flex-shrink-0 transition-all duration-300
-                                            ${selectedColorVariant === index ? 'ring ring-green-500 shadow-lg' : ''}`}
-                                    >
-                                        <div className="relative w-full h-full">
-                                            <Image
-                                                src={variant.images[0]?.url || ''}
-                                                fill
-                                                sizes="96px"
-                                                alt={variant.colorName}
-                                                className="object-contain p-1"
-                                            />
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+  <div className="flex flex-wrap gap-4 overflow-x-auto md:overflow-x-visible">
+    {shoe?.colors?.map((variant, index) => (
+      <button
+        key={variant.id}
+        onClick={() => {
+          setSelectedColorVariant(index);
+          setSelectedImage(0);
+        }}
+        className={`relative rounded-lg w-24 h-24 flex-shrink-0 transition-all duration-300 overflow-hidden
+          ${selectedColorVariant === index ? 'ring-2 ring-green-500' : 'border border-gray-200'}`}
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image
+            src={variant.images[0]?.url || ''}
+            fill
+            sizes="96px"
+            alt={variant.colorName}
+            className="object-contain"
+          />
+        </div>
+      </button>
+    ))}
+  </div>
+</div>
 
                         {/* Properties */}
                         <div className="space-y-4">
