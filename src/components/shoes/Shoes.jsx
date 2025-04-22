@@ -191,30 +191,28 @@ export default function Shoes() {
     });
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="px-4">
             {/* Search Bar */}
-            <div className="pb-4">
-                <div className="flex justify-end  mb-7">
-                    <div className="relative w-full max-w-md ml-auto">
-                        <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
-                            <FiSearch className="ml-4 text-gray-500 text-xl" />
-                            <input
-                                type="text"
-                                placeholder="Suchen Sie nach Schuhen..."
-                                value={searchTerm}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                onFocus={() => setIsSearchFocused(true)}
-                                onBlur={() => setIsSearchFocused(false)}
-                                className="w-full px-4 py-3 rounded-lg focus:outline-none"
-                            />
-                        </div>
+            <div className="flex justify-end  mb-5">
+                <div className="relative w-full max-w-md ml-auto">
+                    <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
+                        <FiSearch className="ml-4 text-gray-500 text-xl" />
+                        <input
+                            type="text"
+                            placeholder="Suchen Sie nach Schuhen..."
+                            value={searchTerm}
+                            onChange={(e) => handleSearch(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                            onBlur={() => setIsSearchFocused(false)}
+                            className="w-full px-4 py-3 rounded-lg focus:outline-none"
+                        />
                     </div>
                 </div>
             </div>
 
             {/* Loading state */}
             {loading ? (
-                <div className="min-h-[400px] flex items-center justify-center">
+                <div className="min-h-[500px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
                 </div>
             ) : filteredShoes.length === 0 ? (
@@ -237,7 +235,7 @@ export default function Shoes() {
 
             {/* Pagination */}
             {totalItems > 0 && (
-                <div className="flex items-center justify-between px-6 py-4  ">
+                <div className="flex items-center justify-between px-6 py-10  ">
                     <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md">
                         Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} shoes
                     </div>

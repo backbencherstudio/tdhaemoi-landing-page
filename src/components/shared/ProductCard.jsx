@@ -22,21 +22,11 @@ export default function ProductCard({ shoe }) {
         <Link href={`/shoes/details/${shoe.id}/${shoe.name.toLowerCase().replace(/\s+/g, '-')}`}>
             <div
                 className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group"
-                onMouseEnter={() => {
-                    const interval = startImageCycle();
-                    window._imageInterval = interval;
-                }}
-                onMouseLeave={() => {
-                    if (window._imageInterval) {
-                        clearInterval(window._imageInterval);
-                        setCurrentImageIndex(0);
-                    }
-                }}
             >
                 {/* Image Container */}
                 <div className="aspect-square bg-[#f8f8f8] relative rounded-t-xl overflow-hidden">
                     <Image
-                        src={colorImages[currentImageIndex] || ''}
+                        src={colorImages[0] || ''}
                         width={300}
                         height={400}
                         alt={shoe.name}
@@ -56,60 +46,47 @@ export default function ProductCard({ shoe }) {
                 </div>
 
                 {/* Content */}
-                <div className="p-4 space-y-3">
+                <div className="p-4 space-y-2">
                     {/* Title and Price */}
                     <div className="space-y-1">
                         <div className='flex justify-between'>
                             <h3 className="font-semibold text-lg truncate">{shoe.name}</h3>
-                            <p className="bg-gray-100 px-2 py-1 rounded-full text-xs ">
+                            {/* <p className="bg-gray-100 px-2 py-1 rounded-full text-xs ">
                                 {shoe?.gender}
-                            </p>
+                            </p> */}
+                        </div>
+                        {/* Type and Category */}
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span className='text-xs font-medium capitalize'>{shoe.typeOfShoes}</span>
+                            <span className='text-gray-400'>-</span>
+                            <span className='text-xs font-medium capitalize'>{shoe.Category}</span>
+                        </div>
+                        {/* Color Variants - Updated */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Farben:</span>
+                            <span className="text-sm font-medium">
+                                {shoe.colors?.length || 0}
+                            </span>
                         </div>
                         <div className="flex items-center gap-2">
                             {shoe?.offer ? (
                                 <>
-                                    <span className="text-gray-500 line-through">
+                                    <span className="text-gray-500 line-through ">
                                         {Number(shoe.price).toFixed(2)}€
                                     </span>
-                                    <span className="text-green-600 font-medium text-lg">
+                                    <span className=" font-medium text-lg">
                                         {Number(shoe.price * (1 - shoe.offer / 100)).toFixed(2)}€
                                     </span>
                                 </>
                             ) : (
-                                <p className="text-green-600 font-medium text-lg">
+                                <p className=" font-medium text-lg">
                                     {Number(shoe.price).toFixed(2)}€
                                 </p>
                             )}
                         </div>
                     </div>
 
-                    {/* Type and Category */}
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className='bg-gray-100 px-2 py-1 rounded-full text-xs font-medium capitalize'>{shoe.typeOfShoes}</span>
-                        <span className='text-gray-400'>-</span>
-                        <span className='bg-gray-100 px-2 py-1 rounded-full text-xs font-medium capitalize'>{shoe.Category}</span>
-                    </div>
 
-                    {/* Color Variants */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Farben:</span>
-                        <div className="flex gap-1">
-                            {shoe.colors?.map((variant, index) => (
-                                <div
-                                    key={index}
-                                    className={`w-4 h-4 rounded-full border shadow-sm transition-transform hover:scale-110 cursor-pointer
-                                        ${selectedColorIndex === index ? 'ring-2 ring-green-500' : ''}`}
-                                    style={{ backgroundColor: variant.colorCode }}
-                                    title={variant.colorName}
-                                    onClick={(e) => {
-                                        e.preventDefault(); // Prevent Link navigation
-                                        setSelectedColorIndex(index);
-                                        setCurrentImageIndex(0);
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
                 </div>
             </div>
         </Link>

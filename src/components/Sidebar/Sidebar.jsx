@@ -257,7 +257,7 @@ export default function Sidebar() {
 
     return (
         <>
-            <div className='p-4 '>
+            <div className='px-4'>
                 <div className=' flex items-center justify-between border-b border-gray-200 pb-4 gap-2 mt-3 mb-7'>
                     <h1 className=" font-bold text-2xl md:text-3xl lg:text-[28px]">Filter by
                     </h1>
@@ -265,7 +265,7 @@ export default function Sidebar() {
                 </div>
             </div>
             {/* filter */}
-            <div className="w-full lg:w-80 bg-white shadow-sm rounded-xl sticky top-36">
+            <div className=" bg-white shadow-sm rounded-xl sticky top-36">
 
                 <div className="p-4">
                     <div className="flex justify-between items-center mb-4">

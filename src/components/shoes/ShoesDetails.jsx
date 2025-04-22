@@ -253,13 +253,13 @@ export default function ShoesDetails({ productId }) {
                             <div className='flex items-center gap-2'>
                                 <p className="text-lg flex items-center gap-2">
                                     Farbe: {shoe?.colors?.[selectedColorVariant]?.colorName || 'N/A'}
-                                    <span
+                                    {/* <span
                                         className='w-6 h-6 rounded-full border'
                                         style={{ backgroundColor: shoe?.colors?.[selectedColorVariant]?.colorCode || '#fff' }}
-                                    ></span>
+                                    ></span> */}
                                 </p>
-                                <p className='text-lg'>|</p>
-                                <p className='text-lg'>{shoe?.gender}</p>
+                                {/* <p className='text-lg'>|</p>
+                                <p className='text-lg'>{shoe?.gender}</p> */}
                             </div>
                         </div>
 
