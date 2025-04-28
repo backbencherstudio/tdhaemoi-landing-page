@@ -186,101 +186,69 @@ export default function CreateProducts() {
         try {
           const product = await getProductById(editId);
           
-          // Set form data
           setFormData(prev => ({
             ...prev,
             ...product
           }));
 
-          // Automatically set the first color variant as active if exists
+          // Handle color variants
           if (product.colorVariants && product.colorVariants.length > 0) {
             setCurrentColor(product.colorVariants[0]);
           }
 
-          // Rest of your existing fetch logic...
+          // Handle selected answers and nested questions
           if (product.selectedAnswers) {
+            // First, set the initial answers without triggering nested questions
             setSelectedAnswers(product.selectedAnswers);
-          }
 
-          // Fetch categories and set initial category
-          if (product.category) {
-            const categoriesResponse = await getAllCategories();
-            if (categoriesResponse.success) {
-              setCategories(categoriesResponse.data);
-              setSelectedCategory(product.category);
+            // If category exists, fetch category data
+            if (product.category) {
+              const categoriesResponse = await getAllCategories();
+              if (categoriesResponse.success) {
+                setCategories(categoriesResponse.data);
+                setSelectedCategory(product.category);
 
-              // Fetch subcategories
-              const subCategoriesResponse = await getSubCategories(product.category);
-              if (subCategoriesResponse.success) {
-                setSubCategories(subCategoriesResponse.data);
-                setSelectedSubCategory(product.subCategory);
+                const subCategoriesResponse = await getSubCategories(product.category);
+                if (subCategoriesResponse.success) {
+                  setSubCategories(subCategoriesResponse.data);
+                  setSelectedSubCategory(product.subCategory);
 
-                // Fetch questions
-                const questionsResponse = await getCategoryQuestions(
-                  product.category,
-                  product.subCategory
-                );
-                if (questionsResponse.success) {
-                  setQuestions(questionsResponse.data);
-                  
-                  // Reset nested questions before reconstructing
-                  setNextQuestions(null);
-                  
-                  // Create a Set to track unique question IDs
-                  const processedQuestionIds = new Set();
-                  let allNestedQuestions = [];
+                  // Fetch questions and handle nested questions properly
+                  const questionsResponse = await getCategoryQuestions(
+                    product.category,
+                    product.subCategory
+                  );
 
-                  // Process main questions and their selected answers
-                  questionsResponse.data.forEach(question => {
-                    const selectedAnswer = Object.entries(product.selectedAnswers || {}).find(
-                      ([key, value]) => key === question.question_key
-                    );
-
-                    if (selectedAnswer && !processedQuestionIds.has(question.question_key)) {
-                      processedQuestionIds.add(question.question_key);
+                  if (questionsResponse.success) {
+                    setQuestions(questionsResponse.data);
+                    
+                    // Reset nested questions
+                    let allNestedQuestions = [];
+                    
+                    // Process main questions and their nested questions
+                    questionsResponse.data.forEach(question => {
+                      const selectedAnswer = product.selectedAnswers[question.question_key];
                       
-                      // Find the selected option
-                      const selectedOption = question.options.find(
-                        opt => `${question.question_key}_${opt.id}` === selectedAnswer[1].value
-                      );
+                      if (selectedAnswer) {
+                        // Find the selected option that matches the saved answer
+                        const selectedOption = question.options.find(
+                          opt => `${question.question_key}_${opt.id}` === selectedAnswer.value
+                        );
 
-                      // Add nested questions if they exist
-                      if (selectedOption?.nextQuestions?.questions) {
-                        selectedOption.nextQuestions.questions.forEach(nestedQ => {
-                          if (!processedQuestionIds.has(nestedQ.id)) {
-                            processedQuestionIds.add(nestedQ.id);
-                            allNestedQuestions.push(nestedQ);
-                          }
-                        });
+                        // If this option has nested questions, add them
+                        if (selectedOption?.nextQuestions?.questions) {
+                          allNestedQuestions = [
+                            ...allNestedQuestions,
+                            ...selectedOption.nextQuestions.questions
+                          ];
+                        }
                       }
+                    });
+
+                    // Set nested questions only for the currently selected options
+                    if (allNestedQuestions.length > 0) {
+                      setNextQuestions(allNestedQuestions);
                     }
-                  });
-
-                  // Process nested answers
-                  Object.entries(product.selectedAnswers || {}).forEach(([key, answer]) => {
-                    if (answer.isNested && !processedQuestionIds.has(key)) {
-                      const questionId = key.replace('nested_', '');
-                      processedQuestionIds.add(questionId);
-
-                      // Find the parent question and its nested questions
-                      questionsResponse.data.forEach(mainQuestion => {
-                        mainQuestion.options.forEach(option => {
-                          if (option.nextQuestions?.questions) {
-                            const nestedQuestion = option.nextQuestions.questions.find(
-                              nq => nq.id.toString() === questionId
-                            );
-                            if (nestedQuestion && !allNestedQuestions.some(q => q.id === nestedQuestion.id)) {
-                              allNestedQuestions.push(nestedQuestion);
-                            }
-                          }
-                        });
-                      });
-                    }
-                  });
-
-                  // Set unique nested questions
-                  if (allNestedQuestions.length > 0) {
-                    setNextQuestions(allNestedQuestions);
                   }
                 }
               }
@@ -740,88 +708,57 @@ export default function CreateProducts() {
     }
   };
 
-  // Add handleOptionSelect to handle nested questions
+  // Update handleOptionSelect to properly handle nested questions
   const handleOptionSelect = (questionKey, value, option, isNested = false) => {
     const answerKey = isNested ? `nested_${questionKey}` : questionKey;
     
-    // Update selected answers with complete data structure
     setSelectedAnswers(prev => ({
-        ...prev,
-        [answerKey]: {
-            value: value,
-            question: option.question,
-            answer: option.option,
-            isNested: isNested
-        }
+      ...prev,
+      [answerKey]: {
+        value: value,
+        question: option.question,
+        answer: option.option,
+        isNested: isNested
+      }
     }));
 
-    // If this is a main question (not nested)
+    // Handle nested questions
     if (!isNested) {
-        // Find the current question in the questions array
-        const currentQuestion = questions.find(q => q.question_key === questionKey);
-        if (currentQuestion) {
-            // Find the selected option in the current question
-            const selectedOption = currentQuestion.options.find(
-                opt => `${questionKey}_${opt.id}` === value
-            );
+      const currentQuestion = questions.find(q => q.question_key === questionKey);
+      if (currentQuestion) {
+        const selectedOption = currentQuestion.options.find(
+          opt => `${questionKey}_${opt.id}` === value
+        );
 
-            // If the selected option has next questions, update them
-            if (selectedOption?.nextQuestions?.questions) {
-                setNextQuestions(prev => {
-                    // Keep existing nested questions that aren't related to this question
-                    const existingQuestions = prev?.filter(q => 
-                        !selectedOption.nextQuestions.questions.some(
-                            newQ => newQ.id === q.id
-                        )
-                    ) || [];
-                    
-                    return [
-                        ...existingQuestions,
-                        ...selectedOption.nextQuestions.questions
-                    ];
-                });
-            }
-        }
-    } else {
-        // For nested questions
-        if (option.nextQuestions?.questions) {
-            setNextQuestions(prev => {
-                const existingQuestions = prev?.filter(q => 
-                    !option.nextQuestions.questions.some(
-                        newQ => newQ.id === q.id
-                    )
-                ) || [];
-                
-                return [
-                    ...existingQuestions,
-                    ...option.nextQuestions.questions
-                ];
-            });
-        }
+        // Clear previous nested questions for this question
+        setNextQuestions(prev => {
+          const filteredQuestions = prev?.filter(q => 
+            !currentQuestion.options.some(opt => 
+              opt.nextQuestions?.questions?.some(nq => nq.id === q.id)
+            )
+          ) || [];
+
+          // Add new nested questions if they exist
+          return selectedOption?.nextQuestions?.questions 
+            ? [...filteredQuestions, ...selectedOption.nextQuestions.questions]
+            : filteredQuestions;
+        });
+      }
     }
 
     // Update form data
     setFormData(prev => ({
-        ...prev,
-        selectedAnswers: {
-            ...prev.selectedAnswers,
-            [answerKey]: {
-                value: value,
-                question: option.question,
-                answer: option.option,
-                isNested: isNested
-            }
+      ...prev,
+      selectedAnswers: {
+        ...prev.selectedAnswers,
+        [answerKey]: {
+          value: value,
+          question: option.question,
+          answer: option.option,
+          isNested: isNested
         }
+      }
     }));
-
-    // Log the current state for debugging
-    console.log('Selected Answers:', {
-        answerKey,
-        value,
-        option,
-        isNested,
-        allAnswers: selectedAnswers
-    });
   };
 
   return (
