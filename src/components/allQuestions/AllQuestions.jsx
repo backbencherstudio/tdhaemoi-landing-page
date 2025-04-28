@@ -55,7 +55,7 @@ export default function AllQuestions() {
     // const isFirstQuestion = currentQuestionIndex === 0;
 
     // Modify handleAnswerSelect to handle both radio and input
-    const handleAnswerSelect = (questionId, answerId, answerText, option) => {
+    const handleAnswerSelect = (questionId, answerId, answerText, option, inputValue = '') => {
         const newAnswers = {
             ...answers,
             [questionId]: { 
@@ -63,7 +63,7 @@ export default function AllQuestions() {
                 answer: answerText,
                 hasNextQuestions: option.nextQuestions ? true : false,
                 nextQuestions: option.nextQuestions || null,
-                inputValue: inputValues[questionId] || '',
+                inputValue: inputValue || inputValues[questionId] || '',
                 isNested: !!nestedQuestions
             }
         };
@@ -72,15 +72,26 @@ export default function AllQuestions() {
 
     // Add new function to handle input changes
     const handleInputChange = (questionId, value) => {
+        // Validate input to ensure it's a valid number
+        const numericValue = value.replace(/[^0-9]/g, '');
+        
         setInputValues(prev => ({
             ...prev,
-            [questionId]: value
+            [questionId]: numericValue
         }));
 
         // Update answer when input changes
-        if (value) {
+        if (numericValue) {
             const option = questions[currentQuestionIndex].options[0];
-            handleAnswerSelect(questionId, option.id, `${option.option} ${value}`, option);
+            const fullAnswer = `${option.option.split('______')[0]}${numericValue}${option.option.split('______')[1]}`;
+            
+            handleAnswerSelect(
+                questionId, 
+                option.id, 
+                fullAnswer, 
+                option,
+                numericValue // Pass the numeric value separately
+            );
         }
     }
 
@@ -153,20 +164,62 @@ export default function AllQuestions() {
     const handleComplete = () => {
         const currentQuestionId = questions[currentQuestionIndex].id;
         if (answers[currentQuestionId]) {
-            console.log('All Questions Completed! Final Answers:', answers)
+            // Get user data from sessionStorage
+            const formData = JSON.parse(sessionStorage.getItem('formSubmissionData') || '{}');
+            
+            // Create answers array with questions and selected options
+            const answersArray = Object.entries(answers).map(([questionId, answerData]) => {
+                const question = questions.find(q => q.id === parseInt(questionId)) || 
+                               (nestedQuestions?.questions || []).find(q => q.id === parseInt(questionId));
+                
+                return {
+                    questionId: parseInt(questionId),
+                    question: question?.question || '',
+                    selectedOption: {
+                        id: answerData.id,
+                        answer: answerData.answer
+                    },
+                    inputValue: answerData.inputValue || '',
+                    isSkipped: answerData.skipped || false
+                };
+            });
 
-            // Save answers to sessionStorage
-            sessionStorage.setItem('questionAnswers', JSON.stringify(answers))
+            // Create final data structure
+            const finalData = {
+                userData: {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    gender: formData.gender
+                },
+                categoryInfo: {
+                    id: formData.categoryId,
+                    title: formData.categoryTitle,
+                    slug: formData.categorySlug,
+                    subCategory: formData.selectedSubCategory ? {
+                        id: formData.selectedSubCategory.id,
+                        title: formData.selectedSubCategory.title,
+                        slug: formData.selectedSubCategory.slug
+                    } : null
+                },
+                questionsAndAnswers: answersArray
+            };
+
+            // Log the complete data structure
+            console.log('Complete User Journey Data:', finalData);
+
+            // Store the final data
+            sessionStorage.setItem('completeUserData', JSON.stringify(finalData));
 
             // Show loading animation
-            setShowLoadingSpring(true)
+            setShowLoadingSpring(true);
 
             // Redirect to shoes page after a brief delay
             setTimeout(() => {
-                router.push('/shoes')
-            }, 500)
+                router.push('/shoes');
+            }, 500);
         }
-    }
+    };
 
     if (isLoading) {
         return (
@@ -283,7 +336,7 @@ export default function AllQuestions() {
                                             type="radio"
                                             name={`question-${currentQuestion.id}`}
                                             checked={answers[currentQuestion.id]?.id === option.id}
-                                            onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option, option)}
+                                            onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option, option, inputValues[currentQuestion.id] || '')}
                                             className="mr-4 accent-[#62a07c] w-5 h-5"
                                         />
                                         <span>{beforeInput}</span>
@@ -291,6 +344,8 @@ export default function AllQuestions() {
                                             type="number"
                                             value={inputValues[currentQuestion.id] || ''}
                                             onChange={(e) => handleInputChange(currentQuestion.id, e.target.value)}
+                                            min="0"
+                                            max="999"
                                             className="mx-2 w-20 p-1 bg-transparent border border-gray-700 rounded text-white focus:border-[#62a07c] outline-none"
                                         />
                                         <span>{afterInput}</span>
@@ -311,7 +366,7 @@ export default function AllQuestions() {
                                         type="radio"
                                         name={`question-${currentQuestion.id}`}
                                         checked={answers[currentQuestion.id]?.id === option.id}
-                                        onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option, option)}
+                                        onChange={() => handleAnswerSelect(currentQuestion.id, option.id, option.option, option, inputValues[currentQuestion.id] || '')}
                                         className="mr-4 accent-[#62a07c] w-5 h-5"
                                     />
                                     <span>{option.option}</span>

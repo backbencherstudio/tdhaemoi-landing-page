@@ -5,26 +5,60 @@ import { cache } from 'react';
 export const createProducts = async (productData) => {
     try {
         const formData = new FormData();
-        formData.append('name', productData.name);
+        
+        // Basic product information
+        formData.append('name', productData.productName);
         formData.append('brand', productData.brand);
-        formData.append('Category', productData.Category);
-        formData.append('Sub_Category', productData.Sub_Category);
+        formData.append('Category', productData.category);
+        formData.append('Sub_Category', productData.subCategory);
         formData.append('typeOfShoes', productData.typeOfShoes);
         formData.append('productDesc', productData.productDesc);
         formData.append('price', productData.price);
         formData.append('availability', String(productData.availability));
-        formData.append('offer', productData.offer);
-        formData.append('size', JSON.stringify(productData.size));
-        formData.append('feetFirstFit', productData.feetFirstFit);
-        formData.append('footLength', productData.footLength);
-        formData.append('technicalData', productData.technicalData);
-        formData.append('Company', productData.Company);
+        formData.append('offer', productData.offer || '0');
+        
+        // Handle size and quantities
+        const sizeData = productData.size.map(size => ({
+            size: size,
+            quantity: parseInt(productData.sizeQuantities[size]) || 0
+        }));
+        formData.append('size', JSON.stringify(sizeData));
+        
+        // Technical information
+        formData.append('feetFirstFit', productData.feetFirstFit || '');
+        formData.append('footLength', productData.footLength || '');
+        formData.append('technicalData', productData.technicalData || '');
+        formData.append('Company', productData.company || '');
         formData.append('gender', productData.gender);
         
-        // Add characteristics as stringified array of IDs
+        // Process questions and answers
+        const questionData = {
+            category: productData.category,
+            subCategory: productData.subCategory || null,
+            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
+                questionKey,
+                answer: value.value,
+                question: value.question,
+                isNested: questionKey.startsWith('nested_')
+            }))
+        };
+
+        // Log the question data before stringifying
+        console.log('Question Data to Send:', JSON.stringify(questionData, null, 2));
+
+        formData.append('question', JSON.stringify(questionData));
+
+        // Log formData for debugging
+        for (let pair of formData.entries()) {
+            if (pair[0] === 'question') {
+                console.log('Question FormData:', JSON.parse(pair[1]));
+            }
+        }
+
+        // Add characteristics
         formData.append('characteristics', JSON.stringify(productData.characteristics));
 
-        // Add images with color information
+        // Handle color variants and images
         let imageIndex = 0;
         productData.colorVariants.forEach((variant, colorIndex) => {
             variant.images.forEach(img => {
@@ -33,11 +67,12 @@ export const createProducts = async (productData) => {
                 const renamedFile = new File([img.file], uniqueFileName, {
                     type: img.file.type
                 });
-
                 formData.append('images', renamedFile);
                 imageIndex++;
             });
         });
+
+        // Prepare color data
         const colorsArray = productData.colorVariants.map((variant, colorIndex) => ({
             colorName: variant.colorName,
             colorCode: variant.colorCode,
@@ -46,7 +81,6 @@ export const createProducts = async (productData) => {
                 return `${Date.now()}_${colorIndex}_${imgIndex}.${fileExtension}`;
             })
         }));
-
         formData.append('colors', JSON.stringify(colorsArray));
 
         // Log formData for debugging
@@ -54,6 +88,7 @@ export const createProducts = async (productData) => {
             console.log(pair[0], pair[1]);
         }
 
+        // Send the request
         const response = await axiosClient.post('/products', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -62,7 +97,6 @@ export const createProducts = async (productData) => {
 
         return response.data;
     } catch (error) {
-        // console.error('API Error:', error.response?.data || error);
         throw new Error(error.response?.data?.message || error.message || 'Something went wrong');
     }
 }
@@ -109,30 +143,48 @@ export const getAllProduct = async ({
         throw new Error(errorMessage);
     }
 }
-
 // update product admin
 export const updateProduct = async (id, productData) => {
     try {
         const formData = new FormData();
 
-        // Add basic product fields
-        formData.append('name', productData.name);
+        // Basic product fields
+        formData.append('name', productData.productName);
         formData.append('brand', productData.brand);
-        formData.append('Category', productData.Category);
-        formData.append('Sub_Category', productData.Sub_Category);
+        formData.append('Category', productData.category);
+        formData.append('Sub_Category', productData.subCategory);
         formData.append('typeOfShoes', productData.typeOfShoes);
         formData.append('productDesc', productData.productDesc);
         formData.append('price', productData.price);
         formData.append('availability', String(productData.availability));
         formData.append('offer', productData.offer || '0');
-        formData.append('size', JSON.stringify(productData.size));
-        formData.append('feetFirstFit', productData.feetFirstFit);
-        formData.append('footLength', productData.footLength);
-        formData.append('technicalData', productData.technicalData);
-        formData.append('Company', productData.Company);
+
+        // Handle size and quantities
+        const sizeData = productData.size.map(size => ({
+            size: size,
+            quantity: parseInt(productData.sizeQuantities[size]) || 0
+        }));
+        formData.append('size', JSON.stringify(sizeData));
+
+        // Technical information
+        formData.append('feetFirstFit', productData.feetFirstFit || '');
+        formData.append('footLength', productData.footLength || '');
+        formData.append('technicalData', productData.technicalData || '');
+        formData.append('Company', productData.company || '');
         formData.append('gender', productData.gender);
-        
-        // Add characteristics as stringified array of IDs
+
+        // Handle questions and answers
+        const questionData = {
+            category: productData.category,
+            subCategory: productData.subCategory || null,
+            answers: Object.entries(productData.answers || {}).map(([key, value]) => ({
+                questionKey: key,
+                answer: value
+            }))
+        };
+        formData.append('question', JSON.stringify(questionData));
+
+        // Add characteristics
         formData.append('characteristics', JSON.stringify(productData.characteristics));
 
         // Handle color variants and their images
@@ -202,7 +254,6 @@ export const updateProduct = async (id, productData) => {
     }
 };
 
-
 // delete single image product admin
 export const deleteSingleImage = async (productId, imageFilename) => {
     try {
@@ -218,7 +269,6 @@ export const deleteSingleImage = async (productId, imageFilename) => {
         throw new Error(error.response?.data?.message || error.message || 'Failed to delete image');
     }
 }
-
 // delete product admin
 export const deleteProduct = async (id) => {
     try {
@@ -228,9 +278,6 @@ export const deleteProduct = async (id) => {
         throw new Error(error.message || 'Failed to delete product');
     }
 }
-
-
-
 // Get all products with filters client site 
 export const getAllProducts = cache(async (filters) => {
     const queryParams = new URLSearchParams();
@@ -299,8 +346,6 @@ export const getAllProducts = cache(async (filters) => {
         throw new Error(error.response?.data?.message || 'Failed to fetch products');
     }
 });
-
-
 // get product by id admin
 export const getProductById = async (id) => {
     try {
@@ -308,10 +353,71 @@ export const getProductById = async (id) => {
         if (response.data && response.data.success && response.data.product) {
             const product = response.data.product;
 
-            return {
+            // Parse question data
+            let parsedQuestions = {};
+            if (product.question) {
+                try {
+                    const questionData = typeof product.question === 'string' 
+                        ? JSON.parse(product.question) 
+                        : product.question;
+
+                    // Parse answers array from the question data
+                    if (questionData.answers && Array.isArray(questionData.answers)) {
+                        questionData.answers.forEach(answer => {
+                            const { questionKey, answer: answerValue } = answer;
+                            
+                            // Create the value in the expected format
+                            parsedQuestions[questionKey] = {
+                                value: answerValue,
+                                answer: answerValue,
+                                isNested: questionKey.startsWith('nested_'),
+                                // Reconstruct the full answer structure
+                                question: `${questionKey}_${answerValue.split('_').pop()}`
+                            };
+                        });
+                    }
+
+                    // Stringify the parsed questions for debugging
+                    console.log('Parsed Questions:', JSON.stringify(parsedQuestions, null, 2));
+                } catch (error) {
+                    console.error('Error parsing question data:', error);
+                }
+            }
+
+            // Parse size data
+            let sizeData = [];
+            let sizeQuantities = {};
+            try {
+                const parsedSize = typeof product.size === 'string' 
+                    ? JSON.parse(product.size) 
+                    : product.size;
+
+                if (Array.isArray(parsedSize)) {
+                    if (parsedSize.length > 0 && typeof parsedSize[0] === 'object') {
+                        sizeData = parsedSize.map(item => item.size);
+                        sizeQuantities = parsedSize.reduce((acc, item) => ({
+                            ...acc,
+                            [item.size]: item.quantity
+                        }), {});
+                    } else {
+                        sizeData = parsedSize;
+                    }
+                }
+            } catch (error) {
+                console.error('Error parsing size data:', error);
+            }
+
+            const transformedProduct = {
                 ...product,
-                size: Array.isArray(product.size) ? product.size :
-                    typeof product.size === 'string' ? JSON.parse(product.size) : [],
+                productName: product.name,
+                category: product.Category?.toLowerCase(),
+                subCategory: product.Sub_Category?.toLowerCase(),
+                size: sizeData,
+                sizeQuantities: sizeQuantities,
+                selectedAnswers: parsedQuestions,
+                characteristics: Array.isArray(product.characteristics) 
+                    ? product.characteristics.map(c => c.id.toString())
+                    : [],
                 colorVariants: product.colors?.map(color => ({
                     id: color.id,
                     colorName: color.colorName,
@@ -320,12 +426,16 @@ export const getProductById = async (id) => {
                         id: img.id,
                         url: img.url,
                         preview: img.url,
-                        name: `Image ${img.id}`,
                         isExisting: true,
-                        file: null // Add this to maintain structure
+                        file: null
                     }))
                 })) || []
             };
+
+            // Log the transformed product for debugging
+            console.log('Transformed Product:', JSON.stringify(transformedProduct, null, 2));
+
+            return transformedProduct;
         }
         throw new Error('Product not found');
     } catch (error) {
@@ -333,7 +443,6 @@ export const getProductById = async (id) => {
         throw new Error(error.response?.data?.message || 'Failed to fetch product');
     }
 }
-
 export const getProductByIdclient = async (id) => {
     try {
         const response = await axiosClient.get(`/products/${id}`);
@@ -370,7 +479,6 @@ export const getProductByIdclient = async (id) => {
     }
 }
 
-
 // get CHARACTERISTICS
 export const getCharacteristics = async () => {
     const response = await axiosClient.get('/products/technical-icons');
@@ -380,3 +488,77 @@ export const getCharacteristics = async () => {
         throw new Error(error.response?.data?.message || 'Failed to fetch characteristics');
     }
 }
+
+// Get all categories
+export const getAllCategories = async () => {
+    try {
+        const response = await axiosClient.get('/questions');
+        if (response.data && response.data.level === "category") {
+            return {
+                success: true,
+                data: response.data.data
+            };
+        }
+        throw new Error('Invalid category data format');
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch categories');
+    }
+}
+
+// Get subcategories by category slug
+export const getSubCategories = async (categorySlug) => {
+    try {
+        const response = await axiosClient.get(`/questions/${categorySlug}`);
+        if (response.data) {
+            if (!response.data.data || response.data.level !== "sub-categories") {
+                return {
+                    success: true,
+                    data: []
+                };
+            }
+
+            return {
+                success: true,
+                data: response.data.data
+            };
+        }
+
+        return {
+            success: true,
+            data: []
+        };
+    } catch (error) {
+        // console.log('Error fetching subcategories:', error);
+        return {
+            success: true,
+            data: []
+        };
+    }
+}
+
+// Get questions by category/subcategory slug
+export const getCategoryQuestions = async (categorySlug, subCategorySlug = null) => {
+    try {
+        const formattedCategorySlug = categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
+        let endpoint = `/questions/${formattedCategorySlug}`;
+
+        if (subCategorySlug) {
+            const formattedSubCategorySlug = subCategorySlug.charAt(0).toUpperCase() + subCategorySlug.slice(1);
+            endpoint = `/questions/${formattedCategorySlug}/${formattedSubCategorySlug}`;
+        }
+        const response = await axiosClient.get(endpoint);
+        return {
+            success: true,
+            data: response.data.questions || [],
+            nextQuestions: response.data.nextQuestions || null
+        };
+    } catch (error) {
+        // console.error('Error fetching questions:', error);
+        return {
+            success: true,
+            data: [],
+            nextQuestions: null
+        };
+    }
+}
+

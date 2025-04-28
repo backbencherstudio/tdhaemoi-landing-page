@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
-import { createProducts, getProductById, updateProduct, deleteSingleImage, getCharacteristics } from "@/apis/productsApis";
+import { createProducts, getProductById, updateProduct, deleteSingleImage, getCharacteristics, getAllCategories, getSubCategories, getCategoryQuestions } from "@/apis/productsApis";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import JoditEditor from "jodit-react";
@@ -140,6 +140,20 @@ export default function CreateProducts() {
   const [characteristics, setCharacteristics] = useState([]);
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
+
+  // Add these state variables
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [nextQuestions, setNextQuestions] = useState(null);
+
+  // Add these new state variables at the top with other states
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     productName: '',
     brand: '',
@@ -151,6 +165,7 @@ export default function CreateProducts() {
     availability: true,
     offer: '',
     size: [],
+    sizeQuantities: {},
     feetFirstFit: '',
     footLength: '',
     color: '',
@@ -167,9 +182,115 @@ export default function CreateProducts() {
   // Add this effect to fetch product data when in edit mode
   useEffect(() => {
     if (isEditMode) {
-      fetchProductData()
+      const fetchProductData = async () => {
+        try {
+          const product = await getProductById(editId);
+          
+          // Set form data
+          setFormData(prev => ({
+            ...prev,
+            ...product
+          }));
+
+          // Set selected answers
+          if (product.selectedAnswers) {
+            setSelectedAnswers(product.selectedAnswers);
+          }
+
+          // Fetch categories and set initial category
+          if (product.category) {
+            const categoriesResponse = await getAllCategories();
+            if (categoriesResponse.success) {
+              setCategories(categoriesResponse.data);
+              setSelectedCategory(product.category);
+
+              // Fetch subcategories
+              const subCategoriesResponse = await getSubCategories(product.category);
+              if (subCategoriesResponse.success) {
+                setSubCategories(subCategoriesResponse.data);
+                setSelectedSubCategory(product.subCategory);
+
+                // Fetch questions
+                const questionsResponse = await getCategoryQuestions(
+                  product.category,
+                  product.subCategory
+                );
+                if (questionsResponse.success) {
+                  setQuestions(questionsResponse.data);
+                  
+                  // Find and reconstruct nested questions
+                  let allNestedQuestions = [];
+                  
+                  // Go through each main question
+                  questionsResponse.data.forEach(question => {
+                    // Find if this question has a selected answer
+                    const selectedAnswer = Object.entries(product.selectedAnswers || {}).find(
+                      ([key, value]) => key === question.question_key
+                    );
+
+                    if (selectedAnswer) {
+                      // Find the selected option
+                      const selectedOption = question.options.find(
+                        opt => `${question.question_key}_${opt.id}` === selectedAnswer[1].value
+                      );
+
+                      // If this option has nested questions, add them
+                      if (selectedOption?.nextQuestions?.questions) {
+                        allNestedQuestions = [
+                          ...allNestedQuestions,
+                          ...selectedOption.nextQuestions.questions
+                        ];
+                      }
+                    }
+                  });
+
+                  // Set nested questions if any were found
+                  if (allNestedQuestions.length > 0) {
+                    setNextQuestions(allNestedQuestions);
+                  }
+
+                  // Check for any nested answers and make sure their questions are visible
+                  Object.entries(product.selectedAnswers || {}).forEach(([key, answer]) => {
+                    if (answer.isNested) {
+                      // Make sure the parent question's nested questions are visible
+                      const parentQuestionKey = key.replace('nested_', '');
+                      const parentQuestion = questionsResponse.data.find(q => 
+                        q.options.some(opt => 
+                          opt.nextQuestions?.questions.some(nq => 
+                            nq.id.toString() === parentQuestionKey
+                          )
+                        )
+                      );
+
+                      if (parentQuestion) {
+                        const parentOption = parentQuestion.options.find(opt => 
+                          opt.nextQuestions?.questions.some(nq => 
+                            nq.id.toString() === parentQuestionKey
+                          )
+                        );
+
+                        if (parentOption?.nextQuestions?.questions) {
+                          setNextQuestions(prev => [
+                            ...(prev || []),
+                            ...parentOption.nextQuestions.questions
+                          ]);
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching product:', error);
+          toast.error('Failed to load product data');
+        }
+      };
+
+      fetchProductData();
     }
-  }, [editId])
+  }, [editId, isEditMode]);
 
 
   useEffect(() => {
@@ -185,60 +306,6 @@ export default function CreateProducts() {
     } catch (error) {
       console.error('Error fetching characteristics:', error);
       toast.error('Failed to load characteristics');
-    }
-  };
-
-  const fetchProductData = async () => {
-    try {
-      const product = await getProductById(editId);
-      if (product) {
-        let parsedSize = [];
-        try {
-          parsedSize = product.size ?
-            (typeof product.size === 'string' ? JSON.parse(product.size) : product.size)
-            : [];
-        } catch (parseError) {
-          console.error('Error parsing size data:', parseError);
-          parsedSize = Array.isArray(product.size) ? product.size : [];
-        }
-
-        // Handle characteristics - they are now objects in the array
-        const characteristicIds = product.characteristics ?
-          (Array.isArray(product.characteristics) ?
-            product.characteristics.map(char => char.id.toString()) :
-            [])
-          : [];
-
-        const colorVariants = product.colorVariants || [];
-
-        setFormData({
-          productName: product.name || '',
-          brand: product.brand || '',
-          category: (product.Category || '').toLowerCase(),
-          subCategory: product.Sub_Category || '',
-          typeOfShoes: product.typeOfShoes || '',
-          productDesc: product.productDesc || '',
-          price: product.price?.toString() || '',
-          availability: Boolean(product.availability),
-          offer: product.offer?.toString() || '',
-          size: parsedSize,
-          feetFirstFit: product.feetFirstFit?.toString() || '',
-          footLength: product.footLength || '',
-          color: product.color || '',
-          technicalData: product.technicalData || '',
-          company: product.Company || '',
-          gender: (product.gender || '').toLowerCase(),
-          colorVariants: colorVariants,
-          characteristics: characteristicIds  // Use the extracted IDs
-        });
-
-        if (colorVariants.length > 0) {
-          setCurrentColor(colorVariants[0]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching product data:', error);
-      toast.error("Failed to fetch product data");
     }
   };
 
@@ -265,14 +332,41 @@ export default function CreateProducts() {
   // Handle size selection
   const handleSizeToggle = (size) => {
     setFormData(prev => {
-      const currentSizes = [...prev.size]
+      const currentSizes = [...prev.size];
+      const currentQuantities = { ...prev.sizeQuantities };
+
       if (currentSizes.includes(size)) {
-        return { ...prev, size: currentSizes.filter(s => s !== size) }
+        // Remove size and its quantity when deselected
+        delete currentQuantities[size];
+        return {
+          ...prev,
+          size: currentSizes.filter(s => s !== size),
+          sizeQuantities: currentQuantities
+        };
       } else {
-        return { ...prev, size: [...currentSizes, size] }
+        // Add size with initial quantity of 0
+        return {
+          ...prev,
+          size: [...currentSizes, size],
+          sizeQuantities: {
+            ...currentQuantities,
+            [size]: 0
+          }
+        };
       }
-    })
-  }
+    });
+  };
+
+  const handleSizeQuantityChange = (size, quantity) => {
+    const newQuantity = quantity === '' ? 0 : parseInt(quantity) || 0;
+    setFormData(prev => ({
+      ...prev,
+      sizeQuantities: {
+        ...prev.sizeQuantities,
+        [size]: newQuantity
+      }
+    }));
+  };
 
   // Handle availability toggle
   const handleAvailabilityToggle = (checked) => {
@@ -369,27 +463,30 @@ export default function CreateProducts() {
         return;
       }
 
-      // Convert characteristics to stringified array of IDs
-      const characteristicIds = JSON.stringify(formData.characteristics.map(id => parseInt(id)));
-
+      // Prepare the product data
       const productData = {
-        name: formData.productName,
+        productName: formData.productName,
         brand: formData.brand,
-        Category: formData.category,
-        Sub_Category: formData.subCategory,
+        category: formData.category,
+        subCategory: formData.subCategory,
         typeOfShoes: formData.typeOfShoes,
         productDesc: formData.productDesc,
         price: formData.price,
         availability: formData.availability,
         offer: formData.offer || '0',
         size: formData.size,
+        sizeQuantities: formData.sizeQuantities,
         feetFirstFit: formData.feetFirstFit,
         footLength: formData.footLength,
         technicalData: formData.technicalData,
-        Company: formData.company,
+        company: formData.company,
         gender: formData.gender?.toUpperCase(),
         colorVariants: formData.colorVariants,
-        characteristics: characteristicIds
+        characteristics: formData.characteristics,
+        // Add questions data
+        questions: questions, // Pass the questions array
+        selectedAnswers: selectedAnswers, // Pass the selected answers
+        nextQuestions: nextQuestions // Pass the next questions if any
       };
 
       let response;
@@ -544,6 +641,143 @@ export default function CreateProducts() {
     }
   }, [formData.colorVariants]);
 
+  // Add useEffect to fetch categories when component mounts
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Update the fetchCategories function
+  const fetchCategories = async () => {
+    setIsCategoryLoading(true);
+    try {
+      const response = await getAllCategories();
+      if (response.success) {
+        setCategories(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+      toast.error('Failed to load categories');
+    } finally {
+      setIsCategoryLoading(false);
+    }
+  };
+
+  // Update the handleCategoryChange function
+  const handleCategoryChange = async (categorySlug) => {
+    setSelectedCategory(categorySlug);
+    setSelectedSubCategory('');
+    setQuestions([]);
+    setNextQuestions(null);
+    setSelectedAnswers({});
+    setFormData(prev => ({
+      ...prev,
+      category: categorySlug,
+      subCategory: '',
+      answers: {}
+    }));
+
+    setIsSubCategoryLoading(true);
+    try {
+      // Fetch subcategories if available
+      const subCatsResponse = await getSubCategories(categorySlug);
+      if (subCatsResponse.success) {
+        setSubCategories(subCatsResponse.data);
+      } else {
+        setSubCategories([]);
+      }
+
+      // Fetch category questions
+      const questionsResponse = await getCategoryQuestions(categorySlug);
+      if (questionsResponse.success) {
+        setQuestions(questionsResponse.data);
+        setNextQuestions(questionsResponse.nextQuestions);
+      } else {
+        setQuestions([]);
+      }
+    } catch (error) {
+      console.log('Error loading category data:', error);
+      setSubCategories([]);
+      setQuestions([]);
+    } finally {
+      setIsSubCategoryLoading(false);
+    }
+  };
+
+  // Update the handleSubCategoryChange function
+  const handleSubCategoryChange = async (subCategorySlug) => {
+    setSelectedSubCategory(subCategorySlug);
+    setSelectedAnswers({});
+    setNextQuestions(null);
+    setFormData(prev => ({
+      ...prev,
+      subCategory: subCategorySlug,
+      answers: {}
+    }));
+
+    try {
+      const response = await getCategoryQuestions(selectedCategory, subCategorySlug);
+      if (response.success) {
+        setQuestions(response.data);
+        setNextQuestions(response.nextQuestions);
+      }
+    } catch (error) {
+      console.log('Error fetching subcategory questions:', error);
+      setQuestions([]);
+    }
+  };
+
+  // Add handleOptionSelect to handle nested questions
+  const handleOptionSelect = (questionKey, value, option, isNested = false) => {
+    const answerKey = isNested ? `nested_${questionKey}` : questionKey;
+    
+    // Update selected answers
+    setSelectedAnswers(prev => ({
+        ...prev,
+        [answerKey]: {
+            value: value,
+            question: option.question,
+            answer: option.option,
+            isNested: isNested
+        }
+    }));
+
+    // Find the current question in the questions array
+    const currentQuestion = questions.find(q => q.question_key === questionKey);
+    
+    // If this is a main question (not nested)
+    if (!isNested && currentQuestion) {
+        // Find the selected option in the current question
+        const selectedOption = currentQuestion.options.find(
+            opt => `${questionKey}_${opt.id}` === value
+        );
+
+        // If the selected option has next questions, update them
+        if (selectedOption?.nextQuestions?.questions) {
+            setNextQuestions(selectedOption.nextQuestions.questions);
+        }
+    } else {
+        // For nested questions, we want to keep the existing nextQuestions
+        // Only update if the current nested question leads to more questions
+        const nestedOption = option.nextQuestions?.questions;
+        if (nestedOption) {
+            setNextQuestions(prev => [...(prev || []), ...nestedOption]);
+        }
+    }
+
+    // Update form data
+    setFormData(prev => ({
+        ...prev,
+        selectedAnswers: {
+            ...prev.selectedAnswers,
+            [answerKey]: {
+                value: value,
+                question: option.question,
+                answer: option.option,
+                isNested: isNested
+            }
+        }
+    }));
+  };
 
   return (
     <div className=" max-w-7xl mx-auto">
@@ -735,7 +969,7 @@ export default function CreateProducts() {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Basic Information</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="productName">Product Name *</Label>
                   <Input
@@ -759,45 +993,6 @@ export default function CreateProducts() {
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-                <div className="space-y-2 w-full">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => handleSelectChange('category', value)}
-                  >
-                    <SelectTrigger className="w-full" id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="scarpe sportive">Scarpe sportive</SelectItem>
-                      <SelectItem value="running">Running</SelectItem>
-                      <SelectItem value="hiking">Hiking</SelectItem>
-                      <SelectItem value="casual">Casual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 w-full">
-                  <Label htmlFor="subCategory">Sub-Category</Label>
-                  <Select
-                    value={formData.subCategory}
-                    onValueChange={(value) => handleSelectChange('subCategory', value)}
-                  >
-                    <SelectTrigger className="w-full" id="subCategory">
-                      <SelectValue placeholder="Select sub-category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="scarpe da running">Scarpe da Running</SelectItem>
-                      <SelectItem value="boots">Boots</SelectItem>
-                      <SelectItem value="sandals">Sandals</SelectItem>
-                      <SelectItem value="athletic">Athletic</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="space-y-2 w-full">
                   <Label htmlFor="typeOfShoes">Type of Shoes</Label>
                   <Select
@@ -816,7 +1011,164 @@ export default function CreateProducts() {
                   </Select>
                 </div>
               </div>
+              {/* CATEGORIZATION & QUESTIONS */}
+              <div className="space-y-6 my-7">
+                <div>
+                  <CardTitle>Product Categorization & Questions</CardTitle>
+                  <CardDescription>Select category and answer relevant questions</CardDescription>
+                </div>
+                <div className="space-y-4">
+                  <div className='flex gap-4'>
+                    {/* Category Selection */}
+                    <div className="space-y-2 w-1/2">
+                      <Label>Category *</Label>
+                      <Select
+                        value={selectedCategory}
+                        onValueChange={handleCategoryChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          {isCategoryLoading ? (
+                            <div className="flex items-center gap-2">
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                              <span className="text-gray-500">Loading...</span>
+                            </div>
+                          ) : (
+                            <SelectValue placeholder="Select category" />
+                          )}
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories && categories.map(category => (
+                            <SelectItem key={category.slug} value={category.slug}>
+                              {category.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
+                    {/* Subcategory Selection */}
+                    {subCategories.length > 0 && (
+                      <div className="space-y-2 w-1/2">
+                        <Label>Subcategory</Label>
+                        <Select
+                          value={selectedSubCategory}
+                          onValueChange={handleSubCategoryChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            {isSubCategoryLoading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                                <span className="text-gray-500">Loading...</span>
+                              </div>
+                            ) : (
+                              <SelectValue placeholder="Select subcategory" />
+                            )}
+                          </SelectTrigger>
+                          <SelectContent>
+                            {subCategories.map(subCat => (
+                              <SelectItem key={subCat.slug} value={subCat.slug}>
+                                {subCat.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Questions */}
+                  {questions.length > 0 && (
+                    <div className="space-y-6 mt-6">
+                      <h3 className="text-lg font-medium">Product Questions</h3>
+                      {questions.map(question => (
+                        <div key={question.question_key} className="p-4 border rounded-lg bg-gray-50 space-y-3">
+                          <Label className="text-base font-medium text-gray-900">
+                            {question.question}
+                            {question.required && <span className="text-red-500 ml-1">*</span>}
+                          </Label>
+
+                          <Select
+                            value={selectedAnswers[question.question_key]?.value || ''}
+                            onValueChange={(value) => {
+                              const selectedOption = question.options.find(
+                                opt => `${question.question_key}_${opt.id}` === value
+                              );
+                              handleOptionSelect(
+                                question.question_key,
+                                value,
+                                {
+                                    question: question.question,
+                                    option: selectedOption?.option,
+                                    nextQuestions: selectedOption?.nextQuestions
+                                }
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="w-full bg-white">
+                              <SelectValue placeholder="Choose an answer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {question.options?.map(option => (
+                                <SelectItem
+                                  key={`${question.question_key}_${option.id}`}
+                                  value={`${question.question_key}_${option.id}`}
+                                >
+                                  {option.option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+
+                      {/* Render nested questions if available */}
+                      {nextQuestions && nextQuestions.length > 0 && (
+                        <div className="mt-6 space-y-6">
+                          <h3 className="text-lg font-medium">Additional Questions</h3>
+                          {nextQuestions.map(question => (
+                            <div key={question.id} className="p-4 border rounded-lg bg-gray-50 space-y-3">
+                              <Label className="text-base font-medium text-gray-900">
+                                {question.question}
+                              </Label>
+
+                              <Select
+                                value={selectedAnswers[`nested_${question.id}`] || ''}
+                                onValueChange={(value) => {
+                                  const selectedOption = question.options.find(
+                                    opt => `nested_${question.id}_${opt.id}` === value
+                                  );
+                                  handleOptionSelect(
+                                    question.id,
+                                    value,
+                                    { ...selectedOption, question: question.question },
+                                    true
+                                  );
+                                }}
+                              >
+                                <SelectTrigger className="w-full bg-white">
+                                  <SelectValue placeholder="Choose an answer" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {question.options?.map(option => (
+                                    <SelectItem
+                                      key={`nested_${question.id}_${option.id}`}
+                                      value={`nested_${question.id}_${option.id}`}
+                                    >
+                                      {option.option}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* product description */}
               <div className="space-y-2">
                 <Label htmlFor="productDesc">Product Description *</Label>
                 <div className="border rounded-md">
@@ -889,17 +1241,84 @@ export default function CreateProducts() {
               <h3 className="text-lg font-medium">Shoe Specifications</h3>
 
               <div className="space-y-4">
-                <Label>Available Sizes *</Label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Available Sizes & Quantities *</Label>
+                    <p className="text-sm text-gray-500 mt-1">Select sizes and specify quantities for each size</p>
+                  </div>
+                  <Badge variant="outline" className="font-normal">
+                    {formData.size.length} sizes selected
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {availableSizes.map(size => (
-                    <Badge
+                    <div
                       key={size}
-                      variant={formData.size.includes(size) ? "default" : "outline"}
-                      className="cursor-pointer hover:bg-gray-100 hover:text-black hover:border-black px-3 py-1"
-                      onClick={() => handleSizeToggle(size)}
+                      className={`relative group transition-all duration-200 ${formData.size.includes(size)
+                          ? 'border-2 border-green-500 bg-green-50'
+                          : 'border border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                        } rounded-lg p-3`}
                     >
-                      {size}
-                    </Badge>
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div
+                            onClick={() => handleSizeToggle(size)}
+                            className="flex items-center space-x-2 cursor-pointer"
+                          >
+                            <div className={`
+                              w-6 h-6 flex items-center justify-center rounded
+                              ${formData.size.includes(size)
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-100 text-gray-600'}
+                            `}>
+                              {size}
+                            </div>
+                            <span className={`text-sm ${formData.size.includes(size) ? 'text-green-700' : 'text-gray-600'}`}>
+                              EU
+                            </span>
+                          </div>
+
+                          {formData.size.includes(size) && (
+                            <button
+                              onClick={() => handleSizeToggle(size)}
+                              className="opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200 
+                                       text-gray-400 hover:text-red-500 focus:outline-none"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+
+                        {formData.size.includes(size) && (
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              min="0"
+                              value={formData.sizeQuantities[size]}
+                              onChange={(e) => handleSizeQuantityChange(size, e.target.value)}
+                              className="h-8 text-sm pr-8 bg-white"
+                              placeholder="Qty"
+                            />
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                              pcs
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Hover effect for unselected sizes */}
+                      {!formData.size.includes(size) && (
+                        <div
+                          className="absolute inset-0 bg-gray-50/80 opacity-0 group-hover:opacity-100 
+                                   transition-opacity duration-200 rounded-lg flex items-center 
+                                   justify-center cursor-pointer"
+                          onClick={() => handleSizeToggle(size)}
+                        >
+                          <Plus className="h-5 w-5 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -952,8 +1371,8 @@ export default function CreateProducts() {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Additional Information</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-                <div className="space-y-2 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                {/* <div className="space-y-2 w-full">
                   <Label htmlFor="company">Company/Manufacturer</Label>
                   <Input
                     id="company"
@@ -963,7 +1382,7 @@ export default function CreateProducts() {
                     placeholder="Enter company name"
                     className="w-full"
                   />
-                </div>
+                </div> */}
 
                 {/* GENDER */}
                 <div className="space-y-2 w-full">
@@ -1061,10 +1480,8 @@ export default function CreateProducts() {
 
             <Separator />
 
-
           </CardContent>
         </Card>
-
         {/* Submit Button */}
         <div className="flex justify-end">
           <Button
