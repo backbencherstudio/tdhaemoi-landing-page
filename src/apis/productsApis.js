@@ -37,24 +37,13 @@ export const createProducts = async (productData) => {
             subCategory: productData.subCategory || null,
             answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
                 questionKey,
-                answer: value.value,
+                answer: value.value,  // Use the value property
                 question: value.question,
-                isNested: questionKey.startsWith('nested_')
+                isNested: value.isNested
             }))
         };
-
-        // Log the question data before stringifying
-        console.log('Question Data to Send:', JSON.stringify(questionData, null, 2));
-
         formData.append('question', JSON.stringify(questionData));
-
-        // Log formData for debugging
-        for (let pair of formData.entries()) {
-            if (pair[0] === 'question') {
-                console.log('Question FormData:', JSON.parse(pair[1]));
-            }
-        }
-
+        
         // Add characteristics
         formData.append('characteristics', JSON.stringify(productData.characteristics));
 
@@ -353,6 +342,13 @@ export const getProductById = async (id) => {
         if (response.data && response.data.success && response.data.product) {
             const product = response.data.product;
 
+            // Helper function to format gender
+            const formatGender = (gender) => {
+                if (!gender) return '';
+                // Convert MALE -> male, FEMALE -> female, UNISEX -> unisex
+                return gender.toLowerCase();
+            };
+
             // Parse question data
             let parsedQuestions = {};
             if (product.question) {
@@ -411,6 +407,7 @@ export const getProductById = async (id) => {
                 ...product,
                 productName: product.name,
                 category: product.Category?.toLowerCase(),
+                gender: formatGender(product.gender),
                 subCategory: product.Sub_Category?.toLowerCase(),
                 size: sizeData,
                 sizeQuantities: sizeQuantities,

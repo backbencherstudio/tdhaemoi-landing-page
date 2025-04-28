@@ -179,7 +179,7 @@ export default function CreateProducts() {
   const availableSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47']
   const genderOptions = ['Male', 'Female', 'Unisex']
 
-  // Add this effect to fetch product data when in edit mode
+  // Update this useEffect that handles product data fetching
   useEffect(() => {
     if (isEditMode) {
       const fetchProductData = async () => {
@@ -192,7 +192,12 @@ export default function CreateProducts() {
             ...product
           }));
 
-          // Set selected answers
+          // Automatically set the first color variant as active if exists
+          if (product.colorVariants && product.colorVariants.length > 0) {
+            setCurrentColor(product.colorVariants[0]);
+          }
+
+          // Rest of your existing fetch logic...
           if (product.selectedAnswers) {
             setSelectedAnswers(product.selectedAnswers);
           }
@@ -218,66 +223,65 @@ export default function CreateProducts() {
                 if (questionsResponse.success) {
                   setQuestions(questionsResponse.data);
                   
-                  // Find and reconstruct nested questions
-                  let allNestedQuestions = [];
+                  // Reset nested questions before reconstructing
+                  setNextQuestions(null);
                   
-                  // Go through each main question
+                  // Create a Set to track unique question IDs
+                  const processedQuestionIds = new Set();
+                  let allNestedQuestions = [];
+
+                  // Process main questions and their selected answers
                   questionsResponse.data.forEach(question => {
-                    // Find if this question has a selected answer
                     const selectedAnswer = Object.entries(product.selectedAnswers || {}).find(
                       ([key, value]) => key === question.question_key
                     );
 
-                    if (selectedAnswer) {
+                    if (selectedAnswer && !processedQuestionIds.has(question.question_key)) {
+                      processedQuestionIds.add(question.question_key);
+                      
                       // Find the selected option
                       const selectedOption = question.options.find(
                         opt => `${question.question_key}_${opt.id}` === selectedAnswer[1].value
                       );
 
-                      // If this option has nested questions, add them
+                      // Add nested questions if they exist
                       if (selectedOption?.nextQuestions?.questions) {
-                        allNestedQuestions = [
-                          ...allNestedQuestions,
-                          ...selectedOption.nextQuestions.questions
-                        ];
+                        selectedOption.nextQuestions.questions.forEach(nestedQ => {
+                          if (!processedQuestionIds.has(nestedQ.id)) {
+                            processedQuestionIds.add(nestedQ.id);
+                            allNestedQuestions.push(nestedQ);
+                          }
+                        });
                       }
                     }
                   });
 
-                  // Set nested questions if any were found
+                  // Process nested answers
+                  Object.entries(product.selectedAnswers || {}).forEach(([key, answer]) => {
+                    if (answer.isNested && !processedQuestionIds.has(key)) {
+                      const questionId = key.replace('nested_', '');
+                      processedQuestionIds.add(questionId);
+
+                      // Find the parent question and its nested questions
+                      questionsResponse.data.forEach(mainQuestion => {
+                        mainQuestion.options.forEach(option => {
+                          if (option.nextQuestions?.questions) {
+                            const nestedQuestion = option.nextQuestions.questions.find(
+                              nq => nq.id.toString() === questionId
+                            );
+                            if (nestedQuestion && !allNestedQuestions.some(q => q.id === nestedQuestion.id)) {
+                              allNestedQuestions.push(nestedQuestion);
+                            }
+                          }
+                        });
+                      });
+                    }
+                  });
+
+                  // Set unique nested questions
                   if (allNestedQuestions.length > 0) {
                     setNextQuestions(allNestedQuestions);
                   }
-
-                  // Check for any nested answers and make sure their questions are visible
-                  Object.entries(product.selectedAnswers || {}).forEach(([key, answer]) => {
-                    if (answer.isNested) {
-                      // Make sure the parent question's nested questions are visible
-                      const parentQuestionKey = key.replace('nested_', '');
-                      const parentQuestion = questionsResponse.data.find(q => 
-                        q.options.some(opt => 
-                          opt.nextQuestions?.questions.some(nq => 
-                            nq.id.toString() === parentQuestionKey
-                          )
-                        )
-                      );
-
-                      if (parentQuestion) {
-                        const parentOption = parentQuestion.options.find(opt => 
-                          opt.nextQuestions?.questions.some(nq => 
-                            nq.id.toString() === parentQuestionKey
-                          )
-                        );
-
-                        if (parentOption?.nextQuestions?.questions) {
-                          setNextQuestions(prev => [
-                            ...(prev || []),
-                            ...parentOption.nextQuestions.questions
-                          ]);
-                        }
-                      }
-                    }
-                  });
                 }
               }
             }
@@ -741,26 +745,48 @@ export default function CreateProducts() {
         }
     }));
 
-    // Find the current question in the questions array
-    const currentQuestion = questions.find(q => q.question_key === questionKey);
-    
     // If this is a main question (not nested)
-    if (!isNested && currentQuestion) {
-        // Find the selected option in the current question
-        const selectedOption = currentQuestion.options.find(
-            opt => `${questionKey}_${opt.id}` === value
-        );
+    if (!isNested) {
+        // Find the current question in the questions array
+        const currentQuestion = questions.find(q => q.question_key === questionKey);
+        if (currentQuestion) {
+            // Find the selected option in the current question
+            const selectedOption = currentQuestion.options.find(
+                opt => `${questionKey}_${opt.id}` === value
+            );
 
-        // If the selected option has next questions, update them
-        if (selectedOption?.nextQuestions?.questions) {
-            setNextQuestions(selectedOption.nextQuestions.questions);
+            // If the selected option has next questions, update them
+            if (selectedOption?.nextQuestions?.questions) {
+                setNextQuestions(prev => {
+                    // Keep existing nested questions that aren't related to this question
+                    const existingQuestions = prev?.filter(q => 
+                        !selectedOption.nextQuestions.questions.some(
+                            newQ => newQ.id === q.id
+                        )
+                    ) || [];
+                    
+                    return [
+                        ...existingQuestions,
+                        ...selectedOption.nextQuestions.questions
+                    ];
+                });
+            }
         }
     } else {
-        // For nested questions, we want to keep the existing nextQuestions
-        // Only update if the current nested question leads to more questions
-        const nestedOption = option.nextQuestions?.questions;
-        if (nestedOption) {
-            setNextQuestions(prev => [...(prev || []), ...nestedOption]);
+        // For nested questions
+        if (option.nextQuestions?.questions) {
+            setNextQuestions(prev => {
+                const existingQuestions = prev?.filter(q => 
+                    !option.nextQuestions.questions.some(
+                        newQ => newQ.id === q.id
+                    )
+                ) || [];
+                
+                return [
+                    ...existingQuestions,
+                    ...option.nextQuestions.questions
+                ];
+            });
         }
     }
 
@@ -777,6 +803,15 @@ export default function CreateProducts() {
             }
         }
     }));
+
+    // Log the current state for debugging
+    console.log('Selected Answers:', {
+        answerKey,
+        value,
+        option,
+        isNested,
+        allAnswers: selectedAnswers
+    });
   };
 
   return (
@@ -901,7 +936,7 @@ export default function CreateProducts() {
                           <div className="aspect-square rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
                             <Image
                               src={image.preview}
-                              alt={image.name}
+                              alt={`Product image - ${image.name}`}
                               width={200}
                               height={200}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -1121,47 +1156,53 @@ export default function CreateProducts() {
                         </div>
                       ))}
 
-                      {/* Render nested questions if available */}
+                      {/* Nested Questions */}
                       {nextQuestions && nextQuestions.length > 0 && (
-                        <div className="mt-6 space-y-6">
-                          <h3 className="text-lg font-medium">Additional Questions</h3>
-                          {nextQuestions.map(question => (
-                            <div key={question.id} className="p-4 border rounded-lg bg-gray-50 space-y-3">
-                              <Label className="text-base font-medium text-gray-900">
-                                {question.question}
-                              </Label>
+                          <div className="mt-6 space-y-6">
+                              <h3 className="text-lg font-medium">Additional Questions</h3>
+                              {nextQuestions.map(question => (
+                                  <div key={question.id} className="p-4 border rounded-lg bg-gray-50 space-y-3">
+                                      <Label className="text-base font-medium text-gray-900">
+                                          {question.question}
+                                      </Label>
 
-                              <Select
-                                value={selectedAnswers[`nested_${question.id}`] || ''}
-                                onValueChange={(value) => {
-                                  const selectedOption = question.options.find(
-                                    opt => `nested_${question.id}_${opt.id}` === value
-                                  );
-                                  handleOptionSelect(
-                                    question.id,
-                                    value,
-                                    { ...selectedOption, question: question.question },
-                                    true
-                                  );
-                                }}
-                              >
-                                <SelectTrigger className="w-full bg-white">
-                                  <SelectValue placeholder="Choose an answer" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {question.options?.map(option => (
-                                    <SelectItem
-                                      key={`nested_${question.id}_${option.id}`}
-                                      value={`nested_${question.id}_${option.id}`}
-                                    >
-                                      {option.option}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          ))}
-                        </div>
+                                      <Select
+                                          value={selectedAnswers[`nested_${question.id}`]?.value || ''}
+                                          onValueChange={(value) => {
+                                              const selectedOption = question.options.find(
+                                                  opt => `nested_${question.id}_${opt.id}` === value
+                                              );
+                                              if (selectedOption) {
+                                                  handleOptionSelect(
+                                                      question.id,
+                                                      value,
+                                                      {
+                                                          question: question.question,
+                                                          option: selectedOption.option,
+                                                          nextQuestions: selectedOption.nextQuestions
+                                                      },
+                                                      true // Mark as nested
+                                                  );
+                                              }
+                                          }}
+                                      >
+                                          <SelectTrigger className="w-full bg-white">
+                                              <SelectValue placeholder="Choose an answer" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                              {question.options?.map(option => (
+                                                  <SelectItem
+                                                      key={`nested_${question.id}_${option.id}`}
+                                                      value={`nested_${question.id}_${option.id}`}
+                                                  >
+                                                      {option.option}
+                                                  </SelectItem>
+                                              ))}
+                                          </SelectContent>
+                                      </Select>
+                                  </div>
+                              ))}
+                          </div>
                       )}
                     </div>
                   )}
