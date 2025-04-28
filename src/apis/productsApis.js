@@ -166,9 +166,11 @@ export const updateProduct = async (id, productData) => {
         const questionData = {
             category: productData.category,
             subCategory: productData.subCategory || null,
-            answers: Object.entries(productData.answers || {}).map(([key, value]) => ({
-                questionKey: key,
-                answer: value
+            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
+                questionKey,
+                answer: value.value,  
+                question: value.question,
+                isNested: value.isNested
             }))
         };
         formData.append('question', JSON.stringify(questionData));
@@ -183,7 +185,6 @@ export const updateProduct = async (id, productData) => {
             colorCode: variant.colorCode,
             images: variant.images.map(img => {
                 if (img.isExisting) {
-                    // Keep existing image data
                     return {
                         id: img.id,
                         url: img.url,
@@ -221,7 +222,6 @@ export const updateProduct = async (id, productData) => {
         // Add color data to formData
         formData.append('colors', JSON.stringify(colorsArray));
 
-        // Log the data being sent (for debugging)
         console.log('Update Data:', {
             colors: colorsArray,
             formDataEntries: Array.from(formData.entries()).map(([key, value]) => ({
@@ -229,6 +229,18 @@ export const updateProduct = async (id, productData) => {
                 value: key === 'colors' ? JSON.parse(value) : value
             }))
         });
+
+        // Add this before the axios request in updateProduct
+        console.log('Question Data being sent:', JSON.stringify({
+            category: productData.category,
+            subCategory: productData.subCategory,
+            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
+                questionKey,
+                answer: value.value,
+                question: value.question,
+                isNested: value.isNested
+            }))
+        }, null, 2));
 
         const response = await axiosClient.put(`/products/${id}`, formData, {
             headers: {

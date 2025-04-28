@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+// import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -487,10 +487,20 @@ export default function CreateProducts() {
         gender: formData.gender?.toUpperCase(),
         colorVariants: formData.colorVariants,
         characteristics: formData.characteristics,
-        // Add questions data
-        questions: questions, // Pass the questions array
-        selectedAnswers: selectedAnswers, // Pass the selected answers
-        nextQuestions: nextQuestions // Pass the next questions if any
+        // Format questions data
+        selectedAnswers: Object.fromEntries(
+          Object.entries(selectedAnswers).map(([key, value]) => [
+            key,
+            {
+              value: value.value,
+              question: value.question,
+              isNested: value.isNested || false,
+              answer: value.answer
+            }
+          ])
+        ),
+        category: formData.category,
+        subCategory: formData.subCategory,
       };
 
       let response;
@@ -734,7 +744,7 @@ export default function CreateProducts() {
   const handleOptionSelect = (questionKey, value, option, isNested = false) => {
     const answerKey = isNested ? `nested_${questionKey}` : questionKey;
     
-    // Update selected answers
+    // Update selected answers with complete data structure
     setSelectedAnswers(prev => ({
         ...prev,
         [answerKey]: {
