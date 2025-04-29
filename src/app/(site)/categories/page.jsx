@@ -92,9 +92,9 @@ export default function Categories() {
                 <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {categories.map((category) => (
                         <Link
-                            key={category.id}
+                            key={category?.id}
                             href={`/categories/${category.slug}`}
-                            className="relative group h-[500px] md:h-[800px] xl:h-[940px]"
+                            className="relative group h-[500px] md:h-[845px] xl:h-[945px]"
                             onClick={(e) => handleCategoryClick(e, category)}
                         >
                             <div className="w-full h-full">
@@ -102,7 +102,7 @@ export default function Categories() {
                                     src={category.image}
                                     alt={category.title}
                                     fill
-                                    className="bg-black/90 transition-transform duration-500"
+                                    className="bg-black/90 transition-transform duration-500 object-cover"
                                     priority
                                     quality={100}
                                     loading="eager"

@@ -23,6 +23,8 @@ export default function ShoesDetails({ productId }) {
     const [sizes, setSizes] = useState([]);
     const [selectedSize, setSelectedSize] = useState(null);
     const [selectedColorVariant, setSelectedColorVariant] = useState(0);
+    const [quantities, setQuantities] = useState({});
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -31,19 +33,29 @@ export default function ShoesDetails({ productId }) {
                 setShoe(data.product);
                 setRecommendedProducts(data.recommendedProducts);
 
+                // Parse size data
                 if (data.product?.size) {
-                    if (Array.isArray(data.product.size)) {
-                        setSizes(data.product.size);
-                        setSelectedSize(data.product.size[0]);
-                    } else {
-                        try {
-                            const parsedSizes = JSON.parse(data.product.size);
-                            setSizes(parsedSizes);
-                            setSelectedSize(parsedSizes[0]);
-                        } catch (e) {
-                            console.error('Error parsing sizes:', e);
-                            setSizes([]);
+                    let parsedSizes = [];
+                    try {
+                        // If size is a string, parse it
+                        if (typeof data.product.size === 'string') {
+                            parsedSizes = JSON.parse(data.product.size);
+                        } else {
+                            parsedSizes = data.product.size;
                         }
+
+                        // Extract sizes and quantities
+                        const sizeArray = parsedSizes.map(item => item.size);
+                        const quantityMap = {};
+                        parsedSizes.forEach(item => {
+                            quantityMap[item.size] = item.quantity;
+                        });
+
+                        setSizes(sizeArray);
+                        setQuantities(quantityMap);
+                        setSelectedSize(sizeArray[0]);
+                    } catch (e) {
+                        console.error('Error parsing sizes:', e);
                     }
                 }
             } catch (error) {
@@ -253,13 +265,13 @@ export default function ShoesDetails({ productId }) {
                             <div className='flex items-center gap-2'>
                                 <p className="text-lg flex items-center gap-2">
                                     Farbe: {shoe?.colors?.[selectedColorVariant]?.colorName || 'N/A'}
-                                    {/* <span
-                                        className='w-6 h-6 rounded-full border'
-                                        style={{ backgroundColor: shoe?.colors?.[selectedColorVariant]?.colorCode || '#fff' }}
-                                    ></span> */}
                                 </p>
-                                {/* <p className='text-lg'>|</p>
-                                <p className='text-lg'>{shoe?.gender}</p> */}
+                                {selectedSize && (
+                                    <>
+                                        <p className='text-lg'>|</p>
+                                        <p className='text-lg'>Auf Lager: {quantities[selectedSize] || 0}</p>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -330,7 +342,7 @@ export default function ShoesDetails({ productId }) {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
-                                    <p className='text-white'>90% FIT</p>
+                                    <p className='text-white'>0% FIT</p>
                                     {isDropdownOpen && (
                                         <div className="absolute right-0 mt-3 w-24 bg-white rounded-lg shadow-lg z-10">
                                             {sizes.map((size) => (

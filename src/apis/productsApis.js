@@ -332,16 +332,35 @@ export const getAllProducts = cache(async (filters) => {
         }
 
         // Transform the products without any filtering
-        const transformedProducts = response.data.products.map(product => ({
-            ...product,
-            size: typeof product.size === 'string' ? JSON.parse(product.size) : product.size,
-            colorVariants: product.colors.map(color => ({
-                name: color.colorName,
-                code: color.colorCode,
-                mainImage: color.images[0]?.url || null,
-                images: color.images.map(img => img.url)
-            }))
-        }));
+        const transformedProducts = response.data.products.map(product => {
+            // Parse size data
+            let parsedSize = [];
+            try {
+                if (typeof product.size === 'string') {
+                    const sizeData = JSON.parse(product.size);
+                    parsedSize = sizeData.map(item => ({
+                        size: item.size,
+                        quantity: item.quantity
+                    }));
+                } else {
+                    parsedSize = product.size;
+                }
+            } catch (error) {
+                console.error('Error parsing size:', error);
+                parsedSize = [];
+            }
+
+            return {
+                ...product,
+                size: parsedSize,
+                colorVariants: product.colors.map(color => ({
+                    name: color.colorName,
+                    code: color.colorCode,
+                    mainImage: color.images[0]?.url || null,
+                    images: color.images.map(img => img.url)
+                }))
+            };
+        });
 
         return {
             products: transformedProducts,
