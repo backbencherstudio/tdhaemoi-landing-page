@@ -163,86 +163,70 @@ export const updateProduct = async (id, productData) => {
         formData.append('Company', productData.company || '');
         formData.append('gender', productData.gender);
 
-        // Handle questions and answers
+        // Update the question data formatting - Same as createProducts
         const questionData = {
             category: productData.category,
             subCategory: productData.subCategory || null,
-            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
-                questionKey,
-                answer: value.value,  
-                question: value.question,
-                isNested: value.isNested
+            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, answerData]) => ({
+                questionKey: questionKey.replace('nested_', ''),
+                answer: answerData.answer,
+                question: answerData.question,
+                isNested: answerData.isNested || questionKey.startsWith('nested_')
             }))
         };
+        
         formData.append('question', JSON.stringify(questionData));
-
+        
         // Add characteristics
         formData.append('characteristics', JSON.stringify(productData.characteristics));
 
-        // Handle color variants and their images
-        const colorsArray = productData.colorVariants.map(variant => ({
-            id: variant.id,
-            colorName: variant.colorName,
-            colorCode: variant.colorCode,
-            images: variant.images.map(img => {
-                if (img.isExisting) {
-                    return {
-                        id: img.id,
-                        url: img.url,
-                    };
-                }
-                return null;
-            }).filter(Boolean)
-        }));
-
-        // Handle new image uploads
+        // Handle color variants and images
         let imageIndex = 0;
-        productData.colorVariants.forEach((variant, colorIndex) => {
+        const colorsArray = productData.colorVariants.map((variant, colorIndex) => {
+            const colorData = {
+                id: variant.id,
+                colorName: variant.colorName,
+                colorCode: variant.colorCode,
+                images: []
+            };
+
+            // Handle existing images
+            variant.images.forEach(img => {
+                if (img.isExisting) {
+                    colorData.images.push({
+                        id: img.id,
+                        url: img.url
+                    });
+                }
+            });
+
+            // Handle new images
             variant.images.forEach(img => {
                 if (!img.isExisting && img.file instanceof File) {
                     const fileExtension = img.file.name.split('.').pop();
                     const uniqueFileName = `${Date.now()}_${colorIndex}_${imageIndex}.${fileExtension}`;
-
+                    
                     const renamedFile = new File([img.file], uniqueFileName, {
                         type: img.file.type
                     });
-
+                    
                     formData.append('images', renamedFile);
-
-                    // Add new image reference to the corresponding color
-                    colorsArray[colorIndex].images.push({
+                    
+                    colorData.images.push({
                         filename: uniqueFileName,
                         isNew: true
                     });
-
+                    
                     imageIndex++;
                 }
             });
+
+            return colorData;
         });
 
-        // Add color data to formData
         formData.append('colors', JSON.stringify(colorsArray));
 
-        console.log('Update Data:', {
-            colors: colorsArray,
-            formDataEntries: Array.from(formData.entries()).map(([key, value]) => ({
-                key,
-                value: key === 'colors' ? JSON.parse(value) : value
-            }))
-        });
-
-        // Add this before the axios request in updateProduct
-        console.log('Question Data being sent:', JSON.stringify({
-            category: productData.category,
-            subCategory: productData.subCategory,
-            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
-                questionKey,
-                answer: value.value,
-                question: value.question,
-                isNested: value.isNested
-            }))
-        }, null, 2));
-
+        // Send the request
         const response = await axiosClient.put(`/products/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -358,11 +342,10 @@ export const getProductById = async (id) => {
             // Helper function to format gender
             const formatGender = (gender) => {
                 if (!gender) return '';
-                // Convert MALE -> male, FEMALE -> female, UNISEX -> unisex
                 return gender.toLowerCase();
             };
 
-            // Parse question data
+            // Parse question data and answers
             let parsedQuestions = {};
             if (product.question) {
                 try {
@@ -372,22 +355,22 @@ export const getProductById = async (id) => {
 
                     // Parse answers array from the question data
                     if (questionData.answers && Array.isArray(questionData.answers)) {
-                        questionData.answers.forEach(answer => {
-                            const { questionKey, answer: answerValue } = answer;
+                        parsedQuestions = questionData.answers.reduce((acc, answer) => {
+                            const { questionKey, answer: answerValue, question, isNested } = answer;
                             
-                            // Create the value in the expected format
-                            parsedQuestions[questionKey] = {
-                                value: answerValue,
+                            // Create the answer object in the expected format
+                            const key = isNested ? `nested_${questionKey}` : questionKey;
+                            acc[key] = {
+                                value: isNested 
+                                    ? `nested_${questionKey}_${answerValue}` 
+                                    : `${questionKey}_${answerValue}`,
+                                question: question,
                                 answer: answerValue,
-                                isNested: questionKey.startsWith('nested_'),
-                                // Reconstruct the full answer structure
-                                question: `${questionKey}_${answerValue.split('_').pop()}`
+                                isNested: isNested
                             };
-                        });
+                            return acc;
+                        }, {});
                     }
-
-                    // Stringify the parsed questions for debugging
-                    console.log('Parsed Questions:', JSON.stringify(parsedQuestions, null, 2));
                 } catch (error) {
                     console.error('Error parsing question data:', error);
                 }
@@ -441,9 +424,6 @@ export const getProductById = async (id) => {
                     }))
                 })) || []
             };
-
-            // Log the transformed product for debugging
-            console.log('Transformed Product:', JSON.stringify(transformedProduct, null, 2));
 
             return transformedProduct;
         }
