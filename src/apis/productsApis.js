@@ -268,11 +268,35 @@ export const deleteProduct = async (id) => {
 export const getAllProducts = cache(async (filters) => {
     const queryParams = new URLSearchParams();
 
-    // Batch process all filters
+    // Get question data from sessionStorage
+    const storedUserData = sessionStorage.getItem('completeUserData');
+    if (storedUserData) {
+        try {
+            const userData = JSON.parse(storedUserData);
+            
+            // Format question data similar to createProducts format
+            const questionData = {
+                category: userData.categoryInfo.slug,
+                subCategory: userData.categoryInfo.subCategory?.slug || null,
+                answers: userData.questionsAndAnswers.map(qa => ({
+                    questionKey: qa.questionId.toString(),
+                    answer: qa.selectedOption.answer,
+                    question: qa.question,
+                    isNested: qa.isNested || false
+                }))
+            };
+
+            // Add question data to query params
+            queryParams.append('question', JSON.stringify(questionData));
+        } catch (error) {
+            console.error('Error parsing stored question data:', error);
+        }
+    }
+
+    // Add existing filters
     Object.entries(filters).forEach(([key, value]) => {
         if (value) {
             if (Array.isArray(value) && value.length > 0) {
-                // Handle arrays (sizes, colors, and typeOfShoes) in batch
                 if (key === 'size') {
                     value.sort().forEach(size => {
                         queryParams.append('size[]', size);
