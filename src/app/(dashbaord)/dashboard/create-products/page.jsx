@@ -713,51 +713,49 @@ export default function CreateProducts() {
     const answerKey = isNested ? `nested_${questionKey}` : questionKey;
     
     setSelectedAnswers(prev => ({
-      ...prev,
-      [answerKey]: {
-        value: value,
-        question: option.question,
-        answer: option.option,
-        isNested: isNested
-      }
+        ...prev,
+        [answerKey]: {
+            value: value, // Keep the full value for reference
+            question: option.question,
+            answer: option.option, // Store the actual option text
+            isNested: isNested
+        }
     }));
 
     // Handle nested questions
     if (!isNested) {
-      const currentQuestion = questions.find(q => q.question_key === questionKey);
-      if (currentQuestion) {
-        const selectedOption = currentQuestion.options.find(
-          opt => `${questionKey}_${opt.id}` === value
-        );
+        const currentQuestion = questions.find(q => q.question_key === questionKey);
+        if (currentQuestion) {
+            const selectedOption = currentQuestion.options.find(
+                opt => `${questionKey}_${opt.id}` === value
+            );
 
-        // Clear previous nested questions for this question
-        setNextQuestions(prev => {
-          const filteredQuestions = prev?.filter(q => 
-            !currentQuestion.options.some(opt => 
-              opt.nextQuestions?.questions?.some(nq => nq.id === q.id)
-            )
-          ) || [];
+            setNextQuestions(prev => {
+                const filteredQuestions = prev?.filter(q => 
+                    !currentQuestion.options.some(opt => 
+                        opt.nextQuestions?.questions?.some(nq => nq.id === q.id)
+                    )
+                ) || [];
 
-          // Add new nested questions if they exist
-          return selectedOption?.nextQuestions?.questions 
-            ? [...filteredQuestions, ...selectedOption.nextQuestions.questions]
-            : filteredQuestions;
-        });
-      }
+                return selectedOption?.nextQuestions?.questions 
+                    ? [...filteredQuestions, ...selectedOption.nextQuestions.questions]
+                    : filteredQuestions;
+            });
+        }
     }
 
     // Update form data
     setFormData(prev => ({
-      ...prev,
-      selectedAnswers: {
-        ...prev.selectedAnswers,
-        [answerKey]: {
-          value: value,
-          question: option.question,
-          answer: option.option,
-          isNested: isNested
+        ...prev,
+        selectedAnswers: {
+            ...prev.selectedAnswers,
+            [answerKey]: {
+                value: value,
+                question: option.question,
+                answer: option.option, // Store the actual option text
+                isNested: isNested
+            }
         }
-      }
     }));
   };
 

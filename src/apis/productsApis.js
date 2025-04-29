@@ -31,17 +31,18 @@ export const createProducts = async (productData) => {
         formData.append('Company', productData.company || '');
         formData.append('gender', productData.gender);
         
-        // Process questions and answers
+        // Update the question data formatting
         const questionData = {
             category: productData.category,
             subCategory: productData.subCategory || null,
-            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, value]) => ({
+            answers: Object.entries(productData.selectedAnswers || {}).map(([questionKey, answerData]) => ({
                 questionKey,
-                answer: value.value,  // Use the value property
-                question: value.question,
-                isNested: value.isNested
+                answer: answerData.answer,
+                question: answerData.question,
+                isNested: answerData.isNested || false
             }))
         };
+        
         formData.append('question', JSON.stringify(questionData));
         
         // Add characteristics
