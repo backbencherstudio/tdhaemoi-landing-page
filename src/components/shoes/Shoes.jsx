@@ -194,6 +194,10 @@ export default function Shoes() {
         <div className="px-4">
             {/* Search Bar */}
             <div className="flex justify-end  mb-5">
+                {/* drop down sub category */}
+                <div className="relative w-full max-w-md ml-auto">
+                    {/* sub category */}
+                </div>
                 <div className="relative w-full max-w-md ml-auto">
                     <div className={`flex items-center border border-gray-300 bg-white rounded-lg shadow-sm transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-[#62A07B]' : ''}`}>
                         <FiSearch className="ml-4 text-gray-500 text-xl" />

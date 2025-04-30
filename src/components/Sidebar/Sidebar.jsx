@@ -86,24 +86,47 @@ export default function Sidebar() {
         parseInt(searchParams.get('maxPrice') || '1000')
     ]);
 
+    // Add state for shoe types
+    const [typeOfShoes, setTypeOfShoes] = useState([]);
+
+    // Add state for brands
+    const [brands, setBrands] = useState([]);
+
+    // Add useEffect to fetch shoe types
+    useEffect(() => {
+        fetchShoeTypes();
+        fetchBrands();
+    }, []);
+    const fetchShoeTypes = async () => {
+        try {
+            const response = await fetch('/data/shoesTypeDropdown.json');
+            const data = await response.json();
+            // Extract just the values from the data
+            const shoeTypes = data.map(type => type.value);
+            setTypeOfShoes(shoeTypes);
+        } catch (error) {
+            console.error('Error loading shoe types:', error);
+        }
+    };
+
+    // Add useEffect to fetch brands
+    const fetchBrands = async () => {
+        try {
+            const response = await fetch('/data/brandName.json');
+            const data = await response.json();
+            // Extract just the values from the data
+            const brandNames = data.map(brand => brand.value);
+            setBrands(brandNames);
+        } catch (error) {
+            console.error('Error loading brands:', error);
+        }
+    };
+
+
     // Filter Options
-    const typeOfShoes = ['Laufschuhe', 'Gymnastikschuhe', 'Skischuhe', 'Wanderschuhe', 'Kletterschuhe', 'Fußballschuhe', 'Tennisschuhe', 'Fitnessschuhe', 'Badeschuhe', 'Freizeitschuhe'];
     const genders = ['MALE', 'FEMALE', 'UNISEX'];
 
     const sizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
-
-    const brands = [
-        'Adidas',
-        'Nike',
-        'Salomon',
-        'La Sportiva',
-        'Scarpa',
-        'Asics',
-        'Brooks',
-        'Hoka',
-        'Merrell',
-        'New Balance'
-    ];
 
     const toggleSection = (section) => {
         setOpenSections(prev => ({

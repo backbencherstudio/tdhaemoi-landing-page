@@ -1,0 +1,42 @@
+[
+    {
+        "value": "Laufschuhe",
+        "label": "Laufschuhe"
+    },
+    {
+        "value": "Gymnastikschuhe",
+        "label": "Gymnastikschuhe"
+    },
+    {
+        "value": "Skischuhe",
+        "label": "Skischuhe"
+    },
+    {
+        "value": "Wanderschuhe",
+        "label": "Wanderschuhe"
+    },
+    {
+        "value": "Kletterschuhe",
+        "label": "Kletterschuhe"
+    },
+    {
+        "value": "Fußballschuhe",
+        "label": "Fußballschuhe"
+    },
+    {
+        "value": "Tennisschuhe",
+        "label": "Tennisschuhe"
+    },
+    {
+        "value": "Fitnessschuhe",
+        "label": "Fitnessschuhe"
+    },
+    {
+        "value": "Badeschuhe",
+        "label": "Badeschuhe"
+    },
+    {
+        "value": "Freizeitschuhe",
+        "label": "Freizeitschuhe"
+    }
+]

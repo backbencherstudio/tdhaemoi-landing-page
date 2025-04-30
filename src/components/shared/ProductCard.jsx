@@ -57,9 +57,16 @@ export default function ProductCard({ shoe }) {
                         </div>
                         {/* Type and Category */}
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span className='text-xs font-medium capitalize'>{shoe.typeOfShoes}</span>
+                            <span className='text-xs font-medium capitalize'>
+                                {(shoe.Sub_Category && shoe.Sub_Category !== "null") ? shoe.Sub_Category : (shoe.Category === null ? 'N/A' : shoe.Category)}
+                            </span>
                             <span className='text-gray-400'>-</span>
-                            <span className='text-xs font-medium capitalize'>{shoe.Category}</span>
+                            <span className='text-xs font-medium capitalize'>
+                                {shoe.gender === 'MALE' ? 'Herren' : 
+                                 shoe.gender === 'FEMALE' ? 'Frauen' : 
+                                 shoe.gender === 'UNISEX' ? 'Unisex' : 
+                                 shoe.gender}
+                            </span>
                         </div>
                         {/* Color Variants - Updated */}
                         <div className="flex items-center gap-2">

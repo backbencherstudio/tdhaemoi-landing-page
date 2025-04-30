@@ -78,6 +78,10 @@ const colorMap = {
   '#708090': 'Slate Gray',
 };
 
+// Remove or comment out the existing brandOptions array since we'll fetch from JSON
+// const brandOptions = [...]
+
+
 
 // extract image filename from url with base url
 const extractImageFilename = (url) => {
@@ -153,6 +157,10 @@ export default function CreateProducts() {
   // Add these new state variables at the top with other states
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
+  const [brandOptions, setBrandOptions] = useState([]);
+
+  // Add state for shoe type options
+  const [shoeTypeOptions, setShoeTypeOptions] = useState([]);
 
   const [formData, setFormData] = useState({
     productName: '',
@@ -185,18 +193,18 @@ export default function CreateProducts() {
       const fetchProductData = async () => {
         try {
           const product = await getProductById(editId);
-          
+
           // First set basic product data with safe characteristics mapping
           setFormData(prev => ({
             ...prev,
             ...product,
-            characteristics: Array.isArray(product.characteristics) 
-                ? product.characteristics.map(c => 
-                    (typeof c === 'object' && c !== null) 
-                        ? c.id?.toString() 
-                        : c?.toString()
-                  ).filter(Boolean)
-                : []
+            characteristics: Array.isArray(product.characteristics)
+              ? product.characteristics.map(c =>
+                (typeof c === 'object' && c !== null)
+                  ? c.id?.toString()
+                  : c?.toString()
+              ).filter(Boolean)
+              : []
           }));
 
           if (product.colorVariants && product.colorVariants.length > 0) {
@@ -207,12 +215,12 @@ export default function CreateProducts() {
           if (product.category) {
             const categorySlug = product.category.toLowerCase();
             setSelectedCategory(categorySlug);
-            
+
             // Fetch categories
             const categoriesResponse = await getAllCategories();
             if (categoriesResponse.success) {
               setCategories(categoriesResponse.data);
-              
+
               // If subcategory exists, fetch subcategories
               if (product.subCategory) {
                 const subCatSlug = product.subCategory.toLowerCase();
@@ -232,12 +240,12 @@ export default function CreateProducts() {
               if (questionsResponse.success && questionsResponse.data) {
                 const questions = questionsResponse.data;
                 setQuestions(questions);
-                
+
                 // Parse question data
                 if (product.question) {
-                  const questionData = typeof product.question === 'string' 
-                      ? JSON.parse(product.question) 
-                      : product.question;
+                  const questionData = typeof product.question === 'string'
+                    ? JSON.parse(product.question)
+                    : product.question;
 
                   if (questionData.answers) {
                     const formattedAnswers = {};
@@ -269,18 +277,18 @@ export default function CreateProducts() {
                     // Then handle nested questions
                     if (nestedQuestions.length > 0) {
                       setNextQuestions(nestedQuestions);
-                      
+
                       questionData.answers.forEach(answer => {
                         if (answer.isNested) {
-                          const nestedQuestion = nestedQuestions.find(q => 
+                          const nestedQuestion = nestedQuestions.find(q =>
                             q.id.toString() === answer.questionKey
                           );
-                          
+
                           if (nestedQuestion) {
-                            const option = nestedQuestion.options.find(opt => 
+                            const option = nestedQuestion.options.find(opt =>
                               opt.option === answer.answer
                             );
-                            
+
                             if (option) {
                               formattedAnswers[`nested_${answer.questionKey}`] = {
                                 value: `nested_${answer.questionKey}_${option.id}`,
@@ -314,8 +322,11 @@ export default function CreateProducts() {
 
   useEffect(() => {
     fetchCharacteristics();
+    fetchBrandOptions();
+    fetchShoeTypeOptions();
   }, []);
 
+  // characteristics
   const fetchCharacteristics = async () => {
     try {
       const response = await getCharacteristics();
@@ -325,6 +336,29 @@ export default function CreateProducts() {
     } catch (error) {
       console.error('Error fetching characteristics:', error);
       toast.error('Failed to load characteristics');
+    }
+  };
+  // brand name 
+  const fetchBrandOptions = async () => {
+    try {
+      const response = await fetch('/data/brandName.json');
+      const data = await response.json();
+      setBrandOptions(data);
+    } catch (error) {
+      console.error('Error loading brand options:', error);
+      toast.error('Failed to load brand options');
+    }
+  };
+
+  //  shoe type options
+  const fetchShoeTypeOptions = async () => {
+    try {
+      const response = await fetch('/data/shoesTypeDropdown.json');
+      const data = await response.json();
+      setShoeTypeOptions(data);
+    } catch (error) {
+      console.error('Error loading shoe type options:', error);
+      toast.error('Failed to load shoe types');
     }
   };
 
@@ -758,34 +792,34 @@ export default function CreateProducts() {
   // Update handleOptionSelect to properly handle the selection
   const handleOptionSelect = (questionKey, value, option, isNested = false) => {
     const answerKey = isNested ? `nested_${questionKey}` : questionKey;
-    
-    // Find the actual option object from the questions array
-    const question = isNested 
-        ? nextQuestions?.find(q => q.id === questionKey)
-        : questions?.find(q => q.question_key === questionKey);
 
-    const selectedOption = question?.options?.find(opt => 
-        `${isNested ? 'nested_' : ''}${questionKey}_${opt.id}` === value
+    // Find the actual option object from the questions array
+    const question = isNested
+      ? nextQuestions?.find(q => q.id === questionKey)
+      : questions?.find(q => q.question_key === questionKey);
+
+    const selectedOption = question?.options?.find(opt =>
+      `${isNested ? 'nested_' : ''}${questionKey}_${opt.id}` === value
     );
 
     if (selectedOption) {
-        setSelectedAnswers(prev => ({
-            ...prev,
-            [answerKey]: {
-                value: value,
-                question: question.question,
-                answer: selectedOption.option,
-                isNested: isNested
-            }
-        }));
-
-        // Handle nested questions
-        if (!isNested && selectedOption.nextQuestions?.questions) {
-            setNextQuestions(selectedOption.nextQuestions.questions);
-        } else if (!isNested) {
-            // Clear nested questions if no next questions
-            setNextQuestions(null);
+      setSelectedAnswers(prev => ({
+        ...prev,
+        [answerKey]: {
+          value: value,
+          question: question.question,
+          answer: selectedOption.option,
+          isNested: isNested
         }
+      }));
+
+      // Handle nested questions
+      if (!isNested && selectedOption.nextQuestions?.questions) {
+        setNextQuestions(selectedOption.nextQuestions.questions);
+      } else if (!isNested) {
+        // Clear nested questions if no next questions
+        setNextQuestions(null);
+      }
     }
   };
 
@@ -994,14 +1028,21 @@ export default function CreateProducts() {
 
                 <div className="space-y-2">
                   <Label htmlFor="brand">Brand *</Label>
-                  <Input
-                    id="brand"
-                    name="brand"
+                  <Select
                     value={formData.brand}
-                    onChange={handleChange}
-                    placeholder="Enter brand name"
-                    required
-                  />
+                    onValueChange={(value) => handleSelectChange('brand', value)}
+                  >
+                    <SelectTrigger className="w-full" id="brand">
+                      <SelectValue placeholder="Select brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brandOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2 w-full">
                   <Label htmlFor="typeOfShoes">Type of Shoes</Label>
@@ -1013,10 +1054,11 @@ export default function CreateProducts() {
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="running">Running</SelectItem>
-                      <SelectItem value="walking">Walking</SelectItem>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="hiking">Hiking</SelectItem>
+                      {shoeTypeOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1273,8 +1315,8 @@ export default function CreateProducts() {
                     <div
                       key={size}
                       className={`relative group transition-all duration-200 ${formData.size.includes(size)
-                          ? 'border-2 border-green-500 bg-green-50'
-                          : 'border border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                        ? 'border-2 border-green-500 bg-green-50'
+                        : 'border border-gray-200 hover:border-gray-300 hover:shadow-sm'
                         } rounded-lg p-3`}
                     >
                       <div className="flex flex-col space-y-2">

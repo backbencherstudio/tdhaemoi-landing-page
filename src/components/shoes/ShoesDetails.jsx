@@ -269,7 +269,12 @@ export default function ShoesDetails({ productId }) {
                                 {selectedSize && (
                                     <>
                                         <p className='text-lg'>|</p>
-                                        <p className='text-lg'>Auf Lager: {quantities[selectedSize] || 0}</p>
+                                        <p className='text-lg'>
+                                            {quantities[selectedSize] > 0 
+                                                ? `Auf Lager: ${quantities[selectedSize]}`
+                                                : <span className="text-red-500">Out of Stock</span>
+                                            }
+                                        </p>
                                     </>
                                 )}
                             </div>

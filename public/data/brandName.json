@@ -1,0 +1,42 @@
+[
+    {
+        "value": "Adidas",
+        "label": "Adidas"
+    },
+    {
+        "value": "Nike",
+        "label": "Nike"
+    },
+    {
+        "value": "Solomon",
+        "label": "Solomon"
+    },
+    {
+        "value": "La Sportiva",
+        "label": "La Sportiva"
+    },
+    {
+        "value": "Scarpa",
+        "label": "Scarpa"
+    },
+    {
+        "value": "Asics",
+        "label": "Asics"
+    },
+    {
+        "value": "Brooks",
+        "label": "Brooks"
+    },
+    {
+        "value": "Hoka",
+        "label": "Hoka"
+    },
+    {
+        "value": "Merrell",
+        "label": "Merrell"
+    },
+    {
+        "value": "New Balance",
+        "label": "New Balance"
+    }
+]
