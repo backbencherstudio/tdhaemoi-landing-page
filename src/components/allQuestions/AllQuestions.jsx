@@ -153,7 +153,7 @@ export default function AllQuestions() {
             [currentQuestionId]: { skipped: true }
         }
         setAnswers(newAnswers)
-        console.log('Skipped Question:', currentQuestionId)
+        // console.log('Skipped Question:', currentQuestionId)
 
         // Automatically move to next question after skip
         if (currentQuestionIndex < questions.length - 1) {
@@ -206,7 +206,7 @@ export default function AllQuestions() {
             };
 
             // Log the complete data structure
-            console.log('Complete User Journey Data:', finalData);
+            // console.log('Complete User Journey Data:', finalData);
 
             // Store the final data
             sessionStorage.setItem('completeUserData', JSON.stringify(finalData));

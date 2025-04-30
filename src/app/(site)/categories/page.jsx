@@ -22,7 +22,7 @@ export default function Categories() {
             try {
                 const decodedData = JSON.parse(decodeURIComponent(data))
                 setSubmittedData(decodedData)
-                console.log('Received Form Data:', decodedData)
+                // console.log('Received Form Data:', decodedData)
             } catch (error) {
                 console.error('Error parsing data:', error)
             }

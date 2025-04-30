@@ -75,7 +75,7 @@ export const createProducts = async (productData) => {
 
         // Log formData for debugging
         for (let pair of formData.entries()) {
-            console.log(pair[0], pair[1]);
+            // console.log(pair[0], pair[1]);
         }
 
         // Send the request
@@ -274,8 +274,6 @@ export const getAllProducts = cache(async (filters) => {
         if (storedUserData) {
             try {
                 const userData = JSON.parse(storedUserData);
-                
-                // Format question data similar to createProducts format
                 const questionData = {
                     category: userData.categoryInfo.slug,
                     subCategory: userData.categoryInfo.subCategory?.slug || null,
@@ -286,15 +284,11 @@ export const getAllProducts = cache(async (filters) => {
                         isNested: qa.isNested || false
                     }))
                 };
-
-                // Add question data to query params
                 queryParams.append('question', JSON.stringify(questionData));
             } catch (error) {
                 console.error('Error parsing stored question data:', error);
             }
         }
-
-        // Modify how filters are added
         Object.entries(filters).forEach(([key, value]) => {
             if (value) {
                 if (Array.isArray(value) && value.length > 0) {

@@ -758,7 +758,7 @@ export default function CreateProducts() {
         setQuestions([]);
       }
     } catch (error) {
-      console.log('Error loading category data:', error);
+      // console.log('Error loading category data:', error);
       setSubCategories([]);
       setQuestions([]);
     } finally {
@@ -784,7 +784,7 @@ export default function CreateProducts() {
         setNextQuestions(response.nextQuestions);
       }
     } catch (error) {
-      console.log('Error fetching subcategory questions:', error);
+      // console.log('Error fetching subcategory questions:', error);
       setQuestions([]);
     }
   };

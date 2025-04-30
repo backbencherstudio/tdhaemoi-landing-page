@@ -57,7 +57,7 @@ export default function Settings() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted, activeTab:', activeTab);
+        // console.log('Form submitted, activeTab:', activeTab);
 
         if (activeTab === 'profile') {
             try {
