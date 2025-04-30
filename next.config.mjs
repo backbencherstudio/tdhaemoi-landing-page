@@ -7,6 +7,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'antivirus-duck-agricultural-vast.trycloudflare.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'manually-thomson-cure-fundamentals.trycloudflare.com',
+      },
     ],
   },
 }
