@@ -300,8 +300,7 @@ export const getAllProducts = cache(async (filters) => {
                 if (Array.isArray(value) && value.length > 0) {
                     if (key === 'size') {
                         const sizeObjects = value.map(size => ({
-                            size: size.toString(),
-                            quantity: -1
+                            size: size.toString()
                         }));
                         queryParams.append('size', JSON.stringify(sizeObjects));
                     } else if (key === 'colors') {
