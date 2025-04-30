@@ -28,6 +28,7 @@ export default function Shoes() {
     const currentPage = Number(searchParams.get('page')) || 1;
     const itemsPerPage = 8;
     const [totalItems, setTotalItems] = useState(0);
+    const [error, setError] = useState(null);
 
     // Add this useEffect at the top of your existing useEffects
     useEffect(() => {
@@ -71,9 +72,11 @@ export default function Shoes() {
     const fetchShoes = async () => {
         try {
             setLoading(true);
+            setError(null);
             const filters = {
                 search: searchParams.get('search') || '',
                 typeOfShoes: Array.from(searchParams.getAll('typeOfShoes[]')),
+                brand: searchParams.get('brand') || '',
                 subCategory: searchParams.get('subCategory') || '',
                 colors: Array.from(searchParams.getAll('colorName[]')),
                 size: Array.from(searchParams.getAll('size[]')).sort(),
@@ -86,6 +89,14 @@ export default function Shoes() {
 
             const response = await getAllProducts(filters);
 
+            if (response.error) {
+                setError(response.message);
+                setShoes([]);
+                setTotalItems(0);
+                setTotalPages(0);
+                return;
+            }
+
             if (currentPage === Number(searchParams.get('page'))) {
                 setShoes(response.products);
                 setTotalItems(response.total);
@@ -93,6 +104,7 @@ export default function Shoes() {
             }
         } catch (error) {
             console.error('Error fetching shoes:', error);
+            setError('Failed to fetch shoes. Please try again later.');
             setShoes([]);
             setTotalItems(0);
             setTotalPages(0);
@@ -195,7 +207,7 @@ export default function Shoes() {
             {/* Search Bar */}
             <div className="flex justify-end  mb-5">
                 {/* drop down sub category */}
-                <div className="relative w-full max-w-md ml-auto">
+                <div >
                     {/* sub category */}
                 </div>
                 <div className="relative w-full max-w-md ml-auto">
@@ -214,6 +226,13 @@ export default function Shoes() {
                 </div>
             </div>
 
+            {/* Error state */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-6">
+                    <p>{error}</p>
+                </div>
+            )}
+
             {/* Loading state */}
             {loading ? (
                 <div className="min-h-[500px] flex items-center justify-center">
@@ -224,9 +243,9 @@ export default function Shoes() {
                     <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 20h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h3 className="text-xl font-semibold mb-2">No Products Found..</h3>
+                    <h3 className="text-xl font-semibold mb-2">No Products Found</h3>
                     <p className="text-center">
-                        Please try again later.
+                        Please try different filters or search terms.
                     </p>
                 </div>
             ) : (

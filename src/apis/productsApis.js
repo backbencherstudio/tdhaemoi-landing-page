@@ -266,57 +266,67 @@ export const deleteProduct = async (id) => {
 }
 // Get all products with filters client site 
 export const getAllProducts = cache(async (filters) => {
-    const queryParams = new URLSearchParams();
+    try {
+        const queryParams = new URLSearchParams();
 
-    // Get question data from sessionStorage
-    const storedUserData = sessionStorage.getItem('completeUserData');
-    if (storedUserData) {
-        try {
-            const userData = JSON.parse(storedUserData);
-            
-            // Format question data similar to createProducts format
-            const questionData = {
-                category: userData.categoryInfo.slug,
-                subCategory: userData.categoryInfo.subCategory?.slug || null,
-                answers: userData.questionsAndAnswers.map(qa => ({
-                    questionKey: qa.questionId.toString(),
-                    answer: qa.selectedOption.answer,
-                    question: qa.question,
-                    isNested: qa.isNested || false
-                }))
-            };
+        // Get question data from sessionStorage
+        const storedUserData = sessionStorage.getItem('completeUserData');
+        if (storedUserData) {
+            try {
+                const userData = JSON.parse(storedUserData);
+                
+                // Format question data similar to createProducts format
+                const questionData = {
+                    category: userData.categoryInfo.slug,
+                    subCategory: userData.categoryInfo.subCategory?.slug || null,
+                    answers: userData.questionsAndAnswers.map(qa => ({
+                        questionKey: qa.questionId.toString(),
+                        answer: qa.selectedOption.answer,
+                        question: qa.question,
+                        isNested: qa.isNested || false
+                    }))
+                };
 
-            // Add question data to query params
-            queryParams.append('question', JSON.stringify(questionData));
-        } catch (error) {
-            console.error('Error parsing stored question data:', error);
-        }
-    }
-
-    // Add existing filters
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-            if (Array.isArray(value) && value.length > 0) {
-                if (key === 'size') {
-                    value.sort().forEach(size => {
-                        queryParams.append('size[]', size);
-                    });
-                } else if (key === 'colors') {
-                    value.forEach(color => {
-                        queryParams.append('colorName[]', color);
-                    });
-                } else if (key === 'typeOfShoes') {
-                    value.sort().forEach(type => {
-                        queryParams.append('typeOfShoes[]', type);
-                    });
-                }
-            } else if (value) {
-                queryParams.append(key, value);
+                // Add question data to query params
+                queryParams.append('question', JSON.stringify(questionData));
+            } catch (error) {
+                console.error('Error parsing stored question data:', error);
             }
         }
-    });
 
-    try {
+        // Modify how filters are added
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+                if (Array.isArray(value) && value.length > 0) {
+                    if (key === 'size') {
+                        const sizeObjects = value.map(size => ({
+                            size: size.toString(),
+                            quantity: -1
+                        }));
+                        queryParams.append('size', JSON.stringify(sizeObjects));
+                    } else if (key === 'colors') {
+                        value.forEach(color => {
+                            queryParams.append('colorName[]', color);
+                        });
+                    } else if (key === 'typeOfShoes') {
+                        value.sort().forEach(type => {
+                            queryParams.append('typeOfShoes[]', type);
+                        });
+                    } else if (key === 'brand') {
+                        // Ensure brand is properly added to query params
+                        queryParams.append('brand', value);
+                    }
+                } else if (value) {
+                    // Handle non-array values
+                    if (key === 'brand' && typeof value === 'string' && value.trim()) {
+                        queryParams.append('brand', value.trim());
+                    } else {
+                        queryParams.append(key, value);
+                    }
+                }
+            }
+        });
+
         const response = await axiosClient.get(`/products/query?${queryParams}`);
 
         if (!response.data.products || response.data.products.length === 0) {
@@ -331,17 +341,13 @@ export const getAllProducts = cache(async (filters) => {
             };
         }
 
-        // Transform the products without any filtering
+        // Transform the products
         const transformedProducts = response.data.products.map(product => {
             // Parse size data
             let parsedSize = [];
             try {
                 if (typeof product.size === 'string') {
-                    const sizeData = JSON.parse(product.size);
-                    parsedSize = sizeData.map(item => ({
-                        size: item.size,
-                        quantity: item.quantity
-                    }));
+                    parsedSize = JSON.parse(product.size);
                 } else {
                     parsedSize = product.size;
                 }
@@ -372,7 +378,19 @@ export const getAllProducts = cache(async (filters) => {
             hasPreviousPage: response.data.pagination?.hasPreviousPage || false
         };
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Failed to fetch products');
+        console.error('API Error:', error);
+        // Return a structured error response instead of throwing
+        return {
+            error: true,
+            message: error.response?.data?.message || 'Error while querying products',
+            products: [],
+            total: 0,
+            currentPage: filters.page || 1,
+            totalPages: 0,
+            itemsPerPage: filters.limit || 10,
+            hasNextPage: false,
+            hasPreviousPage: false
+        };
     }
 });
 // get product by id admin
