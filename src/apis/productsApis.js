@@ -490,20 +490,20 @@ export const getProductById = async (id) => {
 export const getProductByIdclient = async (id) => {
     try {
         const response = await axiosClient.get(`/products/${id}`);
-        if (response.data && response.data.success) {
-            const product = response.data.product;
-            const recommendedProducts = response.data.recommendedProducts || [];
+        if (response?.data && response?.data?.success) {
+            const product = response?.data?.product;
+            const recommendedProducts = response?.data?.recommendedProducts || [];
 
             return {
                 product: {
                     ...product,
-                    size: Array.isArray(product.size) ? product.size :
-                        typeof product.size === 'string' ? JSON.parse(product.size) : [],
-                    colorVariants: product.colors?.map(color => ({
+                    size: Array.isArray(product?.size) ? product?.size :
+                        typeof product?.size === 'string' ? JSON.parse(product?.size) : [],
+                    colorVariants: product?.colors?.map(color => ({
                         id: color.id,
                         colorName: color.colorName,
                         colorCode: color.colorCode,
-                        images: color.images.map(img => ({
+                        images: color?.images?.map(img => ({
                             id: img.id,
                             url: img.url,
                             preview: img.url,
@@ -537,10 +537,10 @@ export const getCharacteristics = async () => {
 export const getAllCategories = async () => {
     try {
         const response = await axiosClient.get('/questions');
-        if (response.data && response.data.level === "category") {
+        if (response?.data && response?.data?.level === "category") {
             return {
                 success: true,
-                data: response.data.data
+                data: response?.data?.data
             };
         }
         throw new Error('Invalid category data format');
@@ -554,7 +554,7 @@ export const getSubCategories = async (categorySlug) => {
     try {
         const response = await axiosClient.get(`/questions/${categorySlug}`);
         if (response.data) {
-            if (!response.data.data || response.data.level !== "sub-categories") {
+            if (!response?.data?.data || response?.data?.level !== "sub-categories") {
                 return {
                     success: true,
                     data: []
@@ -563,7 +563,7 @@ export const getSubCategories = async (categorySlug) => {
 
             return {
                 success: true,
-                data: response.data.data
+                data: response?.data?.data
             };
         }
 
