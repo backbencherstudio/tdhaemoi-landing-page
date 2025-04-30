@@ -369,7 +369,7 @@ export default function CreateProducts() {
           size: [...currentSizes, size],
           sizeQuantities: {
             ...currentQuantities,
-            [size]: 0
+            [size]: ""
           }
         };
       }
