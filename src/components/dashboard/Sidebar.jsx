@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { IoClose } from 'react-icons/io5'
 import { HiPencilAlt, HiCollection, HiCog, HiArrowRightOnRectangle } from 'react-icons/hi'
 import { useAuth } from '@/context/AuthContext'
+import { UserPlus } from 'lucide-react'
 // import toast from 'react-hot-toast'
 
 export default function Sidebar({ onClose }) {
@@ -15,6 +16,7 @@ export default function Sidebar({ onClose }) {
         // { icon: HiHome, label: 'Dashboard', href: '/dashboard' },
         { icon: HiPencilAlt, label: 'Create Post', href: '/dashboard/create-products' },
         { icon: HiCollection, label: 'All Posts', href: '/dashboard/all-product' },
+        { icon: UserPlus, label: 'Manage Partner', href: '/dashboard/manage-partner' },
         { icon: HiCog, label: 'Settings', href: '/dashboard/settings' },
     ];
 

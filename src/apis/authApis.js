@@ -93,3 +93,41 @@ export const changePassword = async (oldPassword, newPassword) => {
         throw new Error(errorMessage);
     }
 };
+
+
+// add partner 
+export const addPartner = async (partnerData) => {
+    try {
+        const response = await axiosClient.post('/partner/create', partnerData);
+        if (!response.data) {
+            throw new Error('Invalid response from server');
+        }
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Error adding partner';
+        throw new Error(errorMessage);
+    }
+};
+
+// get all partner
+// api.ts or wherever you define this
+export const getAllPartners = async ({ page = 1, limit = 8, search = '' }) => {
+    try {
+        const response = await axiosClient.get('/partner', {
+            params: {
+                page,
+                limit,
+                search
+            }
+        });
+
+        if (!response.data) {
+            throw new Error('Invalid response from server');
+        }
+
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Error fetching partners';
+        throw new Error(errorMessage);
+    }
+}

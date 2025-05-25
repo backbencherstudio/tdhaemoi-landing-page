@@ -5,6 +5,7 @@ import { updateUserProfile, changePassword } from '@/apis/authApis'
 import { toast } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import AddPartner from '@/components/dashboard/ManagePartner/AddPartner'
 
 export default function Settings() {
     const { user, updateUser } = useAuth()
@@ -115,7 +116,7 @@ export default function Settings() {
                     toast.success('Password changed successfully');
                 }
             } catch (error) {
-                console.error('Detailed error:', error); // More detailed error logging
+                console.error('Detailed error:', error);
                 toast.error(error.message || 'Failed to change password');
             }
         }
@@ -237,6 +238,15 @@ export default function Settings() {
                     >
                         Security
                     </button>
+                    <button
+                        className={`py-2 px-4 cursor-pointer border-b-2 font-medium transition-colors ${activeTab === 'partner'
+                            ? 'border-green-500 text-green-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        onClick={() => setActiveTab('partner')}
+                    >
+                        Add Partner
+                    </button>
                 </div>
             </div>
 
@@ -343,8 +353,8 @@ export default function Settings() {
                                     </div>
                                     <input
                                         type={showPasswords.current ? "text" : "password"}
-                                        {...register("currentPassword", { 
-                                            required: "Current password is required" 
+                                        {...register("currentPassword", {
+                                            required: "Current password is required"
                                         })}
                                         className={`pl-10 pr-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 ${errors.currentPassword ? 'border-red-500' : ''}`}
                                         placeholder="Enter current password"
@@ -378,7 +388,7 @@ export default function Settings() {
                                     </div>
                                     <input
                                         type={showPasswords.new ? "text" : "password"}
-                                        {...register("newPassword", { 
+                                        {...register("newPassword", {
                                             required: "New password is required",
                                             minLength: {
                                                 value: 6,
@@ -417,9 +427,9 @@ export default function Settings() {
                                     </div>
                                     <input
                                         type={showPasswords.confirm ? "text" : "password"}
-                                        {...register("confirmPassword", { 
+                                        {...register("confirmPassword", {
                                             required: "Please confirm your password",
-                                            validate: (value, formValues) => 
+                                            validate: (value, formValues) =>
                                                 value === formValues.newPassword || "Passwords do not match"
                                         })}
                                         className={`pl-10 pr-10 mt-1 block w-full rounded-md border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 ${errors.confirmPassword ? 'border-red-500' : ''}`}
@@ -452,6 +462,13 @@ export default function Settings() {
                         </button>
                     </div>
                 </form>
+            )}
+
+            {/* Manage Partner Tab Content */}
+            {activeTab === 'partner' && (
+                <div>
+                    <AddPartner />
+                </div>
             )}
         </div>
     )

@@ -3,9 +3,18 @@ const nextConfig = {
   images: {
     domains: ['192.168.4.3'],
     remotePatterns: [
+      // {
+      //   protocol: 'http',
+      //   hostname: 'localhost',
+      //   port: '3000',
+      // },
       {
         protocol: 'https',
-        hostname: 'antivirus-duck-agricultural-vast.trycloudflare.com',
+        hostname: 'aymeecel-backend.signalsmind.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'manually-thomson-cure-fundamentals.trycloudflare.com',
       },
       {
         protocol: 'https',
