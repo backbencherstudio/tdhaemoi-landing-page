@@ -1,9 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { toast } from "react-hot-toast"
 import { format } from 'date-fns'
-
 import {
     Table,
     TableBody,
@@ -20,6 +18,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -31,14 +37,19 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronsLeft,
-    ChevronsRight
+    ChevronsRight,
+    Plus
 } from "lucide-react"
 import Image from 'next/image'
+import { deletePartner, getAllPartners } from '@/apis/authApis'
+import toast from 'react-hot-toast'
+import AddPartner from '@/components/dashboard/AddPartner/AddPartner'
 
 export default function ManagePartnerPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchParams.get('search') || '')
     const [pagination, setPagination] = useState({
         currentPage: Number(searchParams.get('page')) || 1,
         totalPages: 0,
@@ -49,29 +60,44 @@ export default function ManagePartnerPage() {
     const [partners, setPartners] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [partnerToDelete, setPartnerToDelete] = useState(null)
+    const [deleting, setDeleting] = useState(false)
     const itemsPerPage = 8
     const [startIndex, setStartIndex] = useState(0)
+    const [addPartnerOpen, setAddPartnerOpen] = useState(false)
+    const [selectedPartnerId, setSelectedPartnerId] = useState(null)
+
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [searchTerm])
+
+    useEffect(() => {
+        if (debouncedSearchTerm !== (searchParams.get('search') || '')) {
+            updateURL(debouncedSearchTerm, 1)
+            setPagination(prev => ({ ...prev, currentPage: 1 }))
+        }
+    }, [debouncedSearchTerm])
 
     useEffect(() => {
         const fetchPartners = async () => {
             try {
                 setLoading(true)
                 setError(null)
-
                 const page = Number(searchParams.get('page')) || 1
                 const search = searchParams.get('search') || ''
-                
-                // Call API with pagination parameters
                 const response = await getAllPartners({
                     page,
                     limit: itemsPerPage,
                     search
                 })
-                
                 const partnersData = response.data || []
-                const total = response.total || 0
+                const total = response.pagination?.total || 0
                 const totalPages = Math.ceil(total / itemsPerPage)
-
                 setPartners(partnersData)
                 setPagination({
                     currentPage: page,
@@ -90,7 +116,6 @@ export default function ManagePartnerPage() {
                 setLoading(false)
             }
         }
-
         fetchPartners()
     }, [searchParams])
 
@@ -98,55 +123,118 @@ export default function ManagePartnerPage() {
         const params = new URLSearchParams()
         if (search) params.set('search', search)
         if (page > 1) params.set('page', page.toString())
-
         router.push(`?${params.toString() || ''}`, { scroll: false })
     }
 
-    function handleSearch(value) {
+    function handleSearchInputChange(value) {
         setSearchTerm(value)
+    }
+
+    function handleClearSearch() {
+        setSearchTerm('')
+        setDebouncedSearchTerm('')
+        updateURL('', 1)
         setPagination(prev => ({ ...prev, currentPage: 1 }))
-        updateURL(value, 1)
     }
 
     function changePage(newPage) {
         if (newPage === pagination.currentPage) return
         setPagination(prev => ({ ...prev, currentPage: newPage }))
-        updateURL(searchTerm, newPage)
+        updateURL(debouncedSearchTerm, newPage)
     }
 
     const getPageNumbers = () => {
         const pageNumbers = []
         const maxVisiblePages = 5
         const { currentPage, totalPages } = pagination
-
         if (totalPages <= maxVisiblePages) {
             for (let i = 1; i <= totalPages; i++) {
                 pageNumbers.push(i)
             }
             return pageNumbers
         }
-
         pageNumbers.push(1)
-
         let start = Math.max(2, currentPage - 1)
         let end = Math.min(totalPages - 1, currentPage + 1)
-
         if (currentPage <= 2) {
             end = 4
         } else if (currentPage >= totalPages - 1) {
             start = totalPages - 3
         }
-
         if (start > 2) pageNumbers.push('...')
-
         for (let i = start; i <= end; i++) {
             pageNumbers.push(i)
         }
-
         if (end < totalPages - 1) pageNumbers.push('...')
         if (totalPages > 1) pageNumbers.push(totalPages)
-
         return pageNumbers
+    }
+
+    const openDeleteModal = (partner) => {
+        setPartnerToDelete(partner)
+        setDeleteModalOpen(true)
+    }
+
+    const handleDelete = async () => {
+        if (!partnerToDelete) return
+        try {
+            setDeleting(true)
+            await deletePartner(partnerToDelete.id)
+            setPartners(prevPartners => prevPartners.filter(partner => partner.id !== partnerToDelete.id))
+            setPagination(prev => ({
+                ...prev,
+                total: prev.total - 1,
+                totalPages: Math.ceil((prev.total - 1) / itemsPerPage)
+            }))
+
+            toast.success('Partner deleted successfully')
+            setDeleteModalOpen(false)
+            setPartnerToDelete(null)
+            const remainingItems = partners.length - 1
+            if (remainingItems === 0 && pagination.currentPage > 1) {
+                changePage(pagination.currentPage - 1)
+            }
+
+        } catch (error) {
+            console.error('Failed to delete partner:', error)
+            toast.error('Failed to delete partner')
+        } finally {
+            setDeleting(false)
+        }
+    }
+
+    // refresh partners
+    const refreshPartners = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            const page = Number(searchParams.get('page')) || 1
+            const search = searchParams.get('search') || ''
+            const response = await getAllPartners({
+                page,
+                limit: itemsPerPage,
+                search
+            })
+            const partnersData = response.data || []
+            const total = response.pagination?.total || 0
+            const totalPages = Math.ceil(total / itemsPerPage)
+            setPartners(partnersData)
+            setPagination({
+                currentPage: page,
+                totalPages,
+                total,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            })
+            setStartIndex((page - 1) * itemsPerPage)
+        } catch (error) {
+            console.error('Failed to fetch partners:', error)
+            setError(error.message)
+            setPartners([])
+            setStartIndex(0)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -156,18 +244,45 @@ export default function ManagePartnerPage() {
                     <h1 className="text-2xl font-bold text-gray-800">Manage Partners</h1>
                     <p className="text-gray-500 mt-1">View and manage your partners</p>
                 </div>
+
+                <Button
+                    className="bg-green-600 cursor-pointer hover:bg-green-700 flex items-center gap-2"
+                    onClick={() => setAddPartnerOpen(true)}
+                >
+                    <Plus className="h-4 w-4" />
+                    Add Partner
+                </Button>
             </div>
 
             <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
                 <div className="p-6 border-b border-gray-100">
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input
-                            placeholder="Search by name or email..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 bg-gray-50 border-gray-200"
-                        />
+                        <div className="flex items-center">
+                            <Search className="absolute left-3 text-gray-400 h-4 w-4" />
+                            <Input
+                                placeholder="Search by name or email..."
+                                value={searchTerm}
+                                onChange={(e) => handleSearchInputChange(e.target.value)}
+                                className="pl-10 bg-gray-50 border-gray-200"
+                            />
+                            {searchTerm && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleClearSearch}
+                                    className="ml-2"
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                        {/* Show searching indicator */}
+                        {searchTerm !== debouncedSearchTerm && (
+                            <div className="absolute top-full left-0 mt-1 text-xs text-gray-400 flex items-center gap-1">
+                                <div className="w-3 h-3 border border-gray-300 border-t-transparent rounded-full animate-spin" />
+                                Searching...
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -206,22 +321,22 @@ export default function ManagePartnerPage() {
                                 partners.map((partner, index) => (
                                     <TableRow key={partner.id} className="hover:bg-gray-50">
                                         <TableCell className="font-medium text-center">
-                                            {index + 1}
+                                            {startIndex + index + 1}
                                         </TableCell>
                                         <TableCell>
-                                            {partner.name}
+                                            {partner?.name || 'Null'}
                                         </TableCell>
                                         <TableCell>
-                                            {partner.email}
+                                            {partner?.email}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {partner.image ? (
+                                            {partner?.image ? (
                                                 <div className="relative w-14 h-14 mx-auto">
                                                     <Image
-                                                        src={partner.image}
+                                                        src={partner?.image}
                                                         width={100}
                                                         height={100}
-                                                        alt={partner.name}
+                                                        alt={partner?.name}
                                                         className="w-full h-full rounded-md object-cover border border-gray-200"
                                                     />
                                                 </div>
@@ -233,11 +348,11 @@ export default function ManagePartnerPage() {
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Badge className="font-normal bg-blue-100 text-blue-800">
-                                                {partner.role}
+                                                {partner?.role}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-center text-gray-500">
-                                            {format(new Date(partner.createdAt), 'MMM d, yyyy')}
+                                            {format(new Date(partner?.createdAt), 'MMM d, yyyy')}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <DropdownMenu>
@@ -252,14 +367,17 @@ export default function ManagePartnerPage() {
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
                                                         className="cursor-pointer"
-                                                        onClick={() => router.push(`/dashboard/manage-partner/edit/${partner.id}`)}
+                                                        onClick={() => {
+                                                            setSelectedPartnerId(partner.id);
+                                                            setAddPartnerOpen(true);
+                                                        }}
                                                     >
                                                         <Edit className="mr-2 h-4 w-4" />
                                                         <span>Update</span>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         className="cursor-pointer text-red-600"
-                                                        onClick={() => { }}
+                                                        onClick={() => openDeleteModal(partner)}
                                                     >
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         <span>Delete</span>
@@ -303,7 +421,6 @@ export default function ManagePartnerPage() {
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
-
                     {getPageNumbers().map((page, index) => (
                         page === '...' ? (
                             <span key={`ellipsis-${index}`} className="px-2">...</span>
@@ -320,7 +437,6 @@ export default function ManagePartnerPage() {
                             </Button>
                         )
                     ))}
-
                     <Button
                         variant="outline"
                         size="icon"
@@ -339,14 +455,59 @@ export default function ManagePartnerPage() {
                     >
                         <ChevronsRight className="h-4 w-4" />
                     </Button>
-
                     <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-md ml-2">
                         Page {pagination.currentPage} of {pagination.totalPages}
                     </div>
                 </div>
             </div>
+
+            {/* Delete confirmation modal */}
+            <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Confirm Deletion</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{partnerToDelete?.name}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex gap-2 mt-4">
+                        <Button
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() => setDeleteModalOpen(false)}
+                            disabled={deleting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="bg-red-600 cursor-pointer hover:bg-red-700"
+                        >
+                            {deleting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                'Delete'
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Add Partner Modal */}
+            <AddPartner
+                open={addPartnerOpen}
+                onOpenChange={(open) => {
+                    setAddPartnerOpen(open);
+                    if (!open) setSelectedPartnerId(null);
+                }}
+                onSuccess={refreshPartners}
+                partnerId={selectedPartnerId}
+            />
         </div>
-
-
     )
 }

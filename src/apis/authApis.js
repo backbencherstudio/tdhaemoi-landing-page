@@ -109,18 +109,12 @@ export const addPartner = async (partnerData) => {
     }
 };
 
-// get all partner
+
 // api.ts or wherever you define this
 export const getAllPartners = async ({ page = 1, limit = 8, search = '' }) => {
-    try {
-        const response = await axiosClient.get('/partner', {
-            params: {
-                page,
-                limit,
-                search
-            }
-        });
 
+    try {
+        const response = await axiosClient.get(`/partner?search=${search}&page=${page}&limit=${limit}`);
         if (!response.data) {
             throw new Error('Invalid response from server');
         }
@@ -130,4 +124,48 @@ export const getAllPartners = async ({ page = 1, limit = 8, search = '' }) => {
         const errorMessage = error.response?.data?.message || 'Error fetching partners';
         throw new Error(errorMessage);
     }
-}
+};
+
+
+// delete partner
+export const deletePartner = async (id) => {
+    try {
+        const response = await axiosClient.delete(`/partner/delete/${id}`);
+        if (!response.data) {
+            throw new Error('Invalid response from server');
+        }
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Error deleting partner';
+        throw new Error(errorMessage);
+    }
+};
+
+// update partner
+export const updatePartner = async (id, partnerData) => {
+    try {
+        const response = await axiosClient.put(`/partner/update/${id}`, partnerData);
+        if (!response.data) {
+            throw new Error('Invalid response from server');
+        }
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Error updating partner';
+        throw new Error(errorMessage);
+    }
+};
+
+
+// get partner by id
+export const getPartnerById = async (id) => {
+    try {
+        const response = await axiosClient.get(`/partner/${id}`);
+        if (!response.data) {
+            throw new Error('Invalid response from server');
+        }
+        return response.data;
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Error fetching partner';
+        throw new Error(errorMessage);
+    }
+};

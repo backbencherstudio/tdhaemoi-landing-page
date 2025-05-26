@@ -121,12 +121,7 @@ export default function AllProduct() {
     router.push(`?${params.toString() || ''}`, { scroll: false })
   }
 
-  // Simplified search handler
-  function handleSearch(value) {
-    setSearchTerm(value)
-    setPagination(prev => ({ ...prev, currentPage: 1 }))
-    updateURL(value, 1)
-  }
+
 
   // Simplified page change handler
   function changePage(newPage) {

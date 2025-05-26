@@ -5,7 +5,7 @@ import { updateUserProfile, changePassword } from '@/apis/authApis'
 import { toast } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import AddPartner from '@/components/dashboard/ManagePartner/AddPartner'
+import AddPartner from '@/components/dashboard/AddPartner/AddPartner'
 
 export default function Settings() {
     const { user, updateUser } = useAuth()
@@ -238,15 +238,7 @@ export default function Settings() {
                     >
                         Security
                     </button>
-                    <button
-                        className={`py-2 px-4 cursor-pointer border-b-2 font-medium transition-colors ${activeTab === 'partner'
-                            ? 'border-green-500 text-green-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        onClick={() => setActiveTab('partner')}
-                    >
-                        Add Partner
-                    </button>
+                   
                 </div>
             </div>
 
