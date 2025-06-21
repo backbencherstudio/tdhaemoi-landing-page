@@ -20,6 +20,16 @@ const getChunkSize = () => {
     return 3;
 }
 
+const descriptions = {
+    'Radschuhe': 'Jeder Tritt - volle Effizienz.',
+    'Laufschuhe': 'Dein Lauf - deine Dynamik.',
+    'Tennisschuhe': 'Schnelle Schritte - volle Kontrolle.',
+    'Basketballschuhe': 'Schnelle Moves - sichere Landung.',
+    'Kletterschuhe': 'Präziser Tritt - maximaler Grip.',
+    'Fussballschuhe': 'Dein Spiel - perfekter Grip.',
+    'Golfschuhe': 'Fester Stand - kontrollierter Schwung.',
+};
+
 export default function CategoryPage({ params }) {
     const router = useRouter()
     const unwrappedParams = React.use(params)
@@ -62,14 +72,15 @@ export default function CategoryPage({ params }) {
                 return
             }
 
-            // Add slugs to subcategories if they don't exist
-            const subCategoriesWithSlugs = currentCategory.data?.map(subCat => ({
+            // Add slugs and descriptions to subcategories
+            const subCategoriesWithData = currentCategory.data?.map(subCat => ({
                 ...subCat,
-                slug: subCat.slug || subCat.title.toLowerCase().replace(/\s+/g, '-')
+                slug: subCat.slug || subCat.title.toLowerCase().replace(/\s+/g, '-'),
+                description: descriptions[subCat.title] || ''
             })) || []
 
             setCategory(currentCategory)
-            setSubCategories(subCategoriesWithSlugs)
+            setSubCategories(subCategoriesWithData)
         } catch (error) {
             console.error('Error fetching category data:', error)
             router.push('/categories')
@@ -104,6 +115,9 @@ export default function CategoryPage({ params }) {
         )
     }
 
+    const leftColumnSubcategories = subCategories.filter((_, index) => index % 2 === 0);
+    const rightColumnSubcategories = subCategories.filter((_, index) => index % 2 !== 0);
+
     return (
         <div className="flex justify-center bg-black min-h-screen">
             <div className="w-full max-w-[1440px] py-8 md:py-12 px-4">
@@ -120,47 +134,88 @@ export default function CategoryPage({ params }) {
                     </Link>
 
                     <div className='mt-4'>
-                        <h1 className='text-white uppercase text-2xl md:text-4xl'>SHOE FINDER FEETF1RST</h1>
+                        <h1 className='text-white uppercase text-2xl md:text-4xl'>Starte dein persönliches Sporterlebnis</h1>
                         <p className="text-white capitalize text-xl font-light mt-4">
-                            Wählen Sie Ihre Kategorie und finden Sie Ihren perfekten Schuh
+                            Wähle deine Sportart und profitiere von individuellen Empfehlungen – für maximale Performance.
                         </p>
                     </div>
                 </div>
 
-                <div className="relative">
-                    <table className="w-full border-separate border-spacing-x-2 sm:border-spacing-x-4 md:border-spacing-x-8 lg:border-spacing-x-16">
-                        <tbody>
-                            {chunk(subCategories, chunkSize).map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    {row.map((subCategory, colIndex) => (
-                                        <td
-                                            key={subCategory.id}
-                                            className={`${chunkSize === 2 ? 'w-1/2' : 'w-1/3'} 
-                                            ${chunkSize === 3 && colIndex === 1 ? 'pt-4 md:pt-14' : ''}`}
-                                        >
-                                            <div className="flex flex-col items-center cursor-pointer group"
-                                                onClick={() => handleImageClick(subCategory)}>
-                                                <div className="w-full relative overflow-hidden rounded-lg">
-                                                    <Image
-                                                        src={subCategory.image}
-                                                        alt={subCategory.title}
-                                                        width={500}
-                                                        height={500}
-                                                        className="w-full transition-transform duration-500 group-hover:scale-105"
-                                                        priority
-                                                    />
-                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
-                                                </div>
-                                                <h2 className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mt-2 md:mt-4 transform transition-transform duration-300 group-hover:scale-105 text-center">
-                                                    {subCategory.title}
-                                                </h2>
-                                            </div>
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="flex flex-col md:flex-row gap-8 lg:gap-36 justify-center">
+                    <div className="flex flex-col gap-8 lg:gap-28 md:w-1/2">
+                        {leftColumnSubcategories.map((subCategory, index) => (
+                            <div
+                                key={subCategory.id}
+                                className="flex flex-col md:flex-row items-center gap-4 md:gap-6"
+
+                            >
+                                <div className="w-full md:w-1/2 order-2 md:order-1 text-right">
+                                    <h2 className="text-white text-xl md:text-2xl font-bold">
+                                        {subCategory.title}
+                                    </h2>
+                                    <p className="text-white text-base mt-2">{subCategory.description}</p>
+                                    <div className="mt-4">
+                                        <button onClick={() => handleImageClick(subCategory)} className="bg-white text-black font-semibold py-2 px-8 transform duration-300 -skew-x-[20deg] hover:bg-gray-300 transition-opacity cursor-pointer">
+                                            <span className="inline-block transform skew-x-[20deg]">
+                                                Passenden Schuh finden
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="w-full md:w-1/2 order-1 md:order-2 group relative overflow-hidden rounded-lg cursor-pointer"
+                                    onClick={() => handleImageClick(subCategory)}
+                                >
+                                    <Image
+                                        src={subCategory.image}
+                                        alt={subCategory.title}
+                                        width={300}
+                                        height={300}
+                                        className="w-full transition-transform duration-500 group-hover:scale-105"
+                                        priority
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-col gap-8 lg:gap-28 md:w-1/2 md:mt-24 lg:mt-48">
+                        {rightColumnSubcategories.map((subCategory, index) => (
+                            <div
+                                key={subCategory.id}
+                                className="flex flex-col md:flex-row items-center   gap-4 md:gap-6"
+
+                            >
+                                <div className="w-full md:w-1/2 relative overflow-hidden rounded-lg cursor-pointer group"
+                                    onClick={() => handleImageClick(subCategory)}
+                                >
+                                    <Image
+
+                                        src={subCategory.image}
+                                        alt={subCategory.title}
+                                        width={300}
+                                        height={300}
+                                        className="w-full transition-transform duration-500 group-hover:scale-105"
+                                        priority
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
+                                </div>
+                                <div className="w-full md:w-1/2 text-left">
+                                    <h2 className="text-white text-xl md:text-2xl font-bold">
+                                        {subCategory.title}
+                                    </h2>
+                                    <p className="text-white text-base mt-2">{subCategory.description}</p>
+                                    <div className="mt-4">
+                                        <button onClick={() => handleImageClick(subCategory)} className="bg-white text-black font-semibold py-2 px-8 transform -skew-x-[20deg] hover:opacity-90 transition-opacity cursor-pointer">
+                                            <span className="inline-block transform skew-x-[20deg]">
+                                                Passenden Schuh finden
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <FormModal
