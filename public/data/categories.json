@@ -77,11 +77,12 @@
         "title": "Sportschuhe",
         "slug": "sportschuhe",
         "image": "/category/category1.png",
-        "data": [ 
+        "data": [
             {
                 "id": 1,
                 "title": "Alpines Skifahren",
                 "slug": "alpines-skifahren",
+                "subTitle": "Alpines Skifahren",
                 "image": "/categoryData/img01.png",
                 "questions": [
                     {
@@ -360,6 +361,7 @@
                 "id": 2,
                 "title": "Laufschuhe",
                 "slug": "laufschuhe",
+                "subTitle": "Dein Lauf – deine Dynamik.",
                 "image": "/categoryData/img02.png",
                 "questions": [
                     {
@@ -830,6 +832,7 @@
                 "id": 3,
                 "title": "Radschuhe",
                 "slug": "radschuhe",
+                "subTitle": "Jeder Tritt – volle Effizienz.",
                 "image": "/categoryData/img03.png",
                 "questions": [
                     {
@@ -924,6 +927,7 @@
                 "id": 4,
                 "title": "Tennisschuhe",
                 "slug": "tennisschuhe",
+                "subTitle": "Schnelle Schritte – volle Kontrolle.",
                 "image": "/categoryData/img04.png",
                 "questions": [
                     {
@@ -1000,6 +1004,7 @@
                 "id": 5,
                 "title": "Baskettballschuhe",
                 "slug": "baskettballschuhe",
+                "subTitle": "Schnelle Moves – sichere Landung.",
                 "image": "/categoryData/img05.png",
                 "questions": [
                     {
@@ -1058,6 +1063,7 @@
                 "id": 6,
                 "title": "Kletterschuhe",
                 "slug": "kletterschuhe",
+                "subTitle": "Präziser Tritt – maximaler Grip.",
                 "image": "/categoryData/img06.png",
                 "questions": [
                     {
@@ -1168,6 +1174,7 @@
                 "id": 7,
                 "title": "Fussballschuhe",
                 "slug": "fussballschuhe",
+                "subTitle": "Dein Spiel – perfekter Grip.",
                 "image": "/categoryData/img07.png",
                 "questions": [
                     {
@@ -1242,15 +1249,9 @@
             },
             {
                 "id": 8,
-                "title": "Schlittschuhe (Coming soon)",
-                "slug": "schlittschuhe",
-                "image": "/categoryData/img08.png",
-                "questions": []
-            },
-            {
-                "id": 9,
                 "title": "Golfschuhe",
                 "slug": "golfschuhe",
+                "subTitle": "Fester Stand – kontrollierter Schwung.",
                 "image": "/categoryData/img09.png",
                 "questions": [
                     {

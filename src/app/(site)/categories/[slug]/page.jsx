@@ -5,30 +5,7 @@ import logo from '../../../../../public/categoryData/logo.png'
 import FormModal from '../../../../components/FormModal'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import LoadingSpring from '@/components/loading/LoadingSpring'
-
-const chunk = (arr, size) =>
-    Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-        arr.slice(i * size, i * size + size)
-    );
-
-// Update the chunk function to be responsive
-const getChunkSize = () => {
-    if (typeof window !== 'undefined') {
-        return window.innerWidth < 768 ? 2 : 3;
-    }
-    return 3;
-}
-
-const descriptions = {
-    'Radschuhe': 'Jeder Tritt - volle Effizienz.',
-    'Laufschuhe': 'Dein Lauf - deine Dynamik.',
-    'Tennisschuhe': 'Schnelle Schritte - volle Kontrolle.',
-    'Basketballschuhe': 'Schnelle Moves - sichere Landung.',
-    'Kletterschuhe': 'Präziser Tritt - maximaler Grip.',
-    'Fussballschuhe': 'Dein Spiel - perfekter Grip.',
-    'Golfschuhe': 'Fester Stand - kontrollierter Schwung.',
-};
+// import LoadingSpring from '@/components/loading/LoadingSpring'
 
 export default function CategoryPage({ params }) {
     const router = useRouter()
@@ -39,25 +16,10 @@ export default function CategoryPage({ params }) {
     const [selectedSubCategory, setSelectedSubCategory] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
-    const [chunkSize, setChunkSize] = useState(3);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setChunkSize(getChunkSize());
-        };
-
-        // Set initial chunk size
-        setChunkSize(getChunkSize());
-
-        // Add resize listener
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     useEffect(() => {
         fetchCategoryData()
     }, [slug])
-
 
     const fetchCategoryData = async () => {
         setIsLoading(true)
@@ -72,11 +34,10 @@ export default function CategoryPage({ params }) {
                 return
             }
 
-            // Add slugs and descriptions to subcategories
+            // Add slugs to subcategories
             const subCategoriesWithData = currentCategory.data?.map(subCat => ({
                 ...subCat,
-                slug: subCat.slug || subCat.title.toLowerCase().replace(/\s+/g, '-'),
-                description: descriptions[subCat.title] || ''
+                slug: subCat.slug || subCat.title.toLowerCase().replace(/\s+/g, '-')
             })) || []
 
             setCategory(currentCategory)
@@ -153,7 +114,7 @@ export default function CategoryPage({ params }) {
                                     <h2 className="text-white text-xl md:text-2xl font-bold">
                                         {subCategory.title}
                                     </h2>
-                                    <p className="text-white text-base mt-2">{subCategory.description}</p>
+                                    <p className="text-white text-base mt-2">{subCategory.subTitle}</p>
                                     <div className="mt-4">
                                         <button onClick={() => handleImageClick(subCategory)} className="bg-white text-black font-semibold py-2 px-8 transform duration-300 -skew-x-[20deg] hover:bg-gray-300 transition-opacity cursor-pointer">
                                             <span className="inline-block transform skew-x-[20deg]">
@@ -204,7 +165,7 @@ export default function CategoryPage({ params }) {
                                     <h2 className="text-white text-xl md:text-2xl font-bold">
                                         {subCategory.title}
                                     </h2>
-                                    <p className="text-white text-base mt-2">{subCategory.description}</p>
+                                    <p className="text-white text-base mt-2">{subCategory.subTitle}</p>
                                     <div className="mt-4">
                                         <button onClick={() => handleImageClick(subCategory)} className="bg-white text-black font-semibold py-2 px-8 transform -skew-x-[20deg] hover:opacity-90 transition-opacity cursor-pointer">
                                             <span className="inline-block transform skew-x-[20deg]">
