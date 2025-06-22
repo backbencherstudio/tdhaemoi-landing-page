@@ -1,59 +1,72 @@
-import React from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import bannerImg from '../../public/banner/banner.png'
-import logo from '../../public/banner/logo.png'
+import Image from "next/image";
+import Link from "next/link";
+import bannerImg from "../../public/banner/rightImg.jpg";
+import logo from "../../public/banner/logo.png";
 
 export default function Home() {
   return (
-    <div className="relative w-full min-h-screen">
-      {/* Blurred background image */}
-      <div className="absolute inset-0">
-        <Image
-          src={bannerImg}
-          alt="Background blur"
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, 100vw"
-          className="object-cover blur-md"
-          quality={100}
-        />
-      </div>
-      {/* Main sharp image */}
-      <div className="relative h-screen">
-        <Image
-          src={bannerImg}
-          alt="Hiking boot in mountainous terrain"
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, 100vw"
-          className="object-cover"
-          quality={100}
-        />
-        {/* Logo overlay */}
-        <div className="absolute top-4 right-4 z-20">
-          <Link href='/'>
+    <div className="w-full">
+      {/* Hero Section */}
+      <div className="relative md:flex w-full h-screen text-white bg-black">
+        {/* Left side black background */}
+        <div className="hidden md:block md:w-1/2 h-full bg-black"></div>
+
+        {/* Right side image */}
+        <div className="absolute inset-0 md:relative md:w-1/2 h-full">
+          <Image
+            src={bannerImg}
+            alt="A person holding a shoebox"
+            fill
+            priority
+            quality={100}
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/80"></div>
+        </div>
+
+        {/* Full width content overlay */}
+        <div className="absolute inset-0 z-10 flex flex-col p-8 sm:p-12 md:p-16 lg:p-24">
+          {/* Logo */}
+          <div className="flex-shrink-0">
             <Image
               src={logo}
-              alt="Company logo"
-              width={200}
-              height={150}
-              className="w-[80px] h-[140px] md:w-[100px] md:h-[160px] lg:w-[150px] lg:h-[190px] object-contain"
+              alt="FeetFirst Logo"
+              width={80}
+              height={80}
+              className="object-contain w-16 h-16 md:w-24 md:h-24"
             />
-          </Link>
-        </div>
-        {/* Button section */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-black bg-opacity-90 py-4 md:py-6 text-center">
-          <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-3 md:mb-4 px-4">
-            FINDE DEINEN PERFEKT PASSENDEN SCHUH!
-          </h2>
-          <Link href="/categories">
-            <button className="bg-[#62a07c] cursor-pointer transform duration-300 text-white px-4 md:px-6 py-2 rounded-md hover:bg-green-600 transition-colors">
-              JETZT STARTEN
-            </button>
-          </Link>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-grow flex flex-col justify-center gap-10">
+            <div className="flex flex-col gap-7">
+              <h1 className="text-xl sm:text-4xl md:text-4xl lg:text-5xl font-bold tracking-wider">
+                EIN SCAN.
+              </h1>
+              <div className=" h-2 w-3 bg-white" />
+              <h1 className="text-xl sm:text-4xl md:text-4xl lg:text-5xl font-bold ">
+                PASSGENAUE EMPFEHLUNGEN.
+              </h1>
+              <div className="h-2 w-3 bg-white" />
+              <h1 className="text-xl sm:text-4xl md:text-4xl lg:text-5xl font-bold tracking-wider">
+                PERSÖNLICH ABGESTIMMT.
+              </h1>
+            </div>
+
+            <p className="text-sm md:text-base ">
+              Sie haben bereits einen Scan durchgeführt oder besitzen ein Konto in der FeetF1rst App? Behalten Sie alle Ihre Daten und Empfehlungen jederzeit im Blick!{" "}
+              <Link href="" className="underline font-bold">
+                Jetzt anmelden!
+              </Link>
+            </p>
+            <Link href="/categories">
+              <button className="bg-white cursor-pointer text-black font-bold py-3 px-12 rounded-lg text-md hover:bg-gray-200 transition-colors">
+                Jetzt starten
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import LoadingSpring from '@/components/loading/LoadingSpring'
+// import LoadingSpring from '@/components/loading/LoadingSpring' 
 import FormModal from '@/components/FormModal'
 import { useSearchParams } from 'next/navigation'
 

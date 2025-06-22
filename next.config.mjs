@@ -20,6 +20,13 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'manually-thomson-cure-fundamentals.trycloudflare.com',
       },
+
+      {
+        protocol: 'https',
+        hostname: 'date-advanced-electrical-hypothetical.trycloudflare.com',
+      },
+
+      
     ],
   },
 }
