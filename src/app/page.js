@@ -1,9 +1,22 @@
+'use client'
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import bannerImg from "../../public/banner/rightImg.jpg";
 import logo from "../../public/banner/logo.png";
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleStart = () => {
+    setLoading(true);
+    setTimeout(() => {
+      router.push("/categories");
+    }, 1000);
+  };
+
   return (
     <div className="w-full">
       {/* Hero Section */}
@@ -59,10 +72,19 @@ export default function Home() {
                 Jetzt anmelden!
               </Link>
             </p>
-            <Link href="/categories">
-              <button className="bg-white cursor-pointer text-black font-bold py-3 px-12 rounded-lg text-md hover:bg-gray-200 transition-colors">
-                Jetzt starten
-              </button>
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleStart();
+              }}
+              className={`bg-white w-fit cursor-pointer text-black font-bold py-3 px-12 rounded-lg text-md hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[48px] ${loading ? 'pointer-events-none' : ''}`}
+            >
+              {loading ? (
+                <span>Loading...</span>
+              ) : (
+                "Jetzt starten"
+              )}
             </Link>
           </div>
         </div>
