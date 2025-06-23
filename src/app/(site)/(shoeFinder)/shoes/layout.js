@@ -1,6 +1,5 @@
-
-import Navbar from '@/components/Navbar/Navbar';
-import Sidebar from '@/components/Sidebar/Sidebar';
+import Navbar from '../../../components/Navbar/Navbar';
+import Sidebar from '../../../components/Sidebar/Sidebar';
 import React from 'react';
 
 export default function Layout({ children }) {

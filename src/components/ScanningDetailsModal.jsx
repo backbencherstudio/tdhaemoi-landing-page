@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import footScanImage from '../../public/leg.png'
-import LoadingSpring from '@/components/loading/LoadingSpring'
+import LoadingSpring from './loading/LoadingSpring'
 import { IoClose } from "react-icons/io5"
 
 export default function ScanningDetailsModal({ onClose }) {

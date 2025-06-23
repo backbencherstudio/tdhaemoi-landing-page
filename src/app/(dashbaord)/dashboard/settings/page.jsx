@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '../../../../context/AuthContext'
 import { updateUserProfile, changePassword } from '@/apis/authApis'
 import { toast } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'

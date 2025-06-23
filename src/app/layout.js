@@ -1,6 +1,6 @@
 import { Pathway_Extreme, Josefin_Sans } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "../context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
 const pathwayExtreme = Pathway_Extreme({

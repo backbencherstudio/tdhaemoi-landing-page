@@ -1,10 +1,5 @@
-import LoginPage from "@/components/dashboard/Login";
+import LoginPage from "../../components/dashboard/Login";
 
-export default function Login() {
-
-  return (
-    <div>
-      <LoginPage />
-    </div>
-  )
+export default function Page() {
+    return <LoginPage />;
 }

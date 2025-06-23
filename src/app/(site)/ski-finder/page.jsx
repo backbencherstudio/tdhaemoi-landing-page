@@ -18,7 +18,7 @@ export default function SkiFinder() {
       category: 'neueAusleiheStarten',
       title: 'NEUE AUSLEIHE STARTEN',
       image: '/skiVerleih/NeueAusleiheStarten.jpg',
-      link: '/neue-ausleihe-starten',
+      link: '/ski-finder/neue-ausleihe-starten',
     }
   ]
   return (

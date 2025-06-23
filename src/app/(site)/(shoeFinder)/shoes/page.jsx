@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Shoes from "@/components/shoes/Shoes";
+import Shoes from "../../../components/shoes/Shoes";
 
 export default function ShoesPage() {
   const searchParams = useSearchParams();

@@ -2,10 +2,10 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { loginUser } from '@/apis/authApis'
-import { useAuth } from '@/context/AuthContext'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { loginUser } from '../../apis/authApis'
+import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {

@@ -6,7 +6,7 @@ import { FiSearch } from 'react-icons/fi';
 import { getAllProducts } from '@/apis/productsApis';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
-import { Button } from "@/components/ui/button"
+import { Button } from "../ui/button"
 import {
     ChevronLeft,
     ChevronRight,

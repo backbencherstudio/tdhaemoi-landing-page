@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { IoClose } from 'react-icons/io5'
 import { HiPencilAlt, HiCollection, HiCog, HiArrowRightOnRectangle } from 'react-icons/hi'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '../../context/AuthContext'
 import { UserPlus } from 'lucide-react'
 // import toast from 'react-hot-toast'
 
