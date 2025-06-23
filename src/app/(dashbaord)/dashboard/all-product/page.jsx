@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "../../../../components/ui/table"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +19,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+} from "../../../../components/ui/dropdown-menu"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Badge } from "../../../../components/ui/badge"
 import {
   Search,
   MoreVertical,
@@ -35,7 +35,7 @@ import {
   ChevronsLeft,
   ChevronsRight
 } from "lucide-react"
-import { getAllProduct, deleteProduct } from '@/apis/productsApis'
+import { getAllProduct, deleteProduct } from '../../../../apis/productsApis'
 import {
   Dialog,
   DialogContent,
@@ -43,7 +43,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "../../../../components/ui/dialog"
 import Image from 'next/image'
 
 export default function AllProduct() {

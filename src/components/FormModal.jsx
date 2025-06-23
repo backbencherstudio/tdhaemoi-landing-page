@@ -1,22 +1,24 @@
 import React, { useState } from 'react'
 import { IoClose } from "react-icons/io5"
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import PrivacyPolicyModal from './PrivacyPolicyModal/PrivacyPolicyModal'
 import { IoIosArrowBack } from 'react-icons/io'
+import { DatePicker } from "./ui/DatePicker"
 
 export default function FormModal({ isOpen, onClose, category, categoryData }) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false)
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    const { register, handleSubmit, reset, control, formState: { errors } } = useForm({
         defaultValues: {
             firstName: '',
             lastName: '',
             email: '',
             gender: '',
+            birthDate: null,
             acceptTerms: true,
             acceptNewsletter: true
         }
@@ -40,6 +42,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
             // Create full submission data
             const submissionData = {
                 ...data,
+                birthDate: data.birthDate ? data.birthDate.toISOString().split('T')[0] : null,
                 categoryId: normalizedData.id,
                 categoryTitle: normalizedData.title,
                 categorySlug: normalizedData.slug,
@@ -151,6 +154,15 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                     />
                                     <span className="text-lg">Frau</span>
                                 </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="other"
+                                        {...register('gender', { required: true })}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-lg">Keine Angabe</span>
+                                </label>
                             </div>
                             {errors.gender && <span className="text-red-500 text-sm block text-center">Bitte wählen Sie Ihr Geschlecht</span>}
                             <div className="grid grid-cols-2 gap-8">
@@ -171,42 +183,36 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                     {errors.lastName && <span className="text-red-500 text-sm">Dieses Feld ist erforderlich</span>}
                                 </div>
                             </div>
-                            <div>
-                                <label className="block mb-3 text-sm">E-Mail</label>
-                                <input
-                                    {...register('email', {
-                                        // required: true,
-                                        pattern: {
-                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                            message: "Invalid email address"
-                                        }
-                                    })}
-                                    className="w-full p-3 rounded border border-black"
-                                />
-                                {errors.email && <span className="text-red-500 text-sm">{errors.email.message || 'Dieses Feld ist erforderlich'}</span>}
-                            </div>
-
-                            <div className="flex flex-col gap-4">
-                                {/* <div className="flex items-start gap-3">
+                            <div className="grid grid-cols-2 gap-8">
+                                <div>
+                                    <label className="block mb-3 text-sm">E-Mail</label>
                                     <input
-                                        type="checkbox"
-                                        {...register('acceptTerms', { required: true })}
-                                        className="min-w-[20px] h-5 mt-[3px] rounded border-gray-300 accent-[#5B9279] cursor-pointer"
+                                        {...register('email', {
+                                            // required: true,
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: "Invalid email address"
+                                            }
+                                        })}
+                                        className="w-full p-3 rounded border border-black"
                                     />
-                                    <span className="text-sm leading-[22px]">
-                                        Hiermit erkläre ich mein Einverständnis zur Erhebung und Verarbeitung meiner personenbezogenen Daten gemäß der
-                                        {' '}
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPrivacyPolicy(true)}
-                                            className="font-bold underline text-blue-500 cursor-pointer hover:text-blue-600"
-                                        >
-                                            Datenschutzrichtlinie
-                                        </button>
-                                        {' '}
-                                        von FeetF1rst.
-                                    </span>
-                                </div> */}
+                                    {errors.email && <span className="text-red-500 text-sm">{errors.email.message || 'Dieses Feld ist erforderlich'}</span>}
+                                </div>
+                                <div>
+                                    <label className="block mb-3 text-sm">Geburtsdatum</label>
+                                    <Controller
+                                        name="birthDate"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <DatePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-4">
                                 <div className="flex items-start gap-3">
                                     <input
                                         type="checkbox"
@@ -222,7 +228,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                         >
                                             Datenschutzrichtlinien
                                         </button>
-                                        {' '}zu und bin damit einverstanden, E-Mails zum Zweck der Aktivierung der FeetF1rst App zu erhalten..
+                                        {' '}zu und bin damit einverstanden, E-Mails zum Zweck der Aktivierung der FeetF1rst App zu erhalten.
                                     </span>
                                 </div>
                             </div>
