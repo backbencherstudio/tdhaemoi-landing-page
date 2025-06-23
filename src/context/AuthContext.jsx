@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { canAccessAdminDashboard } from '../utils/auth'
 
 const AuthContext = createContext()
 
@@ -38,8 +39,12 @@ export function AuthProvider({ children }) {
         setUser(updatedUser)
     }
 
+    const isAdmin = () => {
+        return canAccessAdminDashboard(user)
+    }
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, updateUser }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, updateUser, isAdmin }}>
             {children}
         </AuthContext.Provider>
     )

@@ -7,8 +7,13 @@ export const loginUser = async (email, password) => {
             password,
         });
 
-        if (!response.data?.token) {
+        if (!response.data?.token || !response.data?.user) {
             throw new Error('Invalid response from server');
+        }
+
+        // Validate that user has a role
+        if (!response.data.user.role) {
+            throw new Error('User role not found in response');
         }
 
         return {

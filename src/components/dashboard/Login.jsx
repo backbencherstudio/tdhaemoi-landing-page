@@ -7,6 +7,7 @@ import { Input } from '../ui/input'
 import { loginUser } from '../../apis/authApis'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
+import { canAccessAdminDashboard } from '../../utils/auth'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -24,6 +25,14 @@ export default function LoginPage() {
 
         try {
             const response = await loginUser(email, password)
+            
+            // Check if user can access admin dashboard
+            if (!canAccessAdminDashboard(response.user)) {
+                setError('Access denied. Only administrators can access the dashboard.')
+                toast.error('Access denied. Only administrators can access the dashboard.')
+                return
+            }
+            
             login(response.user, response.token)
             toast.success('Login successful')
             router.push('/dashboard/create-products')

@@ -1,30 +1,34 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '../../context/AuthContext'
+import { canAccessAdminDashboard } from '../../utils/auth'
 
 export default function ProtectedRoute({ children }) {
     const router = useRouter()
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const { user, loading } = useAuth()
 
     useEffect(() => {
-        checkAuth()
-    }, [])
-
-    const checkAuth = () => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            router.push('/login')
-            return
+        if (!loading) {
+            if (!user) {
+                router.push('/login')
+            } else if (!canAccessAdminDashboard(user)) {
+                router.push('/login')
+            }
         }
-        setIsAuthenticated(true)
-    }
+    }, [user, loading, router])
 
-    if (!isAuthenticated) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <p className="text-lg font-medium text-gray-600">Loading...</p>
             </div>
         )
+    }
+
+    if (!user || !canAccessAdminDashboard(user)) {
+        // Don't show anything if not allowed, since router will redirect
+        return null
     }
 
     return children
