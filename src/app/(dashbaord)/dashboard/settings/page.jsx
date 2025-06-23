@@ -1,11 +1,11 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../../../context/AuthContext'
-import { updateUserProfile, changePassword } from '@/apis/authApis'
+import { updateUserProfile, changePassword } from '../../../../apis/authApis'
 import { toast } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import AddPartner from '@/components/dashboard/AddPartner/AddPartner'
+import AddPartner from '../../../../components/dashboard/AddPartner/AddPartner'
 
 export default function Settings() {
     const { user, updateUser } = useAuth()

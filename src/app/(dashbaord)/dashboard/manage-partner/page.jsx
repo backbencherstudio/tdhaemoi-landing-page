@@ -9,7 +9,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
+} from "../../../../components/ui/table"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,7 +17,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "../../../../components/ui/dropdown-menu"
 import {
     Dialog,
     DialogContent,
@@ -25,10 +25,10 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+} from "../../../../components/ui/dialog"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Badge } from "../../../../components/ui/badge"
 import {
     Search,
     MoreVertical,
@@ -41,9 +41,10 @@ import {
     Plus
 } from "lucide-react"
 import Image from 'next/image'
-import { deletePartner, getAllPartners } from '@/apis/authApis'
+import { deletePartner, getAllPartners } from '../../../../apis/authApis'
 import toast from 'react-hot-toast'
-import AddPartner from '@/components/dashboard/AddPartner/AddPartner'
+// import AddPartner from '@/components/dashboard/AddPartner/AddPartner'
+import AddPartner from '../../../../components/dashboard/AddPartner/AddPartner'
 
 export default function ManagePartnerPage() {
     const router = useRouter()

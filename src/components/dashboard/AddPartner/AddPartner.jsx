@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
 import { toast } from 'react-hot-toast';
-import { addPartner, updatePartner, getPartnerById } from '@/apis/authApis';
+import { addPartner, updatePartner, getPartnerById } from '../../../apis/authApis';
 import { Eye, EyeOff } from 'lucide-react';
 import {
     Dialog,
@@ -10,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-} from "@/components/ui/dialog"
+} from "../../../components/ui/dialog"
 
 export default function PartnerModal({ open, onOpenChange, onSuccess, partnerId = null }) {
     const [email, setEmail] = useState('');
@@ -33,12 +34,12 @@ export default function PartnerModal({ open, onOpenChange, onSuccess, partnerId 
     useEffect(() => {
         const fetchPartnerData = async () => {
             if (!partnerId || !open) return;
-            
+
             try {
                 setIsLoadingPartner(true);
                 const response = await getPartnerById(partnerId);
                 const partner = response?.partner || response?.data?.partner || response?.data;
-                
+
                 if (partner) {
                     setPartnerData(partner);
                     setEmail(partner.email || '');
