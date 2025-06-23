@@ -80,24 +80,24 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 px-2">
             <div className="bg-white rounded-lg w-full max-w-2xl overflow-hidden">
-                <div className="bg-[#5B9279] py-4 relative">
+                <div className="py-4 relative">
                     {showPrivacyPolicy ? (
                         <>
                             <button
                                 onClick={() => setShowPrivacyPolicy(false)}
-                                className="absolute cursor-pointer top-1/2 -translate-y-1/2 left-4 text-white hover:opacity-80"
+                                className="absolute cursor-pointer top-1/2 -translate-y-1/2 left-4  hover:opacity-80"
                             >
                                 <IoIosArrowBack className='text-xl' />
                             </button>
 
-                            <h2 className="text-white text-2xl font-semibold text-center uppercase leading-relaxed px-16">
+                            <h2 className=" text-2xl font-semibold text-center uppercase leading-relaxed px-16">
                                 Datenschutzrichtlinie
                             </h2>
                             <button
                                 onClick={handleModalClose}
-                                className="absolute cursor-pointer top-4 right-4 text-white hover:opacity-80"
+                                className="absolute cursor-pointer top-4 right-4  hover:opacity-80"
                             >
                                 <IoClose size={24} />
                             </button>
@@ -107,14 +107,16 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                         <>
                             <button
                                 onClick={handleModalClose}
-                                className="absolute cursor-pointer top-4 right-4 text-white hover:opacity-80"
+                                className="absolute cursor-pointer top-4 right-4 hover:opacity-80"
                             >
                                 <IoClose size={24} />
                             </button>
 
-                            <h2 className="text-white text-2xl font-semibold text-center uppercase leading-relaxed">
-                                Bevor wir Ihren individuellen 3D-Scan durchführen, benötigen wir einige persönliche Daten.
-                            </h2>
+                            <div className='px-5 mt-5'>
+                                <h2 className="text-xl font-semibold uppercase leading-relaxed">
+                                    Bevor wir Mit den scanprozess starten, benötigen wir einige persönliche Daten von ihnen.
+                                </h2>
+                            </div>
                         </>
                     )}
                 </div>
@@ -185,7 +187,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <div className="flex items-start gap-3">
+                                {/* <div className="flex items-start gap-3">
                                     <input
                                         type="checkbox"
                                         {...register('acceptTerms', { required: true })}
@@ -204,7 +206,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                         {' '}
                                         von FeetF1rst.
                                     </span>
-                                </div>
+                                </div> */}
                                 <div className="flex items-start gap-3">
                                     <input
                                         type="checkbox"
@@ -212,15 +214,15 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                         className="min-w-[20px] h-5 mt-[3px] rounded border-gray-300 accent-[#5B9279] cursor-pointer"
                                     />
                                     <span className="text-sm leading-[22px]">
-                                        Ich melde mich zum Newsletter gemäß der{' '}
+                                        Ich stimme den {' '}
                                         <button
                                             type="button"
                                             onClick={() => setShowPrivacyPolicy(true)}
                                             className="font-bold underline text-blue-500 cursor-pointer hover:text-blue-600"
                                         >
-                                            Datenschutzrichtlinie
+                                            Datenschutzrichtlinien
                                         </button>
-                                        {' '}von FeetF1rst an.
+                                        {' '}zu und bin damit einverstanden, E-Mails zum Zweck der Aktivierung der FeetF1rst App zu erhalten..
                                     </span>
                                 </div>
                             </div>

@@ -3,10 +3,6 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Navbar from '../Navbar/Navbar';;
 import icon from "../../../public/shoesDetails/icon.png"
-import icon1 from "../../../public/shoesDetails/icon1.png"
-import icon2 from "../../../public/shoesDetails/icon2.png"
-import icon3 from "../../../public/shoesDetails/icon3.png"
-import icon4 from "../../../public/shoesDetails/icon4.png"
 import footImg from "../../../public/shoesDetails/footImg.png"
 import scannerImg from "../../../public/shoesDetails/scanner.png"
 import RecommendShoes from './Recommend';

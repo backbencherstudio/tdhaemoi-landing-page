@@ -1,9 +1,7 @@
 'use client'
-import Image from 'next/image';
-import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { FiSearch } from 'react-icons/fi';
-import { getAllProducts } from '@/apis/productsApis';
+// import { getAllProducts } from '@/apis/productsApis';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { Button } from "../ui/button"
@@ -14,6 +12,8 @@ import {
     ChevronsRight
 } from "lucide-react"
 import ProductCard from '../shared/ProductCard';
+import { getAllProducts } from '../../apis/productsApis';
+
 
 export default function Shoes() {
     const [shoes, setShoes] = useState([]);

@@ -1,4 +1,4 @@
-import AllQuestions from '../../components/allQuestions/AllQuestions'
+import AllQuestions from '../../../components/allQuestions/AllQuestions'
 import React from 'react'
 
 export default function QuestionPage() {

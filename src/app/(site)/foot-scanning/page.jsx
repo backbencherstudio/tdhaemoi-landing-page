@@ -1,5 +1,5 @@
 'use client'
-import FootScanner from '../../components/FootScanner'
+import FootScanner from '../../../components/FootScanner'
 
 
 export default function FootScanning() {
