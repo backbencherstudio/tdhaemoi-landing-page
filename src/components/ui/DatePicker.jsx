@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "./popover"
 
-export function DatePicker({ date, setDate }) {
+export function DatePicker({ date, setDate, className }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -22,7 +22,8 @@ export function DatePicker({ date, setDate }) {
           variant={"outline"}
           className={cn(
             "w-full justify-start text-left font-normal p-3 rounded border border-black",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -35,6 +36,7 @@ export function DatePicker({ date, setDate }) {
           selected={date}
           onSelect={setDate}
           initialFocus
+          captionLayout="dropdown"
         />
       </PopoverContent>
     </Popover>

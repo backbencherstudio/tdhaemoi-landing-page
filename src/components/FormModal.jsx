@@ -135,7 +135,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                     // Existing Form Content
                     <div className="p-8">
                         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
-                            <div className="flex items-center justify-center gap-10 mb-8">
+                            <div className="flex items-center justify-start gap-10 mb-8">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="radio"
@@ -207,6 +207,7 @@ export default function FormModal({ isOpen, onClose, category, categoryData }) {
                                             <DatePicker
                                                 date={field.value}
                                                 setDate={field.onChange}
+                                                className="w-full py-6 rounded border border-black"
                                             />
                                         )}
                                     />
