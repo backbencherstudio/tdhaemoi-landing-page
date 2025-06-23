@@ -5,7 +5,6 @@ import logo from '../../../../../public/categoryData/logo.png'
 import FormModal from '../../../../components/FormModal'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-// import LoadingSpring from '@/components/loading/LoadingSpring'
 
 export default function CategoryPage({ params }) {
     const router = useRouter()

@@ -45,6 +45,7 @@
     "@eslint/eslintrc": "^3",
     "@shadcn/ui": "^0.0.4",
     "@tailwindcss/postcss": "^4",
+    "@types/node": "24.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
     "shadcn": "^2.4.0",
