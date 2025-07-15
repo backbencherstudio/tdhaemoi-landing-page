@@ -1,13 +1,14 @@
 'use client'
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import Navbar from '../Navbar/Navbar';;
+import Navbar from '../Navbar/Navbar';
 import icon from "../../../public/shoesDetails/icon.png"
 import footImg from "../../../public/shoesDetails/footImg.png"
 import scannerImg from "../../../public/shoesDetails/scanner.png"
 import RecommendShoes from './Recommend';
 import { IoChevronDown, IoChevronBack, IoChevronForward } from "react-icons/io5";
-import { getProductByIdclient } from '@/apis/productsApis';
+import { getProductByIdclient } from '../../apis/productsApis';
+
 
 export default function ShoesDetails({ productId }) {
     const [shoe, setShoe] = useState(null);
