@@ -45,14 +45,14 @@ export default function Category() {
                     </div>
                 </Link>
             ))}
-            <button className="absolute cursor-pointer bottom-5 right-5 lg:bottom-10 lg:right-10 bg-white/95 text-black p-2 rounded-full shadow-2xl flex items-center space-x-3 transition-transform hover:scale-105 duration-300">
+            <Link href="/dauerschleife" className="absolute cursor-pointer bottom-5 right-5 lg:bottom-10 lg:right-10 bg-white/95 text-black p-2 rounded-full shadow-2xl flex items-center space-x-3 transition-transform hover:scale-105 duration-300">
                 <Image src="/main-categorys/leg.png" alt="scan" width={48} height={48} className="w-10 h-10 lg:w-12 lg:h-12 rounded-full" />
                 <span className="font-semibold text-xs lg:text-sm pr-4 leading-tight">
                     Ausschließlich
                     <br />
                     Scandurchführung
                 </span>
-            </button>
+            </Link>
         </div>
     )
 }
