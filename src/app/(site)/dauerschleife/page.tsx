@@ -68,7 +68,7 @@ export default function DauerschleifePage() {
             <Dialog open={openDialog === 'zurueck'} onOpenChange={(v) => setOpenDialog(v ? 'zurueck' : null)}>
                 <DialogContent className="bg-white">
                     <DialogHeader className="text-center">
-                        <DialogTitle className="text-lg font-semibold">
+                        <DialogTitle className="text-md font-semibold">
                             Willst du zur Kategorieauswahl zurückkehren und deinen aktuellen Scan für eine weitere Auswahl verwenden?
                         </DialogTitle>
                     </DialogHeader>
@@ -87,16 +87,16 @@ export default function DauerschleifePage() {
             <Dialog open={openDialog === 'beenden'} onOpenChange={(v) => setOpenDialog(v ? 'beenden' : null)}>
                 <DialogContent className="bg-white">
                     <DialogHeader className="text-center">
-                        <DialogTitle className="text-lg font-semibold">
+                        <DialogTitle className="text-md font-semibold">
                             Möchtest du den Scan abschließen und per E-Mail erhalten?
                         </DialogTitle>
                     </DialogHeader>
                     <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                        <Button onClick={handleBeendenConfirm} variant="default" size="default" className="w-full sm:w-auto cursor-pointer">
+                        <Button onClick={handleBeendenConfirm} variant="default" size="default" className="w-full sm:w-auto cursor-pointer text-sm">
                             Scan beenden & E-Mail erhalten
                         </Button>
                         <DialogClose asChild>
-                            <Button variant="outline" size="default" className="w-full sm:w-auto cursor-pointer"> Abbrechen</Button>
+                            <Button variant="outline" size="default" className="w-full sm:w-auto cursor-pointer text-sm"> Abbrechen</Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>

@@ -10,27 +10,8 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'aymeecel-backend.signalsmind.com',
+        hostname: 'backend.feetf1rst.tech',
       },
-      {
-        protocol: 'https',
-        hostname: 'manually-thomson-cure-fundamentals.trycloudflare.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'manually-thomson-cure-fundamentals.trycloudflare.com',
-      },
-
-      {
-        protocol: 'https',
-        hostname: 'date-advanced-electrical-hypothetical.trycloudflare.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'skilled-vs-miller-come.trycloudflare.com',
-      },
-
-      
     ],
   },
 }
