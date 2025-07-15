@@ -5,7 +5,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 export default function ScanModal({ onClose, onComplete, side }) {
     const [progress, setProgress] = useState(0);
+    const [scanPhase, setScanPhase] = useState('initializing');
     const containerRef = useRef(null);
+    const meshRef = useRef(null);
+    const sceneRef = useRef(null);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -13,6 +16,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
         // Scene setup
         const scene = new THREE.Scene()
         scene.background = new THREE.Color(0xffffff)
+        sceneRef.current = scene;
 
         // Get container dimensions
         const container = containerRef.current;
@@ -67,14 +71,14 @@ export default function ScanModal({ onClose, onComplete, side }) {
         // Controls
         const controls = new OrbitControls(camera, renderer.domElement)
         controls.enableDamping = true
-        controls.dampingFactor = 0.05  
+        controls.dampingFactor = 0.05
         controls.minDistance = 2
         controls.maxDistance = 7
         controls.autoRotate = true
-        controls.autoRotateSpeed = 3.0  
+        controls.autoRotateSpeed = 3.0
         controls.enableZoom = true
-        controls.enablePan = false      
-        controls.rotateSpeed = 0.8      
+        controls.enablePan = false
+        controls.rotateSpeed = 0.8
 
         // Load STL
         const loader = new STLLoader()
@@ -92,9 +96,9 @@ export default function ScanModal({ onClose, onComplete, side }) {
                 color: 0xe6c5a9,
                 metalness: 0.05,
                 roughness: 0.7,
-                clearcoat: 0.3,     
+                clearcoat: 0.3,
                 clearcoatRoughness: 0.2,
-                sheen: 1.0,         
+                sheen: 1.0,
                 sheenRoughness: 0.8,
                 sheenColor: 0xffebe0,
                 transmission: 0.05,
@@ -104,8 +108,9 @@ export default function ScanModal({ onClose, onComplete, side }) {
 
             mesh.rotation.x = -Math.PI / 2
             mesh.rotation.z = Math.PI
-            mesh.position.set(0, -0.3, 0)  
+            mesh.position.set(0, -0.3, 0)
             scene.add(mesh)
+            meshRef.current = mesh;
         })
 
         // Initial camera position for better view
@@ -137,30 +142,138 @@ export default function ScanModal({ onClose, onComplete, side }) {
         }
     }, []);
 
+    // Enhanced progress tracking with phases
     useEffect(() => {
-        const duration = 25000;
-        const interval = 50;
-        const steps = duration / interval;
-        const increment = 100 / steps;
+        const totalDuration = 12000;
+        const phases = [
+            { name: 'initializing', duration: 800, progress: 0 },
+            { name: 'calibrating', duration: 1000, progress: 10 },
+            { name: 'scanning', duration: 6000, progress: 60 },
+            { name: 'processing', duration: 2000, progress: 85 },
+            { name: 'finalizing', duration: 500, progress: 100 }
+        ];
 
-        const interval_id = setInterval(() => {
-            setProgress(prev => {
-                const next = prev + increment;
+        let currentPhaseIndex = 0;
+        let startTime = Date.now();
+        let phaseStartTime = startTime;
 
-                if (next >= 100) {
-                    clearInterval(interval_id);
-                    setTimeout(() => {
-                        onComplete();
-                    }, 1000);
-                    return 100;
+        const updateProgress = () => {
+            const elapsed = Date.now() - startTime;
+            const phaseElapsed = Date.now() - phaseStartTime;
+            const currentPhase = phases[currentPhaseIndex];
+
+            if (elapsed >= totalDuration) {
+                setProgress(100);
+                setScanPhase('completed');
+                setTimeout(() => {
+                    onComplete();
+                }, 500);
+                return;
+            }
+
+            // Calculate progress within current phase
+            const phaseProgress = Math.min(phaseElapsed / currentPhase.duration, 1);
+            const currentPhaseStartProgress = currentPhaseIndex > 0 ? phases[currentPhaseIndex - 1].progress : 0;
+            const currentPhaseEndProgress = currentPhase.progress;
+            const phaseContribution = (currentPhaseEndProgress - currentPhaseStartProgress) * phaseProgress;
+
+            const totalProgress = currentPhaseStartProgress + phaseContribution;
+
+            setProgress(Math.round(totalProgress));
+            setScanPhase(currentPhase.name);
+
+            // Update 3D model based on scanning phase
+            if (meshRef.current && sceneRef.current) {
+                const mesh = meshRef.current;
+
+                if (currentPhase.name === 'scanning') {
+                    // Add scanning effect to the model
+                    const scanIntensity = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+                    mesh.material.emissive = new THREE.Color(0x62a07b).multiplyScalar(scanIntensity * 0.2);
+                    mesh.material.transmission = 0.05 + scanIntensity * 0.1;
+                } else if (currentPhase.name === 'processing') {
+                    // Processing effect
+                    mesh.material.emissive = new THREE.Color(0x4a8063).multiplyScalar(0.3);
+                    mesh.material.transmission = 0.15;
+                } else {
+                    // Reset effects
+                    mesh.material.emissive = new THREE.Color(0x000000);
+                    mesh.material.transmission = 0.05;
                 }
-                const eased = Math.pow(next / 100, 0.85) * 100;
-                return Math.min(eased, 100);
-            });
-        }, interval);
+            }
 
-        return () => clearInterval(interval_id);
+            // Check if we need to move to next phase
+            if (phaseElapsed >= currentPhase.duration && currentPhaseIndex < phases.length - 1) {
+                currentPhaseIndex++;
+                phaseStartTime = Date.now();
+            }
+
+            requestAnimationFrame(updateProgress);
+        };
+
+        updateProgress();
     }, [onComplete]);
+
+    const getPhaseMessage = () => {
+        switch (scanPhase) {
+            case 'initializing':
+                return 'Initializing 3D scanner and calibrating sensors...';
+            case 'calibrating':
+                return 'Calibrating scanner for optimal accuracy...';
+            case 'scanning':
+                return 'Scanning foot geometry and capturing measurements...';
+            case 'processing':
+                return 'Processing scan data and generating 3D model...';
+            case 'finalizing':
+                return 'Finalizing results and preparing analysis...';
+            case 'completed':
+                return 'Scan completed successfully!';
+            default:
+                return 'Please keep your foot steady on the scanner for accurate results';
+        }
+    };
+
+    const getPhaseIcon = () => {
+        switch (scanPhase) {
+            case 'initializing':
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                );
+            case 'calibrating':
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                );
+            case 'scanning':
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#62a07b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                );
+            case 'processing':
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                );
+            case 'finalizing':
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                );
+            default:
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#62a07b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                );
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -176,7 +289,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
                         <h2 className="text-2xl font-bold text-gray-800 mb-1">
                             Scanning {side === 'left' ? 'Left' : 'Right'} Foot
                         </h2>
-                        <p className="text-gray-500">High-precision 3D foot scanning in progress</p>
+                        <p className="text-gray-500 capitalize">{scanPhase} in progress</p>
                     </div>
                 </div>
 
@@ -186,7 +299,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
                         <div ref={containerRef} className="w-full h-full" />
                     </div>
                     {/* Scanning overlay effect */}
-                    <div 
+                    <div
                         className="absolute top-0 left-0 right-0 bottom-8 pointer-events-none overflow-hidden rounded-2xl"
                         style={{
                             background: `linear-gradient(180deg, 
@@ -194,7 +307,7 @@ export default function ScanModal({ onClose, onComplete, side }) {
                                 rgba(74, 128, 99, 0.2), 
                                 rgba(98, 160, 123, 0.1)
                             )`,
-                            animation: 'scanEffect 0.8s ease-in-out infinite',
+                            animation: scanPhase === 'scanning' ? 'scanEffect 0.8s ease-in-out infinite' : 'none',
                             boxShadow: 'inset 0 0 30px rgba(98, 160, 123, 0.2)'
                         }}
                     />
@@ -204,27 +317,36 @@ export default function ScanModal({ onClose, onComplete, side }) {
                 <div className="space-y-5">
                     <div className="flex justify-between items-center text-sm font-medium mb-2">
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#62a07b] animate-pulse" />
-                            <span className="text-gray-700">Scanning in progress</span>
+                            <div className={`w-2 h-2 rounded-full ${scanPhase === 'scanning' ? 'bg-[#62a07b] animate-pulse' :
+                                    scanPhase === 'processing' ? 'bg-purple-500 animate-pulse' :
+                                        scanPhase === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                                }`} />
+                            <span className="text-gray-700 capitalize">{scanPhase}</span>
                         </div>
                         <span className="text-[#62a07b] font-bold">{Math.round(progress)}%</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
                         <div
-                            className="bg-gradient-to-r from-[#62a07b] to-[#4a8063] h-full rounded-full transition-all duration-300"
-                            style={{ 
+                            className={`h-full rounded-full transition-all duration-300 ${scanPhase === 'scanning' ? 'bg-gradient-to-r from-[#62a07b] to-[#4a8063]' :
+                                    scanPhase === 'processing' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
+                                        scanPhase === 'completed' ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                                            'bg-gradient-to-r from-blue-500 to-blue-600'
+                                }`}
+                            style={{
                                 width: `${progress}%`,
-                                boxShadow: '0 0 20px rgba(98, 160, 123, 0.4)'
+                                boxShadow: `0 0 20px ${scanPhase === 'scanning' ? 'rgba(98, 160, 123, 0.4)' :
+                                        scanPhase === 'processing' ? 'rgba(147, 51, 234, 0.4)' :
+                                            scanPhase === 'completed' ? 'rgba(34, 197, 94, 0.4)' :
+                                                'rgba(59, 130, 246, 0.4)'
+                                    }`
                             }}
                         />
                     </div>
                     {/* Status message with icon */}
                     <div className="flex items-center justify-center gap-2 text-gray-500 bg-gray-50 py-3 px-4 rounded-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#62a07b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        {getPhaseIcon()}
                         <p className="text-sm">
-                            Please keep your foot steady on the scanner for accurate results
+                            {getPhaseMessage()}
                         </p>
                     </div>
                 </div>

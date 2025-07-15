@@ -3,11 +3,11 @@ const nextConfig = {
   images: {
     domains: ['192.168.4.3'],
     remotePatterns: [
-      // {
-      //   protocol: 'http',
-      //   hostname: 'localhost',
-      //   port: '3000',
-      // },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+      },
       {
         protocol: 'https',
         hostname: 'aymeecel-backend.signalsmind.com',
@@ -24,6 +24,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'date-advanced-electrical-hypothetical.trycloudflare.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'skilled-vs-miller-come.trycloudflare.com',
       },
 
       
