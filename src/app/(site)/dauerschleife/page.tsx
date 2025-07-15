@@ -21,8 +21,8 @@ export default function DauerschleifePage() {
                 <Image src="/logo/logoBlue.png" alt="logo" width={100} height={100} className='w-24 h-auto' />
             </div>
 
-            <div className='p-5 md:p-10 xl:p-20 mx-auto flex items-center min-h-[calc(100vh-200px)]'>
-                <div className='flex flex-col xl:flex-row justify-between items-center w-full gap-10'>
+            <div className='px-5 md:px-10 xl:px-20 py-5 mx-auto flex items-center min-h-[calc(100vh-200px)]'>
+                <div className='flex flex-col lg:flex-row justify-between items-center w-full gap-10'>
                     {/* Left side - Text and Buttons */}
                     <div className='w-full lg:w-1/2 '>
                         <h1 className='text-white text-3xl lg:text-5xl font-bold mb-8 leading-tight'>
@@ -58,7 +58,7 @@ export default function DauerschleifePage() {
                     <div className='w-full lg:w-1/2 flex justify-center items-center mt-10 xl:mt-0 '>
                         <div className='relative w-fit'>
                             <div className='absolute inset-0 bg-black/50  rounded-lg z-10'></div>
-                            <Image src="/phn.png" alt="phone" width={450} height={600} className='w-auto h-auto md:max-w-2xl rounded-lg relative z-0' />
+                            <Image src="/phn.png" alt="phone" width={450} height={600} className='w-auto h-auto xl:max-w-2xl rounded-lg relative z-0' />
                         </div>
                     </div>
                 </div>
