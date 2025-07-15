@@ -11,7 +11,6 @@ export const loginUser = async (email, password) => {
             throw new Error('Invalid response from server');
         }
 
-        // Validate that user has a role
         if (!response.data.user.role) {
             throw new Error('User role not found in response');
         }

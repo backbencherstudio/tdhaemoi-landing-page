@@ -316,7 +316,7 @@ export default function Settings() {
                         <button
                             type="submit"
                             disabled={!hasChanges}
-                            className={`px-5 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium shadow-sm
+                            className={`px-5 py-2 cursor-pointer rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium shadow-sm
                                 ${hasChanges
                                     ? 'bg-green-600 text-white hover:bg-green-700'
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
