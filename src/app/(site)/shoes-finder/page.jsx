@@ -89,13 +89,13 @@ export default function Categories() {
     return (
         <>
             {renderSubmittedData()}
-            <div className="flex justify-center">
+            <div className="flex justify-center ">
                 <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {categories.map((category) => (
                         <Link
                             key={category?.id}
                             href={`/shoes-finder/${category.slug}`}
-                            className="relative group h-[500px] md:h-[845px] xl:h-[945px]"
+                            className="relative group h-[500px] sm:h-[845px] md:h-screen"
                             onClick={(e) => handleCategoryClick(e, category)}
                         >
                             <div className="w-full h-full">
