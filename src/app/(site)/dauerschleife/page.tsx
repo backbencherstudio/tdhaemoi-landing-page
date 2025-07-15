@@ -17,7 +17,7 @@ export default function DauerschleifePage() {
     return (
         <div className='bg-black min-h-screen overflow-x-hidden'>
             {/* Logo */}
-            <div className='flex justify-end p-5 xl:p-10'>
+            <div className='flex justify-end px-5 md:px-10 xl:px-20 py-5 mt-5'>
                 <Image src="/logo/logoBlue.png" alt="logo" width={100} height={100} className='w-24 h-auto' />
             </div>
 
