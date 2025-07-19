@@ -78,287 +78,9 @@
         "slug": "sportschuhe",
         "image": "/category/category1.png",
         "data": [
+            
             {
                 "id": 1,
-                "title": "Alpines Skifahren",
-                "slug": "alpines-skifahren",
-                "subTitle": "Alpines Skifahren",
-                "image": "/categoryData/img01.png",
-                "questions": [
-                    {
-                        "id": 1,
-                        "question": "Sind Sie Anfänger, Fortgeschrittener oder Experte?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Anfänger"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Fortgeschrittener "
-                            }
-                        ]
-                    },
-                    {
-                        "id": 2,
-                        "question": "Was suchen Sie?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Nur Skischuhe",
-                                "nextQuestions": {
-                                    "id": 1,
-                                    "title": "Nur Skischuhe",
-                                    "questions": [
-                                        {
-                                            "id": 1,
-                                            "question": "Möchten Sie ein Modell aus einer bestimmten Preisklasse?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Budget (günstig & funktional)"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Mittelklasse (ausgewogene Performance & Komfort)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Premium (höchste Qualität & Technologie)"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 2,
-                                            "question": "Wie eng soll der Skischuh sitzen?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Komfortabel (mehr Bewegungsfreiheit, wärmer)"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Sehr eng (maximale Performance für Rennfahrer)"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 3,
-                                            "question": "Welchen Flex bevorzugen Sie?  ",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Weich (Flex 60–90, komfortabel für Einsteiger)"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Mittel (Flex 90–110, ausgewogene Kontrolle)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Hart (Flex 120+, maximale Präzision für Profis)"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "id": 2,
-                                "option": "Nur Ski",
-                                "nextQuestions": {
-                                    "id": 2,
-                                    "title": "Nur Ski",
-                                    "questions": [
-                                        {
-                                            "id": 1,
-                                            "question": "Welche Körpergröße haben Sie?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Bitte geben Sie Ihre Körpergröße in Cm an: ______ cm"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 2,
-                                            "question": "Wie viel wiegen Sie?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Bitte geben Sie Ihr Gewicht in Kg an: ______ kg"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 3,
-                                            "question": "Welche Art von Ski benötigen Sie?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Rennski"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Freeride-Ski"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Freestyle-Ski"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 4,
-                                            "question": "Wie lang sollten Ihre Ski sein?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Kurze Ski – Leicht zu steuern, ideal für Anfänger und enge Slalom-Schwünge"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Mittellange Ski – Gute Balance zwischen Kontrolle und Geschwindigkeit"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Lange Ski – Mehr Stabilität bei hoher Geschwindigkeit, für erfahrene Skifahrer"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "id": 3,
-                                "option": "Komplettes Set (Ski & Skischuhe )",
-                                "nextQuestions": {
-                                    "id": 3,
-                                    "title": "Komplettes Set (Ski & Skischuhe )",
-                                    "questions": [
-                                        {
-                                            "id": 1,
-                                            "question": "Möchten Sie ein Modell aus einer bestimmten Preisklasse?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Budget (günstig & funktional)"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Mittelklasse (ausgewogene Performance & Komfort)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Premium (höchste Qualität & Technologie)"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 2,
-                                            "question": "Wie eng soll der Skischuh sitzen?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Komfortabel (mehr Bewegungsfreiheit, wärmer)"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Eng anliegend (bessere Kontrolle, aber weniger bequem)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Sehr eng (maximale Performance für Rennfahrer)"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 3,
-                                            "question": "Welchen Flex bevorzugen Sie?  ",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Weich (Flex 60–90, komfortabel für Einsteiger)"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Mittel (Flex 90–110, ausgewogene Kontrolle)"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Hart (Flex 120+, maximale Präzision für Profis)"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 4,
-                                            "question": "Welche Körpergröße haben Sie?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Bitte geben Sie Ihre Körpergröße in Cm an: ______ cm"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 5,
-                                            "question": "Wie viel wiegen Sie?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Bitte geben Sie Ihr Gewicht in Kg an: ______ kg"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 6,
-                                            "question": "Welche Art von Ski benötigen Sie?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Rennski"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Freeride-Ski"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Freestyle-Ski"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "id": 7,
-                                            "question": "Wie lang sollten Ihre Ski sein?",
-                                            "options": [
-                                                {
-                                                    "id": 1,
-                                                    "option": "Kurze Ski – Leicht zu steuern, ideal für Anfänger und enge Slalom-Schwünge"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "option": "Mittellange Ski – Gute Balance zwischen Kontrolle und Geschwindigkeit"
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "option": "Lange Ski – Mehr Stabilität bei hoher Geschwindigkeit, für erfahrene Skifahrer"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "id": 2,
                 "title": "Laufschuhe",
                 "slug": "laufschuhe",
                 "subTitle": "Dein Lauf – deine Dynamik.",
@@ -829,7 +551,7 @@
                 ]
             },
             {
-                "id": 3,
+                "id": 2,
                 "title": "Radschuhe",
                 "slug": "radschuhe",
                 "subTitle": "Jeder Tritt – volle Effizienz.",
@@ -924,7 +646,7 @@
                 ]
             },
             {
-                "id": 4,
+                "id": 3,
                 "title": "Tennisschuhe",
                 "slug": "tennisschuhe",
                 "subTitle": "Schnelle Schritte – volle Kontrolle.",
@@ -1001,7 +723,7 @@
                 ]
             },
             {
-                "id": 5,
+                "id": 4,
                 "title": "Baskettballschuhe",
                 "slug": "baskettballschuhe",
                 "subTitle": "Schnelle Moves – sichere Landung.",
@@ -1060,7 +782,7 @@
                 ]
             },
             {
-                "id": 6,
+                "id": 5,
                 "title": "Kletterschuhe",
                 "slug": "kletterschuhe",
                 "subTitle": "Präziser Tritt – maximaler Grip.",
@@ -1171,7 +893,7 @@
                 ]
             },
             {
-                "id": 7,
+                "id": 6,
                 "title": "Fussballschuhe",
                 "slug": "fussballschuhe",
                 "subTitle": "Dein Spiel – perfekter Grip.",
@@ -1248,7 +970,7 @@
                 ]
             },
             {
-                "id": 8,
+                "id": 7,
                 "title": "Golfschuhe",
                 "slug": "golfschuhe",
                 "subTitle": "Fester Stand – kontrollierter Schwung.",

@@ -25,7 +25,7 @@ export default function Categories() {
                 setSubmittedData(decodedData)
                 // console.log('Received Form Data:', decodedData)
             } catch (error) {
-                console.error('Error parsing data:', error)
+                // console.error('Error parsing data:', error)
             }
         }
 
@@ -49,7 +49,7 @@ export default function Categories() {
             }))
             setCategories(categoriesWithSlugs)
         } catch (error) {
-            console.error('Error fetching categories:', error)
+            // console.error('Error fetching categories:', error)
         } finally {
             setIsLoading(false)
         }
