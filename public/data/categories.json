@@ -78,9 +78,103 @@
         "slug": "sportschuhe",
         "image": "/category/category1.png",
         "data": [
-            
             {
                 "id": 1,
+                "title": "Radschuhe",
+                "slug": "radschuhe",
+                "subTitle": "Jeder Tritt – volle Effizienz.",
+                "image": "/categoryData/img03.png",
+                "questions": [
+                    {
+                        "id": 1,
+                        "question": "Welche Passform bevorzugst du?",
+                        "options": [
+                            {
+                                "id": 1,
+                                "option": "Enge, sportliche Passform (maximale Kraftübertragung)"
+                            },
+                            {
+                                "id": 2,
+                                "option": "Ausgewogene Passform (Kombination aus Performance und Komfort)"
+                            },
+                            {
+                                "id": 3,
+                                "option": "Bequeme Passform (mehr Platz und Komfort für lange Fahrten)"
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "question": "Welche Art von Radsport betreibst du?",
+                        "options": [
+                            {
+                                "id": 1,
+                                "option": "Rennrad"
+                            },
+                            {
+                                "id": 2,
+                                "option": "Mountainbike"
+                            },
+                            {
+                                "id": 3,
+                                "option": "Gravel"
+                            }
+                        ]
+                    },
+                    {
+                        "id": 3,
+                        "question": "Welche Art von Pedalen benutzt du?",
+                        "options": [
+                            {
+                                "id": 1,
+                                "option": "Klickpedale"
+                            },
+                            {
+                                "id": 2,
+                                "option": "Plattformpedale"
+                            },
+                            {
+                                "id": 3,
+                                "option": "Hybridpedale"
+                            }
+                        ]
+                    },
+                    {
+                        "id": 4,
+                        "question": "Welcher Steifigkeitsindex passt zu dir?",
+                        "options": [
+                            {
+                                "id": 1,
+                                "option": "5–7 – Mehr Flexibilität und Komfort, ideal für lange Touren & Gehen."
+                            },
+                            {
+                                "id": 2,
+                                "option": "8–10 – Perfekte Balance zwischen Komfort & Effizienz für Training & Rennen."
+                            },
+                            {
+                                "id": 3,
+                                "option": "11–15 – Maximale Kraftübertragung für Wettkämpfe & explosive Sprints."
+                            }
+                        ]
+                    },
+                    {
+                        "id": 5,
+                        "question": "Möchtest du mit einer individuell angepassten Winsole deine Performance auf das nächste Level heben?",
+                        "options": [
+                            {
+                                "id": 1,
+                                "option": "Ja, für optimale Kraftübertragung und Bestleistung"
+                            },
+                            {
+                                "id": 2,
+                                "option": "Nein "
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": 2,
                 "title": "Laufschuhe",
                 "slug": "laufschuhe",
                 "subTitle": "Dein Lauf – deine Dynamik.",
@@ -545,101 +639,6 @@
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "id": 2,
-                "title": "Radschuhe",
-                "slug": "radschuhe",
-                "subTitle": "Jeder Tritt – volle Effizienz.",
-                "image": "/categoryData/img03.png",
-                "questions": [
-                    {
-                        "id": 1,
-                        "question": "Welche Passform bevorzugst du?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Enge, sportliche Passform (maximale Kraftübertragung)"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Ausgewogene Passform (Kombination aus Performance und Komfort)"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Bequeme Passform (mehr Platz und Komfort für lange Fahrten)"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 2,
-                        "question": "Welche Art von Radsport betreibst du?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Rennrad"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Mountainbike"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Gravel"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 3,
-                        "question": "Welche Art von Pedalen benutzt du?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Klickpedale"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Plattformpedale"
-                            },
-                            {
-                                "id": 3,
-                                "option": "Hybridpedale"
-                            }
-                        ]
-                    },
-                    {
-                        "id": 4,
-                        "question": "Welcher Steifigkeitsindex passt zu dir?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "5–7 – Mehr Flexibilität und Komfort, ideal für lange Touren & Gehen."
-                            },
-                            {
-                                "id": 2,
-                                "option": "8–10 – Perfekte Balance zwischen Komfort & Effizienz für Training & Rennen."
-                            },
-                            {
-                                "id": 3,
-                                "option": "11–15 – Maximale Kraftübertragung für Wettkämpfe & explosive Sprints."
-                            }
-                        ]
-                    },
-                    {
-                        "id": 5,
-                        "question": "Möchtest du mit einer individuell angepassten Winsole deine Performance auf das nächste Level heben?",
-                        "options": [
-                            {
-                                "id": 1,
-                                "option": "Ja, für optimale Kraftübertragung und Bestleistung"
-                            },
-                            {
-                                "id": 2,
-                                "option": "Nein "
                             }
                         ]
                     }
@@ -1127,5 +1126,5 @@
                 ]
             }
         ]
-    } 
+    }
 ]
