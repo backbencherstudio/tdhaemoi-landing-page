@@ -280,6 +280,7 @@
     {
         "id": 2,
         "title": "Freestyle",
+        "slug": "freestyle",
         "image": "/category/skifinder/freestyle.jpg",
         "questions": [
             {
